@@ -1,0 +1,193 @@
+package dev.koifih.client.gui.component;
+
+import dev.koifih.client.gui.Theme;
+import dev.koifih.client.utils.Colors;
+import dev.koifih.client.rendering.IconRenderer;
+import dev.koifih.client.rendering.RectRenderer;
+import dev.koifih.client.rendering.Draw;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
+import net.minecraft.client.input.KeyEvent;
+import java.util.function.IntConsumer;
+import java.util.function.IntSupplier;
+
+final class HsvWindow {
+    static final float WIDTH = 104f;
+    private static final float MARGIN = 6f;
+    private static final float SQUARE_HEIGHT = 56f;
+    private static final float HUE_HEIGHT = 6f;
+    private static final float BUTTON_WIDTH = 18f;
+    private static final float BUTTON_HEIGHT = 12f;
+    private static final float BUTTON_GAP = 4f;
+    private static final int COPY_ICON = 0xe14d;
+    private static final int PASTE_ICON = 0xe14f;
+    static final float HEIGHT = MARGIN + SQUARE_HEIGHT + MARGIN + HUE_HEIGHT + MARGIN + BUTTON_HEIGHT + MARGIN;
+
+    private enum Drag { NONE, SQUARE, HUE }
+
+    private final Control owner;
+    private final IntSupplier get;
+    private final IntConsumer set;
+    private float hue;
+    private float saturation;
+    private float value;
+    private Drag drag = Drag.NONE;
+
+    HsvWindow(Control owner, IntSupplier get, IntConsumer set) {
+        this.owner = owner;
+        this.get = get;
+        this.set = set;
+        readColor();
+    }
+
+    static int hsvToRgb(float h, float s, float v) {
+        float c = v * s;
+        float hh = (h % 1f + 1f) % 1f * 6f;
+        float x = c * (1f - Math.abs(hh % 2f - 1f));
+        float r, g, b;
+        switch ((int) hh) {
+            case 0 -> { r = c; g = x; b = 0; }
+            case 1 -> { r = x; g = c; b = 0; }
+            case 2 -> { r = 0; g = c; b = x; }
+            case 3 -> { r = 0; g = x; b = c; }
+            case 4 -> { r = x; g = 0; b = c; }
+            default -> { r = c; g = 0; b = x; }
+        }
+        float m = v - c;
+        return (Math.round((r + m) * 255) << 16) | (Math.round((g + m) * 255) << 8) | Math.round((b + m) * 255);
+    }
+
+    private float px(float units) {
+        return owner.px(units);
+    }
+
+    void readColor() {
+        int rgb = get.getAsInt();
+        float r = ((rgb >> 16) & 255) / 255f;
+        float g = ((rgb >> 8) & 255) / 255f;
+        float b = (rgb & 255) / 255f;
+        float max = Math.max(r, Math.max(g, b));
+        float min = Math.min(r, Math.min(g, b));
+        float delta = max - min;
+        value = max;
+        saturation = max == 0 ? 0 : delta / max;
+        if (delta > 0) {
+            if (max == r) hue = ((g - b) / delta) / 6f;
+            else if (max == g) hue = (2f + (b - r) / delta) / 6f;
+            else hue = (4f + (r - g) / delta) / 6f;
+            hue = (hue + 1f) % 1f;
+        }
+    }
+
+    private void writeColor() {
+        set.accept(hsvToRgb(hue, saturation, value));
+    }
+
+    void copy() {
+        Minecraft.getInstance().keyboardHandler.setClipboard(Colors.hex(get.getAsInt()));
+    }
+
+    void paste() {
+        String text = Minecraft.getInstance().keyboardHandler.getClipboard().trim();
+        if (text.startsWith("#")) text = text.substring(1);
+        else if (text.startsWith("0x") || text.startsWith("0X")) text = text.substring(2);
+        if (text.length() != 6) return;
+        try {
+            set.accept(Integer.parseInt(text, 16));
+            readColor();
+        } catch (NumberFormatException ignored) {
+        }
+    }
+
+    void draw(GuiGraphicsExtractor graphics, float x, float y, float shown, boolean anchoredAbove) {
+        float width = px(WIDTH);
+        float height = px(HEIGHT);
+        float anchorX = x + width / 2f;
+        float anchorY = anchoredAbove ? y + height : y;
+        Draw.popIn(graphics, anchorX, anchorY, shown, 0.9f, () -> drawWindow(graphics, x, y, width, height));
+    }
+
+    private void drawWindow(GuiGraphicsExtractor graphics, float x, float y, float width, float height) {
+        Draw.borderedBox(graphics, x, y, width, height, px(5), Theme.POPUP);
+        int squareX = Math.round(x + px(MARGIN));
+        int squareY = Math.round(y + px(MARGIN));
+        int squareWidth = Math.round(width - 2 * px(MARGIN));
+        int squareHeight = Math.round(px(SQUARE_HEIGHT));
+        RectRenderer.drawSaturationValue(graphics, squareX, squareY, squareWidth, squareHeight, Math.round(px(3)),
+                hsvToRgb(hue, 1f, 1f));
+        marker(graphics, squareX + saturation * squareWidth, squareY + (1f - value) * squareHeight);
+
+        int hueY = Math.round(y + px(MARGIN + SQUARE_HEIGHT + MARGIN));
+        int hueHeight = Math.round(px(HUE_HEIGHT));
+        RectRenderer.drawHueBar(graphics, squareX, hueY, squareWidth, hueHeight, hueHeight / 2);
+        marker(graphics, squareX + hue * squareWidth, hueY + hueHeight / 2f);
+
+        float buttonY = y + px(MARGIN + SQUARE_HEIGHT + MARGIN + HUE_HEIGHT + MARGIN);
+        float pasteX = x + width - px(MARGIN + BUTTON_WIDTH);
+        float copyX = pasteX - px(BUTTON_GAP + BUTTON_WIDTH);
+        button(graphics, copyX, buttonY, COPY_ICON);
+        button(graphics, pasteX, buttonY, PASTE_ICON);
+    }
+
+    private void button(GuiGraphicsExtractor graphics, float x, float y, int icon) {
+        owner.rect(graphics, x, y, px(BUTTON_WIDTH), px(BUTTON_HEIGHT), px(3), Theme.CONTROL);
+        float iconSize = px(8);
+        IconRenderer.draw(graphics, icon, x + (px(BUTTON_WIDTH) - iconSize) / 2, y + (px(BUTTON_HEIGHT) - iconSize) / 2,
+                iconSize, Theme.DIM);
+    }
+
+    private void marker(GuiGraphicsExtractor graphics, float centerX, float centerY) {
+        float outer = px(6);
+        float inner = px(4);
+        owner.rect(graphics, centerX - outer / 2, centerY - outer / 2, outer, outer, outer / 2, 0xFF101010);
+        owner.rect(graphics, centerX - inner / 2, centerY - inner / 2, inner, inner, inner / 2, 0xFFFFFFFF);
+    }
+
+    void click(double mouseX, double mouseY, float x, float y) {
+        float buttonY = y + px(MARGIN + SQUARE_HEIGHT + MARGIN + HUE_HEIGHT + MARGIN);
+        float squareY = y + px(MARGIN);
+        float hueY = y + px(MARGIN + SQUARE_HEIGHT + MARGIN);
+        if (mouseY >= buttonY && mouseY < buttonY + px(BUTTON_HEIGHT)) {
+            float pasteX = x + px(WIDTH) - px(MARGIN + BUTTON_WIDTH);
+            float copyX = pasteX - px(BUTTON_GAP + BUTTON_WIDTH);
+            if (mouseX >= copyX && mouseX < copyX + px(BUTTON_WIDTH)) copy();
+            else if (mouseX >= pasteX && mouseX < pasteX + px(BUTTON_WIDTH)) paste();
+            drag = Drag.NONE;
+            return;
+        }
+        if (mouseY >= squareY && mouseY < squareY + px(SQUARE_HEIGHT)) drag = Drag.SQUARE;
+        else if (mouseY >= hueY - px(3) && mouseY < hueY + px(HUE_HEIGHT + 3)) drag = Drag.HUE;
+        else drag = Drag.NONE;
+        drag(mouseX, mouseY, x, y);
+    }
+
+    void drag(double mouseX, double mouseY, float x, float y) {
+        float squareX = x + px(MARGIN);
+        float squareWidth = px(WIDTH) - 2 * px(MARGIN);
+        if (drag == Drag.SQUARE) {
+            saturation = Math.clamp((float) ((mouseX - squareX) / squareWidth), 0f, 1f);
+            value = 1f - Math.clamp((float) ((mouseY - y - px(MARGIN)) / px(SQUARE_HEIGHT)), 0f, 1f);
+        } else if (drag == Drag.HUE) {
+            hue = Math.clamp((float) ((mouseX - squareX) / squareWidth), 0f, 1f);
+        } else {
+            return;
+        }
+        writeColor();
+    }
+
+    void release() {
+        drag = Drag.NONE;
+    }
+
+    void key(KeyEvent event) {
+        float step = event.hasShiftDown() ? 0.1f : 0.02f;
+        if (event.isLeft()) hue = (hue - step + 1f) % 1f;
+        else if (event.isRight()) hue = (hue + step) % 1f;
+        else if (event.isUp()) value = Math.min(1f, value + step);
+        else if (event.isDown()) value = Math.max(0f, value - step);
+        else if (event.isCopy()) { copy(); return; }
+        else if (event.isPaste()) { paste(); return; }
+        else return;
+        writeColor();
+    }
+}
