@@ -13,6 +13,7 @@
   "none": "Aucune",
   "category.combat": "Combat",
   "category.render": "Rendu",
+  "category.hud": "HUD",
   "category.misc": "Divers",
   "category.player": "Joueur",
   "category.configs": "Configs",

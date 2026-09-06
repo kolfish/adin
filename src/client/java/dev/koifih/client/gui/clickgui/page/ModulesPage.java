@@ -133,6 +133,7 @@ public final class ModulesPage implements Page {
             int rowY = rowY(row);
             rowControls.add(host.add(new Bool(toggleX, rowY + (rowHeight - toggleHeight) / 2, toggleWidth, toggleHeight, scale,
                     Component.literal(module.name()), module::isEnabled, module::setEnabled)));
+            if (module.settings().isEmpty()) continue;
             rowControls.add(host.add(new IconButton(gearX, rowY + (rowHeight - gearSize) / 2, gearSize, scale, SETTINGS_ICON,
                     Component.literal(module.name() + " settings"), () -> openOverlay(module))));
         }

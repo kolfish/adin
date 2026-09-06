@@ -6,6 +6,7 @@ public enum Category {
     COMBAT("combat", 0xe1b3),
     MOVEMENT("movement", 0xe566),
     RENDER("render", 0xe8f4),
+    HUD("hud", 0xe41c),
     PLAYER("player", 0xe7fd),
     MISC("misc", 0xe1bd);
 

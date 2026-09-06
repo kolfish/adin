@@ -4,6 +4,7 @@ import dev.koifih.client.event.EventBus;
 import dev.koifih.client.event.events.TickEvent;
 import dev.koifih.client.input.Keybinds;
 import dev.koifih.client.module.ModuleManager;
+import dev.koifih.client.module.impl.hud.Notifications;
 import dev.koifih.client.module.impl.movement.Sprint;
 import dev.koifih.client.module.impl.render.Esp;
 import dev.koifih.client.render.preview.EntityPreview;
@@ -21,6 +22,7 @@ public final class AdinClient implements ClientModInitializer {
     public void onInitializeClient() {
         MODULES.register(new Sprint());
         MODULES.register(new Esp());
+        MODULES.register(new Notifications());
         Keybinds.register();
         WorldRenderer.init();
         ScreenRenderer.init();

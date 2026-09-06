@@ -2,6 +2,7 @@ package dev.koifih.client.render.screen;
 
 import dev.koifih.Adin;
 import dev.koifih.client.AdinClient;
+import dev.koifih.client.event.events.HudRenderEvent;
 import dev.koifih.client.event.events.ScreenRenderEvent;
 import dev.koifih.client.render.GuiElements;
 import dev.koifih.client.render.Opacity;
@@ -44,5 +45,6 @@ public final class ScreenRenderer {
         AdinClient.EVENTS.post(new ScreenRenderEvent(minecraft.level, minecraft.gameRenderer.mainCamera(), deltaTracker,
                 Projection.capture(), buffer));
         submit(graphics, buffer);
+        AdinClient.EVENTS.post(new HudRenderEvent(graphics, deltaTracker));
     }
 }

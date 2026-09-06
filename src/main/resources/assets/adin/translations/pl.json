@@ -13,6 +13,7 @@
   "none": "Brak",
   "category.combat": "Walka",
   "category.render": "Render",
+  "category.hud": "HUD",
   "category.misc": "Różne",
   "category.player": "Gracz",
   "category.configs": "Konfiguracje",

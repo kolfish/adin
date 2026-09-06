@@ -13,6 +13,7 @@
   "none": "Нет",
   "category.combat": "Бой",
   "category.render": "Рендер",
+  "category.hud": "HUD",
   "category.misc": "Разное",
   "category.player": "Игрок",
   "category.configs": "Конфиги",
