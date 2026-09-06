@@ -11,8 +11,8 @@ public record PanelLayout(float scale, int x, int y, int width, int height, int 
     public static final int GAP = 6;
     public static final int SCREEN_MARGIN = 32;
 
-    public static PanelLayout of(int screenWidth, int screenHeight, int offsetX, int offsetY) {
-        double scale = Math.min(1.0, Math.min(
+    public static PanelLayout of(int screenWidth, int screenHeight, int offsetX, int offsetY, float uiScale) {
+        double scale = Math.min(uiScale, Math.min(
                 Math.max(1, screenWidth - SCREEN_MARGIN) / (double) WIDTH,
                 Math.max(1, screenHeight - SCREEN_MARGIN) / (double) HEIGHT));
         int width = Math.max(1, (int) Math.round(WIDTH * scale));

@@ -2,6 +2,8 @@ package dev.koifih.client.gui.clickgui;
 
 import dev.koifih.client.gui.Lang;
 import dev.koifih.client.gui.Theme;
+import dev.koifih.client.gui.UiScale;
+import dev.koifih.client.gui.Units;
 import dev.koifih.client.gui.animation.Easing;
 import dev.koifih.client.gui.animation.Transition;
 import dev.koifih.client.gui.component.AccentPicker;
@@ -26,12 +28,14 @@ public final class SettingsMenu {
     private static final int PADDING = 10;
     private static final int TITLE_HEIGHT = 18;
     private static final int ROW_STRIDE = 22;
-    private static final int ROW_COUNT = 4;
+    private static final int ROW_COUNT = 6;
     private static final int GEAR_GAP = 6;
     private static final int GEAR_SIZE = 16;
     private static final int RADIUS = 6;
     private static final int CLOSE_ICON = 0xe5cd;
     private static final int LANGUAGE_ICON = 0xe894;
+    private static final int SIZE_ICON = 0xe8ff;
+    private static final int UNITS_ICON = 0xe41c;
     private static final int BIND_WIDTH = 42;
     private static final int BIND_HEIGHT = 16;
 
@@ -41,6 +45,8 @@ public final class SettingsMenu {
     private PanelLayout layout;
     private boolean open;
     private Dropdown language;
+    private Dropdown size;
+    private Dropdown units;
     private AccentPicker accent;
     private Keybind bind;
 
@@ -76,8 +82,24 @@ public final class SettingsMenu {
         language.setIcon(LANGUAGE_ICON);
         language.setBottomLimit(layout.bottom());
 
+        String[] sizes = new String[UiScale.ALL.length];
+        for (int i = 0; i < sizes.length; i++) sizes[i] = UiScale.ALL[i].displayName();
+        size = host.add(new Dropdown(x() + inner, rowY(2) + (rowHeight - dropdownHeight) / 2,
+                width() - 2 * inner, dropdownHeight, scale, Component.literal(Lang.get("size")), sizes,
+                () -> UiScale.current().ordinal(), index -> UiScale.set(UiScale.ALL[index])));
+        size.setIcon(SIZE_ICON);
+        size.setBottomLimit(layout.bottom());
+
+        String[] unitNames = new String[Units.ALL.length];
+        for (int i = 0; i < unitNames.length; i++) unitNames[i] = Units.ALL[i].displayName();
+        units = host.add(new Dropdown(x() + inner, rowY(3) + (rowHeight - dropdownHeight) / 2,
+                width() - 2 * inner, dropdownHeight, scale, Component.literal(Lang.get("units")), unitNames,
+                () -> Units.current().ordinal(), index -> Units.set(Units.ALL[index])));
+        units.setIcon(UNITS_ICON);
+        units.setBottomLimit(layout.bottom());
+
         int accentHeight = layout.atLeastOne(14);
-        AccentPicker picker = new AccentPicker(0, rowY(2) + (rowHeight - accentHeight) / 2, accentHeight, scale,
+        AccentPicker picker = new AccentPicker(0, rowY(4) + (rowHeight - accentHeight) / 2, accentHeight, scale,
                 Theme::accentRgb, Theme::setAccent);
         picker.setX(right() - inner - picker.getWidth());
         accent = host.add(picker);
@@ -85,12 +107,12 @@ public final class SettingsMenu {
 
         int bindWidth = layout.atLeastOne(BIND_WIDTH);
         int bindHeight = layout.atLeastOne(BIND_HEIGHT);
-        bind = host.add(new Keybind(right() - inner - bindWidth, rowY(3) + (rowHeight - bindHeight) / 2,
+        bind = host.add(new Keybind(right() - inner - bindWidth, rowY(5) + (rowHeight - bindHeight) / 2,
                 bindWidth, bindHeight, scale, Component.literal(Lang.get("clickgui_bind")),
                 Keybinds::clickGuiKey, Keybinds::setClickGuiKey));
         bind.setClearable(false);
 
-        controls.addAll(List.of(close, theme, language, accent, bind));
+        controls.addAll(List.of(close, theme, language, size, units, accent, bind));
     }
 
     public int width() {
@@ -181,10 +203,12 @@ public final class SettingsMenu {
         String[] labels = {Lang.get("accent"), Lang.get("clickgui_bind")};
         for (int row = 0; row < labels.length; row++) {
             TextRenderer.drawCentered(graphics, labels[row], textX,
-                    rowY(row + 2) + ROW_STRIDE * 0.5f * scale, 7 * scale, Theme.TEXT);
+                    rowY(row + 4) + ROW_STRIDE * 0.5f * scale, 7 * scale, Theme.TEXT);
         }
         for (Control control : controls) control.extractRenderState(graphics, mouseX, mouseY, delta);
         language.renderPopup(graphics, mouseX, mouseY);
+        size.renderPopup(graphics, mouseX, mouseY);
+        units.renderPopup(graphics, mouseX, mouseY);
         accent.renderPopup(graphics, mouseX, mouseY);
     }
 }

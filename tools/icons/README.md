@@ -28,9 +28,11 @@ of the example mod's CC0 license.
 | New config | add | E145 |
 | Picker search | search | E8B6 |
 | Movement category | directions_run | E566 |
+| Size row | zoom_in | E8FF |
+| Units row | straighten | E41C |
 
 `material-icons.codepoints` contains the relevant entries from Google's upstream
-codepoint list. `charset.txt` selects these twenty glyphs for a 136 x 136 MSDF
+codepoint list. `charset.txt` selects these twenty-two glyphs for a 212 x 212 MSDF
 atlas. Icons share `text.vsh` / `text.fsh` with the Comfortaa renderer, including
 the four-pixel distance range and linear texture filtering. No runtime download
 or font generation is needed.

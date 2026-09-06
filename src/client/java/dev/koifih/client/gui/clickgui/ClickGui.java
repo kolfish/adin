@@ -1,6 +1,7 @@
 package dev.koifih.client.gui.clickgui;
 
 import dev.koifih.client.gui.Theme;
+import dev.koifih.client.gui.UiScale;
 import dev.koifih.client.gui.animation.Easing;
 import dev.koifih.client.gui.animation.Transition;
 import dev.koifih.client.gui.clickgui.page.ConfigsPage;
@@ -38,6 +39,7 @@ public final class ClickGui extends Screen implements WidgetHost {
     private final ModulesPage modulesPage = new ModulesPage(this, () -> selectedTab.category());
     private final ConfigsPage configsPage = new ConfigsPage(this);
     private final List<Page> pages = List.of(modulesPage, configsPage);
+    private final float uiScale = UiScale.current().factor();
     private PanelLayout layout;
     private boolean rebuildPending;
     private boolean closing;
@@ -74,7 +76,7 @@ public final class ClickGui extends Screen implements WidgetHost {
 
     @Override
     protected void init() {
-        layout = PanelLayout.of(width, height, dragOffsetX, dragOffsetY);
+        layout = PanelLayout.of(width, height, dragOffsetX, dragOffsetY, uiScale);
         sidebar.init(layout, () -> selectedTab);
         for (Page page : pages) page.init(layout);
         menu.init(layout);
@@ -157,7 +159,7 @@ public final class ClickGui extends Screen implements WidgetHost {
     }
 
     private void drawPanel(GuiGraphicsExtractor graphics) {
-        int radius = PanelLayout.RADIUS;
+        int radius = layout.atLeastOne(PanelLayout.RADIUS);
         RectRenderer.draw(graphics, layout.x(), layout.y(), layout.width(), layout.height(), radius, Theme.SIDEBAR);
         RectRenderer.draw(graphics, layout.contentX(), layout.contentY(), layout.contentWidth(), layout.contentHeight(),
                 radius, Theme.MAIN);
@@ -241,7 +243,7 @@ public final class ClickGui extends Screen implements WidgetHost {
                 widget.setY(widget.getY() + y - before.y());
             }
         }
-        layout = PanelLayout.of(width, height, dragOffsetX, dragOffsetY);
+        layout = PanelLayout.of(width, height, dragOffsetX, dragOffsetY, uiScale);
         for (Popup popup : popups()) popup.setBottomLimit(layout.bottom());
         for (Page page : pages) page.relayout(layout);
         sidebar.resetPill();
