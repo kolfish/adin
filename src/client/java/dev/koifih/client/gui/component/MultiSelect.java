@@ -36,7 +36,7 @@ public final class MultiSelect extends OptionPopup {
     protected String value() {
         StringBuilder names = new StringBuilder();
         for (int i = 0; i < options.length; i++) {
-            if (!selected.get().contains(i)) continue;
+            if (!selected.get().contains(i) || !isOptionVisible(i)) continue;
             if (!names.isEmpty()) names.append(", ");
             names.append(options[i]);
         }

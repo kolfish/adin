@@ -4,9 +4,11 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import java.util.LinkedHashSet;
 import java.util.Set;
+import java.util.function.IntPredicate;
 
 public final class MultiSetting extends Setting<Set<Integer>> {
     private final String[] options;
+    private IntPredicate optionVisible = option -> true;
 
     public MultiSetting(String id, String[] options, int... defaults) {
         super(id, new LinkedHashSet<>());
@@ -16,6 +18,18 @@ public final class MultiSetting extends Setting<Set<Integer>> {
 
     public String[] options() {
         return options;
+    }
+
+    public void optionVisibleWhen(IntPredicate condition) {
+        optionVisible = condition;
+    }
+
+    public boolean isOptionVisible(int option) {
+        return optionVisible.test(option);
+    }
+
+    public boolean has(int option) {
+        return value.contains(option) && isOptionVisible(option);
     }
 
     @Override

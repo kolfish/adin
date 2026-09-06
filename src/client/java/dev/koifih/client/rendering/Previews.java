@@ -2,6 +2,8 @@ package dev.koifih.client.rendering;
 
 import dev.koifih.Adin;
 import dev.koifih.client.mixin.FallingBlockEntityAccessor;
+import dev.koifih.client.rendering.screen.ScreenPoint;
+import dev.koifih.client.rendering.screen.ScreenRect;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.renderer.entity.EntityRenderer;
@@ -13,6 +15,7 @@ import net.minecraft.world.entity.EntityTypes;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.item.FallingBlockEntity;
 import net.minecraft.world.level.block.Block;
+import net.minecraft.world.phys.AABB;
 import org.joml.Quaternionf;
 import org.joml.Vector3f;
 import java.util.HashMap;
@@ -77,9 +80,62 @@ public final class Previews {
         render(graphics, fallingBlock, x0, y0, x1, y1, yawDegrees);
     }
 
+    public static boolean drawPlayer(GuiGraphicsExtractor graphics, int x0, int y0, int x1, int y1, float sceneYawDegrees) {
+        var player = Minecraft.getInstance().player;
+        return player != null && render(graphics, player, x0, y0, x1, y1, sceneYawDegrees);
+    }
+
+    public record Projector(float scale, Quaternionf rotation, Vector3f lift, float centerX, float centerY) {
+        public ScreenPoint project(double x, double y, double z) {
+            Vector3f point = rotation.transform(new Vector3f((float) x, (float) y, (float) z)).add(lift).mul(scale);
+            return new ScreenPoint(centerX + point.x, centerY + point.y, point.z);
+        }
+
+        public ScreenRect bounds(AABB box) {
+            float minX = Float.POSITIVE_INFINITY;
+            float minY = Float.POSITIVE_INFINITY;
+            float maxX = Float.NEGATIVE_INFINITY;
+            float maxY = Float.NEGATIVE_INFINITY;
+            for (int i = 0; i < 8; i++) {
+                ScreenPoint point = project((i & 1) == 0 ? box.minX : box.maxX, (i & 2) == 0 ? box.minY : box.maxY,
+                        (i & 4) == 0 ? box.minZ : box.maxZ);
+                minX = Math.min(minX, point.x());
+                minY = Math.min(minY, point.y());
+                maxX = Math.max(maxX, point.x());
+                maxY = Math.max(maxY, point.y());
+            }
+            return new ScreenRect(minX, minY, maxX, maxY);
+        }
+    }
+
+    public static Projector playerProjector(int x0, int y0, int x1, int y1, float sceneYawDegrees) {
+        var player = Minecraft.getInstance().player;
+        if (player == null) return null;
+        return new Projector(fitScale(player, x0, y0, x1, y1), sceneRotation(sceneYawDegrees),
+                new Vector3f(0f, player.getBbHeight() / 2f, 0f), (x0 + x1) * 0.5f, (y0 + y1) * 0.5f);
+    }
+
+    public static AABB playerLocalBounds() {
+        var player = Minecraft.getInstance().player;
+        if (player == null) return null;
+        double half = player.getBbWidth() / 2.0;
+        return new AABB(-half, 0.0, -half, half, player.getBbHeight(), half);
+    }
+
+    private static float fitScale(Entity entity, int x0, int y0, int x1, int y1) {
+        float height = Math.max(0.3f, entity.getBbHeight());
+        float width = Math.max(0.3f, entity.getBbWidth());
+        return Math.min((y1 - y0) * 0.5f / height, (x1 - x0) * 0.55f / width);
+    }
+
+    private static Quaternionf sceneRotation(float sceneYawDegrees) {
+        Quaternionf camera = new Quaternionf().rotateX((float) Math.toRadians(15));
+        return new Quaternionf().rotateZ((float) Math.PI).mul(camera).rotateY((float) Math.toRadians(sceneYawDegrees));
+    }
+
     private static boolean render(GuiGraphicsExtractor graphics, Entity entity, int x0, int y0, int x1, int y1, float sceneYawDegrees) {
         var player = Minecraft.getInstance().player;
-        if (player != null) entity.setPos(player.getX(), player.getY(), player.getZ());
+        if (player != null && entity != player) entity.setPos(player.getX(), player.getY(), player.getZ());
         EntityRenderState state;
         try {
             EntityRenderer<? super Entity, ?> renderer = Minecraft.getInstance().getEntityRenderDispatcher().getRenderer(entity);
@@ -90,12 +146,9 @@ public final class Previews {
         }
         state.shadowPieces.clear();
         state.outlineColor = 0;
-        float height = Math.max(0.3f, entity.getBbHeight());
-        float width = Math.max(0.3f, entity.getBbWidth());
-        float scale = Math.min((y1 - y0) * 0.5f / height, (x1 - x0) * 0.55f / width);
+        float scale = fitScale(entity, x0, y0, x1, y1);
         Quaternionf camera = new Quaternionf().rotateX((float) Math.toRadians(15));
-        Quaternionf rotation = new Quaternionf().rotateZ((float) Math.PI).mul(camera).rotateY((float) Math.toRadians(sceneYawDegrees));
-        graphics.entity(state, scale, new Vector3f(0f, entity.getBbHeight() / 2f, 0f), rotation, camera, x0, y0, x1, y1);
+        graphics.entity(state, scale, new Vector3f(0f, entity.getBbHeight() / 2f, 0f), sceneRotation(sceneYawDegrees), camera, x0, y0, x1, y1);
         return true;
     }
 }

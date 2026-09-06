@@ -4,9 +4,14 @@ import dev.koifih.client.gui.Units;
 
 public enum Measure {
     NONE,
-    DISTANCE;
+    DISTANCE,
+    PERCENT;
 
     public String format(int value) {
-        return this == DISTANCE ? Units.current().distance(value) : Integer.toString(value);
+        return switch (this) {
+            case DISTANCE -> Units.current().distance(value);
+            case PERCENT -> value + "%";
+            case NONE -> Integer.toString(value);
+        };
     }
 }

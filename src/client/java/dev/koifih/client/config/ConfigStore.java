@@ -4,7 +4,7 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import dev.koifih.Adin;
 import dev.koifih.client.gui.Theme;
-import dev.koifih.client.feature.Features;
+import dev.koifih.client.feature.FeatureManager;
 import net.minecraft.client.Minecraft;
 import java.io.IOException;
 import java.io.Reader;
@@ -82,7 +82,7 @@ public final class ConfigStore {
             config.colors.theme = Theme.mode().name();
             config.colors.accent = Theme.accentRgb();
         }
-        if (scope != Config.Scope.COLORS) config.features = Features.snapshot();
+        if (scope != Config.Scope.COLORS) config.features = FeatureManager.snapshot();
         save(config);
         return config;
     }
@@ -95,6 +95,6 @@ public final class ConfigStore {
             }
             Theme.setAccent(config.colors.accent);
         }
-        if (settings && config.features != null) Features.apply(config.features);
+        if (settings && config.features != null) FeatureManager.apply(config.features);
     }
 }

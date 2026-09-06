@@ -17,15 +17,19 @@ dev.koifih
 └── client
     ├── AdinClient               client entrypoint
     ├── keybind/Keybinds         key mapping registration and ClickGUI activation
-    ├── event/                   EventBus with typed Listener subscriptions; TickEvent and
-    │                            WorldExtractEvent
-    ├── feature/                 Feature base (enabled, keybind, hold, settings), Category,
-    │   │                        Features registry and config snapshot/apply
+    ├── event/                   EventBus with typed Listener subscriptions; TickEvent,
+    │                            FeatureToggleEvent, plus
+    │                            WorldExtractEvent and ScreenExtractEvent, which share the
+    │                            LevelFrameEvent entity interpolation helpers
+    ├── feature/                 Feature base (enabled, keybind, hold, settings), Category, and
+    │   │                        FeatureManager: registration, lookup by id or class, category
+    │   │                        and enabled lists, keybind ticking, toggle events, disable-all
+    │   │                        and config snapshot/apply
     │   ├── setting/             Setting types: Bool, Slider, Range, Enum, Multi, Color, Entity, Block;
     │   │                        visibleWhen hides a setting until its condition holds and a
     │   │                        Slider's Measure formats its value in the chosen units
     │   ├── movement/Sprint      auto sprint with an omni-sprint setting
-    │   └── render/Esp           see-through boxes around chosen entities
+    │   └── render/Esp           see-through 3D boxes or 2D screen rectangles around chosen entities
     ├── config/                  Config model and ConfigStore (load, save, apply)
     ├── mixin/                   accessors for GuiGraphicsExtractor, KeyMapping, FallingBlockEntity,
     │                            and the ClientInput hook for omni sprint
@@ -41,9 +45,12 @@ dev.koifih
     │       ├── WidgetHost       how sections register widgets and ask for a rebuild
     │       ├── Sidebar          brand, category buttons, selection pill and the gear
     │       ├── SettingsMenu     the client settings popup
+    │       ├── PreviewWindow    the side window that previews a feature's look on your player model
     │       ├── SelectionPill    the sliding sidebar pill
     │       └── page/            Page interface with ModulesPage and ConfigsPage
-    ├── utils/Colors             lerp, hex, opaque, alpha and darken helpers
+    ├── utils
+    │   ├── Colors               lerp, hex, opaque, alpha and darken helpers
+    │   └── MathHelper           clamp, lerp, remap, lengths, angles and epsilon comparisons
     └── rendering
         ├── Pipelines            every RenderPipeline and vertex format
         ├── Scissor              clip propagation into custom render states
@@ -56,12 +63,16 @@ dev.koifih
         ├── Previews             spinning entity and block models
         ├── font/                MsdfFont loader and the Fonts registry
         ├── state/               RectRenderState and TextRenderState
-        └── world/               WorldRenderer, ShapeCollector, BoxStyle, BoxGeometry and
-                                 WorldRenderTypes for see-through 3D shapes
+        ├── world/               WorldRenderer, ShapeCollector, BoxStyle, BoxGeometry and
+        │                        WorldRenderTypes for see-through 3D shapes
+        └── screen/              OverlayRenderer, W2S, Projections, OverlayCollector, RectStyle,
+                                 HealthBar and the screen-space render states for 2D shapes over
+                                 the HUD
 ```
 
 Shaders live in `assets/adin/shaders/core/`: `rect.{vsh,fsh}` draws the
-signed-distance rounded rectangles, `hue_bar.fsh` and `saturation_value.fsh` reuse the rect
+signed-distance rounded rectangles, `shape.{vsh,fsh}` draws anti-aliased screen-space fills and
+border rings for the 2D world overlay, `hue_bar.fsh` and `saturation_value.fsh` reuse the rect
 vertex shader for the color picker, and `text.{vsh,fsh}` draws text and icons. The shared
 rounded-rectangle coverage lives in `shaders/include/rect_coverage.glsl`.
 Font atlases and their regeneration scripts are documented in
@@ -86,11 +97,18 @@ call `visibleWhen` with a condition and the box hides it and reflows until the c
 Features live in `feature/` and subscribe to the event bus while enabled; subscriptions are
 dropped automatically on disable. Sprint sprints whenever you move forward and are allowed
 to, and its Omni sprint setting hooks the client input's forward-impulse check so vanilla
-accepts sprinting sideways and backwards too. ESP draws accent-colored boxes through walls
-around entities within its distance in the ESP color: a mode dropdown (3D only for now), its own color picker, a
-Fill toggle for the translucent fill, an Outline toggle that borders the 2px colored edges in
-black (line widths are full within 10 blocks and shrink with distance so far boxes stay crisp), a Targets multi-select of Self, Players and Entities, and an entity picker that
-appears only while Entities is selected.
+accepts sprinting sideways and backwards too. ESP draws boxes through walls around entities within its distance: a mode dropdown (3D boxes in
+the world or 2D rectangles on the screen), a 2D-only Type dropdown (Full box or Cornered
+brackets), its own color picker, a Show multi-select of Box (2D only), Fill, Outline and Health with
+a Fill opacity slider and a 2D-only Health position dropdown appearing beneath it as needed, a
+Targets multi-select of Self, Players and Entities (2D player boxes are padded slightly so the arms
+and head fit inside), and an entity picker that appears only while Entities is selected. Lines are
+2px in 3D (full width within 10 blocks, shrinking with distance so far boxes stay crisp) and a 1px
+anti-aliased line with a thin black ring in 2D. The health bar is black-bordered, colored from red
+through yellow to green by the target's health, and sits on the left in 3D. A Preview row opens a
+second window beside the panel with a back arrow in its top bar, showing your own player model
+with the box drawn exactly as the ESP would draw it in the current mode; drag to spin the model,
+click to step it 45 degrees, or use the arrow keys.
 
 ## World rendering
 
@@ -101,6 +119,23 @@ width, and an optional wider outline drawn behind the stroke) and the event help
 During submit collection the renderer turns the collected boxes into camera-relative quads and
 lines through `submitCustomGeometry` using two render types built from the vanilla filled-box
 and lines pipeline snippets with depth testing disabled, so shapes show through terrain.
+
+## Screen rendering
+
+`rendering/screen` is the 2D counterpart. `OverlayRenderer` registers a HUD element that runs
+after the vanilla HUD is extracted, captures a `W2S` (world to screen) for the frame and posts a
+`ScreenExtractEvent` with an `OverlayCollector`. `W2S` holds the exact view-projection the level
+is drawn with, rebuilt by `Projections` from the camera render state including view bobbing and
+hurt tilt, plus the camera origin, the GUI-scaled viewport and the size of a physical pixel;
+it projects world points to screen coordinates and reports points behind the near plane.
+`Projections.bounds` projects a bounding box to a screen rectangle, clipping each edge against
+the near plane so boxes that straddle the camera still get a correct rectangle. Features add
+rectangles with a `RectStyle` (same fill, stroke and outline model as `BoxStyle`, widths in
+physical pixels) or plain lines, and the renderer submits them to the GUI render state as
+`ScreenRectRenderState` and `ScreenLineRenderState` elements. They draw through the `shape`
+pipeline, a signed-distance shader (`shape.{vsh,fsh}`, sharing the rect vertex format and
+`rect_coverage.glsl`) that anti-aliases fills and border rings, so a box keeps an even edge as it
+glides across sub-pixel positions instead of its lines popping between pixel widths.
 
 The Configs page lists saved configs from `config/adin/configs/*.json`. Make config opens a
 dialog for a name, description and what to include (colors, settings or both); each card shows the

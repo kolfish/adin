@@ -58,12 +58,15 @@
   "feature.esp": "ESP",
   "feature.esp.description": "Показывает сущности сквозь стены",
   "setting.esp.mode": "Режим",
+  "setting.esp.type": "Тип",
   "setting.esp.distance": "Дистанция",
   "setting.esp.color": "Цвет",
-  "setting.esp.fill": "Заливка",
-  "setting.esp.outline": "Обводка",
+  "setting.esp.show": "Показывать",
+  "setting.esp.fillOpacity": "Непрозрачность заливки",
+  "setting.esp.healthPosition": "Позиция здоровья",
   "setting.esp.targets": "Цели",
   "setting.esp.entities": "Сущности",
+  "setting.esp.preview": "Предпросмотр",
   "bind.help.toggle": "Переключение: нажатие включает или выключает",
   "bind.help.hold": "Удержание: работает только пока клавиша зажата"
 }

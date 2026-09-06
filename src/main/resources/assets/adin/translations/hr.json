@@ -58,12 +58,15 @@
   "feature.esp": "ESP",
   "feature.esp.description": "Prikazuje entitete kroz zidove",
   "setting.esp.mode": "Način",
+  "setting.esp.type": "Vrsta",
   "setting.esp.distance": "Udaljenost",
   "setting.esp.color": "Boja",
-  "setting.esp.fill": "Ispuna",
-  "setting.esp.outline": "Obrub",
+  "setting.esp.show": "Prikaži",
+  "setting.esp.fillOpacity": "Prozirnost ispune",
+  "setting.esp.healthPosition": "Položaj zdravlja",
   "setting.esp.targets": "Mete",
   "setting.esp.entities": "Entiteti",
+  "setting.esp.preview": "Pregled",
   "bind.help.toggle": "Prekidač: pritisak uključuje ili isključuje",
   "bind.help.hold": "Držanje: radi samo dok je tipka pritisnuta"
 }

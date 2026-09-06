@@ -10,6 +10,7 @@ import com.mojang.blaze3d.vertex.VertexFormat;
 import dev.koifih.Adin;
 import dev.koifih.client.rendering.font.Fonts;
 import net.minecraft.client.renderer.BindGroupLayouts;
+import net.minecraft.client.renderer.RenderPipelines;
 import java.util.Optional;
 
 public final class Pipelines {
@@ -24,6 +25,15 @@ public final class Pipelines {
     public static final RenderPipeline RECT = rect("rect").build();
     public static final RenderPipeline HUE_BAR = rect("hue_bar").build();
     public static final RenderPipeline SATURATION_VALUE = rect("saturation_value").build();
+    public static final RenderPipeline QUAD = RenderPipeline.builder(RenderPipelines.GUI_SNIPPET)
+            .withLocation(Adin.id("pipeline/quad"))
+            .withCull(false)
+            .build();
+    public static final RenderPipeline SHAPE = gui("shape")
+            .withBindGroupLayout(BindGroupLayouts.DYNAMIC_TRANSFORMS)
+            .withBindGroupLayout(BindGroupLayouts.PROJECTION)
+            .withVertexBinding(0, RECT_FORMAT)
+            .build();
 
     public static final RenderPipeline TEXT = gui("text")
             .withShaderDefine("MSDF_RANGE", Fonts.DISTANCE_RANGE)

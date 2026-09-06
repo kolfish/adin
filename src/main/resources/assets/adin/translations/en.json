@@ -58,12 +58,15 @@
   "feature.esp": "ESP",
   "feature.esp.description": "Shows entities through walls",
   "setting.esp.mode": "Mode",
+  "setting.esp.type": "Type",
   "setting.esp.distance": "Distance",
   "setting.esp.color": "Color",
-  "setting.esp.fill": "Fill",
-  "setting.esp.outline": "Outline",
+  "setting.esp.show": "Show",
+  "setting.esp.fillOpacity": "Fill opacity",
+  "setting.esp.healthPosition": "Health position",
   "setting.esp.targets": "Targets",
   "setting.esp.entities": "Entities",
+  "setting.esp.preview": "Preview",
   "bind.help.toggle": "Toggle: pressing the key turns it on or off",
   "bind.help.hold": "Hold: stays on only while the key is held"
 }

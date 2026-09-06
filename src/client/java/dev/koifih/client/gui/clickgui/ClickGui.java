@@ -1,5 +1,6 @@
 package dev.koifih.client.gui.clickgui;
 
+import dev.koifih.client.feature.setting.PreviewSetting;
 import dev.koifih.client.gui.Theme;
 import dev.koifih.client.gui.UiScale;
 import dev.koifih.client.gui.animation.Easing;
@@ -36,6 +37,7 @@ public final class ClickGui extends Screen implements WidgetHost {
     private final Transition pageReveal = new Transition(1f, PAGE_REVEAL_MILLIS, Easing.EASE_OUT_CUBIC);
     private final Sidebar sidebar = new Sidebar(this, this::selectTab, this::openMenu);
     private final SettingsMenu menu = new SettingsMenu(this);
+    private final PreviewWindow preview = new PreviewWindow(this);
     private final ModulesPage modulesPage = new ModulesPage(this, () -> selectedTab.category());
     private final ConfigsPage configsPage = new ConfigsPage(this);
     private final List<Page> pages = List.of(modulesPage, configsPage);
@@ -75,11 +77,18 @@ public final class ClickGui extends Screen implements WidgetHost {
     }
 
     @Override
+    public void openPreview(PreviewSetting setting) {
+        preview.open(setting);
+        updateStates();
+    }
+
+    @Override
     protected void init() {
         layout = PanelLayout.of(width, height, dragOffsetX, dragOffsetY, uiScale);
         sidebar.init(layout, () -> selectedTab);
         for (Page page : pages) page.init(layout);
         menu.init(layout);
+        preview.init(layout);
         updateStates();
     }
 
@@ -89,6 +98,7 @@ public final class ClickGui extends Screen implements WidgetHost {
 
     private void selectTab(Sidebar.Tab tab) {
         for (Page page : pages) page.reset();
+        preview.close();
         if (selectedTab != tab) {
             pageReveal.snap(0f);
             pageReveal.set(1f);
@@ -100,6 +110,7 @@ public final class ClickGui extends Screen implements WidgetHost {
 
     private void openMenu() {
         for (Page page : pages) page.reset();
+        preview.close();
         menu.open();
         updateStates();
     }
@@ -115,6 +126,7 @@ public final class ClickGui extends Screen implements WidgetHost {
         modulesPage.setState(selectedTab.category() != null, interactive);
         configsPage.setState(selectedTab.category() == null, interactive);
         menu.updateStates();
+        preview.updateStates(interactive);
     }
 
     private List<Popup> popups() {
@@ -150,6 +162,7 @@ public final class ClickGui extends Screen implements WidgetHost {
             drawPanel(graphics);
             drawContent(graphics, mouseX, mouseY, delta);
             sidebar.draw(graphics, layout, selectedTab, mouseX, mouseY, delta);
+            preview.draw(graphics, mouseX, mouseY, delta);
             menu.draw(graphics, mouseX, mouseY, delta);
         });
     }
@@ -190,6 +203,7 @@ public final class ClickGui extends Screen implements WidgetHost {
             onClose();
             return true;
         }
+        if (preview.keyPressed(event)) return true;
         for (Page page : pages) if (page.keyPressed(event)) return true;
         if (event.key() == GLFW.GLFW_KEY_ESCAPE && menu.isOpen()) {
             closeMenu();
@@ -218,6 +232,7 @@ public final class ClickGui extends Screen implements WidgetHost {
             closeMenu();
             return true;
         }
+        if (preview.mouseClicked(event)) return true;
         for (Page page : pages) if (page.mouseClicked(event, doubleClick)) return true;
         if (event.button() == 0 && layout.inTopBar(event.x(), event.y())) {
             draggingPanel = true;
@@ -231,6 +246,7 @@ public final class ClickGui extends Screen implements WidgetHost {
 
     @Override
     public boolean mouseDragged(MouseButtonEvent event, double dx, double dy) {
+        if (preview.mouseDragged(event)) return true;
         if (!draggingPanel || event.button() != 0) return super.mouseDragged(event, dx, dy);
         PanelLayout before = layout;
         int x = Math.clamp((int) Math.round(event.x() - grabX), 0, Math.max(0, width - before.width()));
@@ -247,6 +263,7 @@ public final class ClickGui extends Screen implements WidgetHost {
         for (Popup popup : popups()) popup.setBottomLimit(layout.bottom());
         for (Page page : pages) page.relayout(layout);
         menu.relayout(layout);
+        preview.relayout(layout);
         sidebar.resetPill();
         return true;
     }
@@ -261,6 +278,7 @@ public final class ClickGui extends Screen implements WidgetHost {
 
     @Override
     public boolean mouseReleased(MouseButtonEvent event) {
+        if (preview.mouseReleased(event)) return true;
         if (draggingPanel && event.button() == 0) {
             draggingPanel = false;
             return true;

@@ -58,12 +58,15 @@
   "feature.esp": "ESP",
   "feature.esp.description": "Affiche les entités à travers les murs",
   "setting.esp.mode": "Mode",
+  "setting.esp.type": "Type",
   "setting.esp.distance": "Distance",
   "setting.esp.color": "Couleur",
-  "setting.esp.fill": "Remplissage",
-  "setting.esp.outline": "Contour",
+  "setting.esp.show": "Afficher",
+  "setting.esp.fillOpacity": "Opacité du remplissage",
+  "setting.esp.healthPosition": "Position de la santé",
   "setting.esp.targets": "Cibles",
   "setting.esp.entities": "Entités",
+  "setting.esp.preview": "Aperçu",
   "bind.help.toggle": "Bascule : appuyer active ou désactive",
   "bind.help.hold": "Maintien : actif seulement tant que la touche est enfoncée"
 }

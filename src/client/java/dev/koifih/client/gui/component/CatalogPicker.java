@@ -27,7 +27,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.function.Supplier;
 
-public final class CatalogPicker extends RowPopup {
+public final class CatalogPicker extends RowPopup implements Windowed {
     private static final int CHECK_ICON = 0xe5ca;
     private static final int SEARCH_ICON = 0xe8b6;
     private static final float MARGIN = 6f;
@@ -68,6 +68,7 @@ public final class CatalogPicker extends RowPopup {
         this.selected = selected;
     }
 
+    @Override
     public void setWindow(int x, int y, int width, int height) {
         windowX = x;
         windowY = y;

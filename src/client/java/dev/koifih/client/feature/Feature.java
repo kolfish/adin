@@ -67,6 +67,7 @@ public abstract class Feature {
             subscriptions.clear();
             onDisable();
         }
+        FeatureManager.toggled(this);
     }
 
     public void toggle() {
