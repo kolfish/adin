@@ -1,5 +1,7 @@
 package dev.koifih.client.gui;
 
+import dev.koifih.client.util.Lang;
+
 public enum Units {
     METRIC("units.metric") {
         @Override

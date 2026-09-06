@@ -1,6 +1,6 @@
 package dev.koifih.client.gui.component;
 
-import dev.koifih.client.gui.Lang;
+import dev.koifih.client.util.Lang;
 import net.minecraft.client.gui.narration.NarratedElementType;
 import net.minecraft.client.gui.narration.NarrationElementOutput;
 import net.minecraft.network.chat.Component;

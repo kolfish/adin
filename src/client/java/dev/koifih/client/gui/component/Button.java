@@ -1,8 +1,8 @@
 package dev.koifih.client.gui.component;
 
 import dev.koifih.client.gui.Theme;
-import dev.koifih.client.rendering.IconRenderer;
-import dev.koifih.client.rendering.TextRenderer;
+import dev.koifih.client.render.gui.Icons;
+import dev.koifih.client.render.gui.Text;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.network.chat.Component;
 
@@ -19,7 +19,7 @@ public final class Button extends Clickable {
     }
 
     public static int preferredWidth(String label, float scale) {
-        return (int) Math.ceil(TextRenderer.width(label, 7 * scale) + 24 * scale);
+        return (int) Math.ceil(Text.width(label, 7 * scale) + 24 * scale);
     }
 
     @Override
@@ -27,13 +27,13 @@ public final class Button extends Clickable {
         if (icon >= 0) {
             rect(graphics, getX(), getY(), getWidth(), getHeight(), px(5), Theme.ROW);
             float iconSize = px(10);
-            IconRenderer.draw(graphics, icon, getX() + (getWidth() - iconSize) / 2, getY() + (getHeight() - iconSize) / 2,
+            Icons.draw(graphics, icon, getX() + (getWidth() - iconSize) / 2, getY() + (getHeight() - iconSize) / 2,
                     iconSize, Theme.DIM);
             return;
         }
         rect(graphics, getX(), getY(), getWidth(), getHeight(), px(5), Theme.ACCENT);
         float size = px(7);
         String label = fit(getMessage().getString(), getWidth() - px(12), size);
-        text(graphics, label, getX() + (getWidth() - TextRenderer.width(label, size)) / 2, centerY(), size, Theme.ON_ACCENT);
+        text(graphics, label, getX() + (getWidth() - Text.width(label, size)) / 2, centerY(), size, Theme.ON_ACCENT);
     }
 }

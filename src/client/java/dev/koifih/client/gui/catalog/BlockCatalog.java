@@ -1,8 +1,7 @@
 package dev.koifih.client.gui.catalog;
 
-import dev.koifih.client.gui.Lang;
-
-import dev.koifih.client.rendering.Previews;
+import dev.koifih.client.render.preview.EntityPreview;
+import dev.koifih.client.util.Lang;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.tags.BlockTags;
@@ -76,7 +75,7 @@ public final class BlockCatalog implements Catalog {
 
     @Override
     public void drawPreview(GuiGraphicsExtractor graphics, Entry entry, int x0, int y0, int x1, int y1, float yawDegrees) {
-        Previews.drawBlock(graphics, (Block) entry.subject(), x0, y0, x1, y1, yawDegrees);
+        EntityPreview.drawBlock(graphics, (Block) entry.subject(), x0, y0, x1, y1, yawDegrees);
     }
 
     @Override

@@ -2,21 +2,21 @@ package dev.koifih.client.gui.clickgui.page;
 
 import dev.koifih.client.config.Config;
 import dev.koifih.client.config.ConfigStore;
-import dev.koifih.client.gui.Lang;
-import dev.koifih.client.gui.clickgui.PanelLayout;
-import dev.koifih.client.gui.clickgui.WidgetHost;
 import dev.koifih.client.gui.Theme;
 import dev.koifih.client.gui.animation.Easing;
 import dev.koifih.client.gui.animation.Transition;
+import dev.koifih.client.gui.clickgui.PanelLayout;
+import dev.koifih.client.gui.clickgui.WidgetHost;
 import dev.koifih.client.gui.component.Button;
 import dev.koifih.client.gui.component.Control;
 import dev.koifih.client.gui.component.IconButton;
 import dev.koifih.client.gui.component.Segmented;
 import dev.koifih.client.gui.component.TextInput;
-import dev.koifih.client.rendering.Opacity;
-import dev.koifih.client.rendering.RectRenderer;
-import dev.koifih.client.rendering.TextRenderer;
-import dev.koifih.client.rendering.Draw;
+import dev.koifih.client.render.Opacity;
+import dev.koifih.client.render.gui.Rects;
+import dev.koifih.client.render.gui.Text;
+import dev.koifih.client.render.gui.Transform;
+import dev.koifih.client.util.Lang;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.input.KeyEvent;
@@ -135,7 +135,7 @@ public final class ConfigsPage implements Page {
                 Component.literal(Lang.get("configs.description")), 48, () -> description, value -> description = value));
         descriptionInput.setPlaceholder(Lang.get("configs.description"));
         String[] scopes = {Lang.get("configs.scope.colors"), Lang.get("configs.scope.settings"), Lang.get("configs.scope.both")};
-        int labelWidth = (int) Math.ceil(TextRenderer.width(Lang.get("configs.include"), 7 * scale));
+        int labelWidth = (int) Math.ceil(Text.width(Lang.get("configs.include"), 7 * scale));
         int scopeRight = dialogX + dialogWidth - area.scaled(DIALOG_PADDING);
         int scopeMax = scopeRight - (dialogX + area.scaled(DIALOG_PADDING) + labelWidth + area.scaled(GAP));
         int scopeWidth = Math.min(scopeMax, Segmented.preferredWidth(scopes, scale));
@@ -282,7 +282,7 @@ public final class ConfigsPage implements Page {
         String[] lines = {Lang.get("configs.empty.1"), Lang.get("configs.empty.2")};
         for (int i = 0; i < lines.length; i++) {
             float size = 7.5f * scale;
-            TextRenderer.drawCenteredX(graphics, lines[i], centerX,
+            Text.drawCenteredX(graphics, lines[i], centerX,
                     centerY - (26 - i * 12) * scale, size, i == 0 ? Theme.TEXT : Theme.MUTED);
         }
         makeButton.extractRenderState(graphics, mouseX, mouseY, delta);
@@ -298,7 +298,7 @@ public final class ConfigsPage implements Page {
 
     private void drawCards(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float delta) {
         float reveal = listReveal.value();
-        Draw.translated(graphics, 0f, 6 * area.scale() * (1f - reveal),
+        Transform.translated(graphics, 0f, 6 * area.scale() * (1f - reveal),
                 () -> Opacity.with(reveal, () -> drawCardList(graphics, mouseX, mouseY, delta)));
     }
 
@@ -309,17 +309,17 @@ public final class ConfigsPage implements Page {
         for (int i = 0; i < visibleCount(); i++) {
             Config config = configs.get(i);
             int y = cardY(i);
-            RectRenderer.draw(graphics, area.rowX(), y, area.rowWidth(), cardHeight, radius, Theme.ROW);
+            Rects.draw(graphics, area.rowX(), y, area.rowWidth(), cardHeight, radius, Theme.ROW);
             Control loadButton = cardControls.get(i * 2);
             float textX = area.rowX() + 10 * scale;
             float textWidth = loadButton.getX() - GAP * scale - textX;
-            String title = TextRenderer.fit(config.name, textWidth, 8.5f * scale);
+            String title = Text.fit(config.name, textWidth, 8.5f * scale);
             String author = config.author == null ? "" : config.author;
             String details = (author.isBlank() ? "" : author + " · ") + scopeText(config);
-            String subtitle = TextRenderer.fit(config.description.isBlank() ? details : config.description + " · " + details,
+            String subtitle = Text.fit(config.description.isBlank() ? details : config.description + " · " + details,
                     textWidth, 6.8f * scale);
-            TextRenderer.drawCentered(graphics, title, textX, y + 13 * scale, 8.5f * scale, Theme.TEXT);
-            TextRenderer.drawCentered(graphics, subtitle, textX, y + 27 * scale, 6.8f * scale, Theme.MUTED);
+            Text.drawCentered(graphics, title, textX, y + 13 * scale, 8.5f * scale, Theme.TEXT);
+            Text.drawCentered(graphics, subtitle, textX, y + 27 * scale, 6.8f * scale, Theme.MUTED);
         }
         for (Control control : cardControls) control.extractRenderState(graphics, mouseX, mouseY, delta);
         addButton.extractRenderState(graphics, mouseX, mouseY, delta);
@@ -332,16 +332,16 @@ public final class ConfigsPage implements Page {
         int y = createDialogY();
         int width = createDialogWidth();
         int height = createDialogHeight();
-        Draw.popIn(graphics, x + width * 0.5f, y + height * 0.5f, reveal, 0.96f, () -> {
+        Transform.popIn(graphics, x + width * 0.5f, y + height * 0.5f, reveal, 0.96f, () -> {
             float scale = area.scale();
             int radius = Math.max(1, area.scaled(6));
-            Draw.borderedBox(graphics, x, y, width, height, radius, Theme.OVERLAY);
+            Rects.bordered(graphics, x, y, width, height, radius, Theme.OVERLAY, Theme.POPUP_BORDER);
             float textX = x + DIALOG_PADDING * scale;
             float titleY = y + (DIALOG_PADDING + DIALOG_TITLE * 0.5f) * scale;
-            TextRenderer.drawCentered(graphics, Lang.get("configs.new"), textX, titleY, 8 * scale, Theme.TEXT);
+            Text.drawCentered(graphics, Lang.get("configs.new"), textX, titleY, 8 * scale, Theme.TEXT);
             String[] labels = {Lang.get("configs.name"), Lang.get("configs.description"), Lang.get("configs.include")};
             for (int row = 0; row < labels.length; row++) {
-                TextRenderer.drawCentered(graphics, labels[row], textX,
+                Text.drawCentered(graphics, labels[row], textX,
                         dialogRowY(y, row) + DIALOG_ROW * 0.5f * scale, 7 * scale, Theme.TEXT);
             }
             for (Control control : createControls) control.extractRenderState(graphics, mouseX, mouseY, delta);

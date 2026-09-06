@@ -1,7 +1,7 @@
 package dev.koifih.client.gui.component;
 
 import dev.koifih.client.gui.Theme;
-import dev.koifih.client.rendering.TextRenderer;
+import dev.koifih.client.render.gui.Text;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.narration.NarratedElementType;
@@ -57,7 +57,7 @@ public final class TextInput extends Control {
         boolean blinkVisible = (System.nanoTime() / BLINK_NANOS) % 2 == 0;
         if (isFocused() && blinkVisible) {
             String beforeCursor = value.substring(0, Math.min(cursor, value.length()));
-            float cursorX = Math.min(getRight() - px(5), textX + TextRenderer.width(beforeCursor, size));
+            float cursorX = Math.min(getRight() - px(5), textX + Text.width(beforeCursor, size));
             rect(graphics, cursorX, centerY() - px(4), Math.max(0.5f, scale), px(8), 0, Theme.ACCENT);
         }
     }

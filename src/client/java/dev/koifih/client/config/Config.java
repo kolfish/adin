@@ -11,7 +11,7 @@ public final class Config {
         public int accent;
     }
 
-    public static final class FeatureState {
+    public static final class ModuleState {
         public boolean enabled;
         public String key;
         public boolean hold;
@@ -24,5 +24,5 @@ public final class Config {
     public String author = "";
     public long created;
     public Colors colors;
-    public Map<String, FeatureState> features;
+    public Map<String, ModuleState> modules;
 }

@@ -3,9 +3,10 @@ package dev.koifih.client.gui.component;
 import dev.koifih.client.gui.Theme;
 import dev.koifih.client.gui.animation.Easing;
 import dev.koifih.client.gui.animation.Transition;
-import dev.koifih.client.rendering.Opacity;
-import dev.koifih.client.rendering.TextRenderer;
-import dev.koifih.client.rendering.Draw;
+import dev.koifih.client.render.Opacity;
+import dev.koifih.client.render.gui.Rects;
+import dev.koifih.client.render.gui.Text;
+import dev.koifih.client.render.gui.Transform;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.narration.NarratedElementType;
 import net.minecraft.client.gui.narration.NarrationElementOutput;
@@ -31,18 +32,18 @@ public final class HelpDot extends Control {
         float radius = getWidth() / 2f;
         rect(graphics, getX(), getY(), getWidth(), getHeight(), radius, Theme.CONTROL);
         float size = px(6.5f);
-        TextRenderer.drawCenteredX(graphics, "?", getX() + getWidth() / 2f, centerY(), size, Theme.DIM);
+        Text.drawCenteredX(graphics, "?", getX() + getWidth() / 2f, centerY(), size, Theme.DIM);
         float amount = shown.value();
         if (amount <= 0f) return;
         graphics.nextStratum();
         String text = tooltip.get();
         float textSize = px(6.5f);
-        float width = TextRenderer.width(text, textSize) + 2 * px(TOOLTIP_PADDING);
+        float width = Text.width(text, textSize) + 2 * px(TOOLTIP_PADDING);
         float height = px(14);
         float x = Math.max(px(2), getX() + getWidth() / 2f - width / 2f);
         float y = getY() - px(TOOLTIP_GAP) - height;
-        Draw.translated(graphics, 0f, px(3) * (1f - amount), () -> Opacity.with(amount, () -> {
-            Draw.borderedBox(graphics, x, y, width, height, px(4), Theme.POPUP);
+        Transform.translated(graphics, 0f, px(3) * (1f - amount), () -> Opacity.with(amount, () -> {
+            Rects.bordered(graphics, x, y, width, height, px(4), Theme.POPUP, Theme.POPUP_BORDER);
             text(graphics, text, x + px(TOOLTIP_PADDING), y + height / 2, textSize, Theme.TEXT);
         }));
     }

@@ -1,22 +1,13 @@
 package dev.koifih.client.gui;
 
-import dev.koifih.client.utils.Colors;
 import dev.koifih.client.gui.animation.Easing;
 import dev.koifih.client.gui.animation.Transition;
+import dev.koifih.client.util.Colors;
 
 public final class Theme {
     public enum Mode { DARK, LIGHT }
 
     public static final int DEFAULT_ACCENT = 0xB8DDB0;
-    private static final int COLOR_COUNT = 19;
-    private static final int[] DARK = {
-            0xFF101010, 0xFFEAEAEA, 0xFF858585, 0xFF999999, 0xFF161616, 0xFF0F0F0F, 0xFF1C1C1C, 0xFF171717,
-            0xFF141414, 0xFF262626, 0xFF3A3A3A, 0xFF343434, 0xFF202020, 0x00000000, 0xFF2B322B, 0xFF444444,
-            0xFF171717, 0xFF2B2B2B, 0xFF484848};
-    private static final int[] LIGHT = {
-            0xFF101010, 0xFF141414, 0xFF666666, 0xFF4E4E4E, 0xFFD6D6D6, 0xFFE3E3E3, 0xFFF1F1F1, 0xFFFFFFFF,
-            0xFFE6E6E6, 0xFFDADADA, 0xFFC2C2C2, 0xFFCACACA, 0xFFFFFFFF, 0xFFC8C8C8, 0xFFE3EAE1, 0xFFB0B0B0,
-            0xFFD0D0D0, 0xFFB4B4B4, 0xFF7A7A7A};
 
     public static int ACCENT;
     public static int ON_ACCENT;
@@ -39,8 +30,8 @@ public final class Theme {
     public static int TOGGLE_OFF_BORDER;
     public static int THUMB_OFF;
 
-    private static final int[] from = new int[COLOR_COUNT];
-    private static final int[] to = new int[COLOR_COUNT];
+    private static final int[] from = new int[Palette.ALL.length];
+    private static final int[] to = new int[Palette.ALL.length];
     private static final Transition blend = new Transition(1f, 220, Easing.EASE_OUT_CUBIC);
     private static final Transition accentBlend = new Transition(1f, 120, Easing.EASE_OUT_CUBIC);
     private static int accentFrom;
@@ -49,9 +40,12 @@ public final class Theme {
     private static Mode mode = Mode.DARK;
 
     static {
-        System.arraycopy(DARK, 0, to, 0, COLOR_COUNT);
-        System.arraycopy(DARK, 0, from, 0, COLOR_COUNT);
-        accentFrom = accentTo = 0xFF000000 | DEFAULT_ACCENT;
+        for (Palette color : Palette.ALL) {
+            from[color.ordinal()] = color.in(mode);
+            to[color.ordinal()] = color.in(mode);
+        }
+        accentFrom = Colors.opaque(DEFAULT_ACCENT);
+        accentTo = accentFrom;
         update();
     }
 
@@ -63,9 +57,12 @@ public final class Theme {
 
     public static void setMode(Mode newMode) {
         if (newMode == mode) return;
+        float t = blend.value();
+        for (Palette color : Palette.ALL) {
+            from[color.ordinal()] = Colors.lerp(from[color.ordinal()], to[color.ordinal()], t);
+            to[color.ordinal()] = color.in(newMode);
+        }
         mode = newMode;
-        for (int i = 0; i < COLOR_COUNT; i++) from[i] = Colors.lerp(from[i], to[i], blend.value());
-        System.arraycopy(newMode == Mode.LIGHT ? LIGHT : DARK, 0, to, 0, COLOR_COUNT);
         blend.snap(0f);
         blend.set(1f);
         setAccent(accentRgb);
@@ -78,34 +75,36 @@ public final class Theme {
     public static void setAccent(int rgb) {
         accentRgb = rgb & 0xFFFFFF;
         accentFrom = ACCENT;
-        accentTo = 0xFF000000 | (mode == Mode.LIGHT ? Colors.darken(accentRgb, 0.28f) : accentRgb);
+        accentTo = Colors.opaque(mode == Mode.LIGHT ? Colors.darken(accentRgb, 0.28f) : accentRgb);
         accentBlend.snap(0f);
         accentBlend.set(1f);
     }
 
     public static void update() {
         float t = blend.value();
-        int i = 0;
-        ON_ACCENT = Colors.lerp(from[i], to[i++], t);
-        TEXT = Colors.lerp(from[i], to[i++], t);
-        MUTED = Colors.lerp(from[i], to[i++], t);
-        DIM = Colors.lerp(from[i], to[i++], t);
-        SIDEBAR = Colors.lerp(from[i], to[i++], t);
-        MAIN = Colors.lerp(from[i], to[i++], t);
-        ROW = Colors.lerp(from[i], to[i++], t);
-        OVERLAY = Colors.lerp(from[i], to[i++], t);
-        FIELD = Colors.lerp(from[i], to[i++], t);
-        CONTROL = Colors.lerp(from[i], to[i++], t);
-        CONTROL_ACTIVE = Colors.lerp(from[i], to[i++], t);
-        TRACK = Colors.lerp(from[i], to[i++], t);
-        POPUP = Colors.lerp(from[i], to[i++], t);
-        POPUP_BORDER = Colors.lerp(from[i], to[i++], t);
-        HIGHLIGHT = Colors.lerp(from[i], to[i++], t);
-        UNCHECKED = Colors.lerp(from[i], to[i++], t);
-        TOGGLE_OFF = Colors.lerp(from[i], to[i++], t);
-        TOGGLE_OFF_BORDER = Colors.lerp(from[i], to[i++], t);
-        THUMB_OFF = Colors.lerp(from[i], to[i], t);
         ACCENT = Colors.lerp(accentFrom, accentTo, accentBlend.value());
+        ON_ACCENT = blended(Palette.ON_ACCENT, t);
+        TEXT = blended(Palette.TEXT, t);
+        MUTED = blended(Palette.MUTED, t);
+        DIM = blended(Palette.DIM, t);
+        SIDEBAR = blended(Palette.SIDEBAR, t);
+        MAIN = blended(Palette.MAIN, t);
+        ROW = blended(Palette.ROW, t);
+        OVERLAY = blended(Palette.OVERLAY, t);
+        FIELD = blended(Palette.FIELD, t);
+        CONTROL = blended(Palette.CONTROL, t);
+        CONTROL_ACTIVE = blended(Palette.CONTROL_ACTIVE, t);
+        TRACK = blended(Palette.TRACK, t);
+        POPUP = blended(Palette.POPUP, t);
+        POPUP_BORDER = blended(Palette.POPUP_BORDER, t);
+        HIGHLIGHT = blended(Palette.HIGHLIGHT, t);
+        UNCHECKED = blended(Palette.UNCHECKED, t);
+        TOGGLE_OFF = blended(Palette.TOGGLE_OFF, t);
+        TOGGLE_OFF_BORDER = blended(Palette.TOGGLE_OFF_BORDER, t);
+        THUMB_OFF = blended(Palette.THUMB_OFF, t);
     }
 
+    private static int blended(Palette color, float t) {
+        return Colors.lerp(from[color.ordinal()], to[color.ordinal()], t);
+    }
 }

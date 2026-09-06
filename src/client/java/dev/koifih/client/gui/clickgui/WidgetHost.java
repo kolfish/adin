@@ -1,6 +1,6 @@
 package dev.koifih.client.gui.clickgui;
 
-import dev.koifih.client.feature.setting.PreviewSetting;
+import dev.koifih.client.setting.PreviewSetting;
 import net.minecraft.client.gui.components.AbstractWidget;
 
 public interface WidgetHost {

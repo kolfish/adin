@@ -3,7 +3,7 @@ package dev.koifih.client.gui.component;
 import dev.koifih.client.gui.Theme;
 import dev.koifih.client.gui.animation.Easing;
 import dev.koifih.client.gui.animation.Transition;
-import dev.koifih.client.rendering.TextRenderer;
+import dev.koifih.client.render.gui.Text;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.narration.NarratedElementType;
 import net.minecraft.client.gui.narration.NarrationElementOutput;
@@ -30,7 +30,7 @@ public final class Segmented extends Control {
 
     public static int preferredWidth(String[] labels, float scale) {
         float widest = 0;
-        for (String label : labels) widest = Math.max(widest, TextRenderer.width(label, 6.5f * scale));
+        for (String label : labels) widest = Math.max(widest, Text.width(label, 6.5f * scale));
         return (int) Math.ceil(labels.length * (widest + 12 * scale));
     }
 
@@ -47,7 +47,7 @@ public final class Segmented extends Control {
         float size = px(6.5f);
         for (int i = 0; i < labels.length; i++) {
             String label = fit(labels[i], segment - px(6), size);
-            float x = getX() + segment * i + (segment - TextRenderer.width(label, size)) / 2;
+            float x = getX() + segment * i + (segment - Text.width(label, size)) / 2;
             text(graphics, label, x, centerY(), size, get.getAsInt() == i ? Theme.TEXT : Theme.DIM);
         }
     }

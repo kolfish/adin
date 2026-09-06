@@ -1,8 +1,8 @@
 package dev.koifih.client.gui.component;
 
 import dev.koifih.client.gui.Theme;
-import dev.koifih.client.utils.Colors;
-import dev.koifih.client.rendering.TextRenderer;
+import dev.koifih.client.render.gui.Text;
+import dev.koifih.client.util.Colors;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.narration.NarratedElementType;
 import net.minecraft.client.gui.narration.NarrationElementOutput;
@@ -58,7 +58,7 @@ public final class ColorPicker extends RowPopup {
     protected void drawRowValue(GuiGraphicsExtractor graphics, float rightLimit, float available) {
         float size = px(7);
         String label = Colors.hex(get.getAsInt());
-        float labelWidth = TextRenderer.width(label, size);
+        float labelWidth = Text.width(label, size);
         text(graphics, label, rightLimit - labelWidth, centerY(), size, Theme.TEXT);
         float swatch = px(9);
         rect(graphics, rightLimit - labelWidth - px(5) - swatch, centerY() - swatch / 2, swatch, swatch, px(2),

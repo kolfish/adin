@@ -1,16 +1,17 @@
 package dev.koifih.client.gui.component;
 
-import dev.koifih.client.gui.catalog.Catalog;
-import dev.koifih.client.gui.Lang;
 import dev.koifih.client.gui.Theme;
-import dev.koifih.client.utils.Colors;
 import dev.koifih.client.gui.animation.Easing;
 import dev.koifih.client.gui.animation.Transition;
-import dev.koifih.client.rendering.IconRenderer;
-import dev.koifih.client.rendering.Opacity;
-import dev.koifih.client.rendering.Scissor;
-import dev.koifih.client.rendering.TextRenderer;
-import dev.koifih.client.rendering.Draw;
+import dev.koifih.client.gui.catalog.Catalog;
+import dev.koifih.client.render.Opacity;
+import dev.koifih.client.render.Scissor;
+import dev.koifih.client.render.gui.Icons;
+import dev.koifih.client.render.gui.Rects;
+import dev.koifih.client.render.gui.Text;
+import dev.koifih.client.render.gui.Transform;
+import dev.koifih.client.util.Colors;
+import dev.koifih.client.util.Lang;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.narration.NarratedElementType;
 import net.minecraft.client.gui.narration.NarrationElementOutput;
@@ -206,7 +207,7 @@ public final class CatalogPicker extends RowPopup implements Windowed {
     protected void drawRowValue(GuiGraphicsExtractor graphics, float rightLimit, float available) {
         float size = px(7);
         String label = selected.get().size() + " " + Lang.get("entities.selected");
-        text(graphics, label, rightLimit - TextRenderer.width(label, size), centerY(), size, Theme.TEXT);
+        text(graphics, label, rightLimit - Text.width(label, size), centerY(), size, Theme.TEXT);
     }
 
     @Override
@@ -218,12 +219,12 @@ public final class CatalogPicker extends RowPopup implements Windowed {
                              float shown, int mouseX, int mouseY) {
         lastMouseX = mouseX;
         lastMouseY = mouseY;
-        Draw.popIn(graphics, x + width / 2f, y + height / 2f, shown, 0.96f, () -> drawWindow(graphics, x, y, width, height));
+        Transform.popIn(graphics, x + width / 2f, y + height / 2f, shown, 0.96f, () -> drawWindow(graphics, x, y, width, height));
         if (shown >= 1f) drawPreview(graphics);
     }
 
     private void drawWindow(GuiGraphicsExtractor graphics, float x, float y, float width, float height) {
-        Draw.borderedBox(graphics, x, y, width, height, px(6), Theme.OVERLAY);
+        Rects.bordered(graphics, x, y, width, height, px(6), Theme.OVERLAY, Theme.POPUP_BORDER);
         drawGroups(graphics);
         drawSearch(graphics);
         drawList(graphics);
@@ -231,7 +232,7 @@ public final class CatalogPicker extends RowPopup implements Windowed {
         Catalog.Entry shownEntry = shownEntry();
         if (shownEntry != null) {
             String name = fit(shownEntry.name(), previewWidth() - px(8), px(6.5f));
-            TextRenderer.drawCenteredX(graphics, name, previewX() + previewWidth() / 2,
+            Text.drawCenteredX(graphics, name, previewX() + previewWidth() / 2,
                     columnTop() + columnHeight() - px(8), px(6.5f), Theme.MUTED);
             if (!catalog.canPreview(shownEntry)) {
                 String[] lines = {Lang.get("preview.unsupported.1"), Lang.get("preview.unsupported.2")};
@@ -239,7 +240,7 @@ public final class CatalogPicker extends RowPopup implements Windowed {
                 float centerY = columnTop() + columnHeight() / 2 - px(8);
                 for (int i = 0; i < lines.length; i++) {
                     String line = fit(lines[i], previewWidth() - px(10), px(6.5f));
-                    TextRenderer.drawCenteredX(graphics, line, centerX, centerY + i * px(10), px(6.5f),
+                    Text.drawCenteredX(graphics, line, centerX, centerY + i * px(10), px(6.5f),
                             i == 0 ? Theme.TEXT : Theme.MUTED);
                 }
             }
@@ -271,7 +272,7 @@ public final class CatalogPicker extends RowPopup implements Windowed {
         rect(graphics, x, y, listWidth(), px(SEARCH_HEIGHT), px(4), Theme.FIELD);
         float centerY = y + px(SEARCH_HEIGHT) / 2;
         float iconSize = px(8);
-        IconRenderer.draw(graphics, SEARCH_ICON, x + px(4), centerY - iconSize / 2, iconSize, Theme.DIM);
+        Icons.draw(graphics, SEARCH_ICON, x + px(4), centerY - iconSize / 2, iconSize, Theme.DIM);
         rect(graphics, x + px(16), centerY - px(4), Math.max(0.5f, scale), px(8), 0, Theme.CONTROL);
         float textX = x + px(21);
         if (query.isEmpty()) {
@@ -281,7 +282,7 @@ public final class CatalogPicker extends RowPopup implements Windowed {
         }
         boolean blinkVisible = (System.nanoTime() / BLINK_NANOS) % 2 == 0;
         if (isOpen() && blinkVisible) {
-            float caretX = Math.min(x + listWidth() - px(5), textX + TextRenderer.width(query, size));
+            float caretX = Math.min(x + listWidth() - px(5), textX + Text.width(query, size));
             rect(graphics, caretX, centerY - px(4), Math.max(0.5f, scale), px(8), 0, Theme.ACCENT);
         }
     }
@@ -304,8 +305,8 @@ public final class CatalogPicker extends RowPopup implements Windowed {
                     float headerCenter = rowY + px(ROW_HEIGHT) / 2;
                     String header = fit(row.header().label(), listWidth() - px(12), px(7));
                     text(graphics, header, listX + px(6), headerCenter, px(7), Theme.TEXT);
-                    rect(graphics, listX + px(6) + TextRenderer.width(header, px(7)) + px(5), headerCenter,
-                            listWidth() - px(17) - TextRenderer.width(header, px(7)), Math.max(0.5f, scale), 0, Theme.CONTROL);
+                    rect(graphics, listX + px(6) + Text.width(header, px(7)) + px(5), headerCenter,
+                            listWidth() - px(17) - Text.width(header, px(7)), Math.max(0.5f, scale), 0, Theme.CONTROL);
                     continue;
                 }
                 Catalog.Entry entry = row.entry();
@@ -316,7 +317,7 @@ public final class CatalogPicker extends RowPopup implements Windowed {
                 float rowCenter = rowY + px(ROW_HEIGHT) / 2;
                 if (shownCheck > 0f) {
                     float checkSize = iconSize * (0.6f + 0.4f * shownCheck);
-                    Opacity.with(shownCheck, () -> IconRenderer.draw(graphics, CHECK_ICON, listX + px(6) + (iconSize - checkSize) / 2,
+                    Opacity.with(shownCheck, () -> Icons.draw(graphics, CHECK_ICON, listX + px(6) + (iconSize - checkSize) / 2,
                             rowCenter - checkSize / 2, checkSize, Theme.ACCENT));
                 }
                 text(graphics, fit(entry.name(), listWidth() - px(24), px(6.5f)), listX + px(17), rowCenter, px(6.5f),

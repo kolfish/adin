@@ -1,11 +1,11 @@
 package dev.koifih.client.gui.component;
 
-import dev.koifih.client.gui.Lang;
 import dev.koifih.client.gui.Theme;
 import dev.koifih.client.gui.animation.Easing;
 import dev.koifih.client.gui.animation.Transition;
-import dev.koifih.client.rendering.IconRenderer;
-import dev.koifih.client.rendering.TextRenderer;
+import dev.koifih.client.render.gui.Icons;
+import dev.koifih.client.render.gui.Text;
+import dev.koifih.client.util.Lang;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.narration.NarratedElementType;
 import net.minecraft.client.gui.narration.NarrationElementOutput;
@@ -48,9 +48,9 @@ public final class ThemeSwitch extends Control {
             boolean selected = Theme.mode() == MODES[i];
             int color = selected ? Theme.TEXT : Theme.DIM;
             String label = Lang.get(LABEL_KEYS[i]);
-            float contentWidth = iconSize + px(3) + TextRenderer.width(label, size);
+            float contentWidth = iconSize + px(3) + Text.width(label, size);
             float startX = getX() + pill * i + (pill - contentWidth) / 2;
-            IconRenderer.draw(graphics, ICONS[i], startX, centerY() - iconSize / 2, iconSize, color);
+            Icons.draw(graphics, ICONS[i], startX, centerY() - iconSize / 2, iconSize, color);
             text(graphics, label, startX + iconSize + px(3), centerY(), size, color);
         }
     }

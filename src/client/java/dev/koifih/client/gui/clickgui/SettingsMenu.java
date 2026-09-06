@@ -1,6 +1,5 @@
 package dev.koifih.client.gui.clickgui;
 
-import dev.koifih.client.gui.Lang;
 import dev.koifih.client.gui.Theme;
 import dev.koifih.client.gui.UiScale;
 import dev.koifih.client.gui.Units;
@@ -13,9 +12,11 @@ import dev.koifih.client.gui.component.IconButton;
 import dev.koifih.client.gui.component.Keybind;
 import dev.koifih.client.gui.component.Popup;
 import dev.koifih.client.gui.component.ThemeSwitch;
-import dev.koifih.client.keybind.Keybinds;
-import dev.koifih.client.rendering.TextRenderer;
-import dev.koifih.client.rendering.Draw;
+import dev.koifih.client.input.Keybinds;
+import dev.koifih.client.render.gui.Rects;
+import dev.koifih.client.render.gui.Text;
+import dev.koifih.client.render.gui.Transform;
+import dev.koifih.client.util.Lang;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.network.chat.Component;
@@ -193,20 +194,20 @@ public final class SettingsMenu {
         float scale = layout.scale();
         float anchorX = x() + layout.scaled(8);
         float anchorY = y() + height();
-        Draw.popIn(graphics, anchorX, anchorY, shown, 0.94f, () -> Draw.translated(graphics, 0f, 4 * scale * (1f - shown),
+        Transform.popIn(graphics, anchorX, anchorY, shown, 0.94f, () -> Transform.translated(graphics, 0f, 4 * scale * (1f - shown),
                 () -> drawBody(graphics, mouseX, mouseY, delta)));
     }
 
     private void drawBody(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float delta) {
         float scale = layout.scale();
         int radius = layout.atLeastOne(RADIUS);
-        Draw.borderedBox(graphics, x(), y(), width(), height(), radius, Theme.OVERLAY);
+        Rects.bordered(graphics, x(), y(), width(), height(), radius, Theme.OVERLAY, Theme.POPUP_BORDER);
         float textX = x() + PADDING * scale;
-        TextRenderer.drawCentered(graphics, Lang.get("settings"), textX,
+        Text.drawCentered(graphics, Lang.get("settings"), textX,
                 y() + (PADDING + TITLE_HEIGHT * 0.5f) * scale, 8 * scale, Theme.TEXT);
         String[] labels = {Lang.get("accent"), Lang.get("clickgui_bind")};
         for (int row = 0; row < labels.length; row++) {
-            TextRenderer.drawCentered(graphics, labels[row], textX,
+            Text.drawCentered(graphics, labels[row], textX,
                     rowY(row + 4) + ROW_STRIDE * 0.5f * scale, 7 * scale, Theme.TEXT);
         }
         for (Control control : controls) control.extractRenderState(graphics, mouseX, mouseY, delta);

@@ -1,6 +1,5 @@
 package dev.koifih.client.gui.clickgui;
 
-import dev.koifih.client.feature.setting.PreviewSetting;
 import dev.koifih.client.gui.Theme;
 import dev.koifih.client.gui.UiScale;
 import dev.koifih.client.gui.animation.Easing;
@@ -11,11 +10,12 @@ import dev.koifih.client.gui.clickgui.page.Page;
 import dev.koifih.client.gui.component.Control;
 import dev.koifih.client.gui.component.Popup;
 import dev.koifih.client.gui.component.TextInput;
-import dev.koifih.client.keybind.Keybinds;
-import dev.koifih.client.rendering.Opacity;
-import dev.koifih.client.rendering.RectRenderer;
-import dev.koifih.client.rendering.Scissor;
-import dev.koifih.client.rendering.Draw;
+import dev.koifih.client.input.Keybinds;
+import dev.koifih.client.render.Opacity;
+import dev.koifih.client.render.Scissor;
+import dev.koifih.client.render.gui.Rects;
+import dev.koifih.client.render.gui.Transform;
+import dev.koifih.client.setting.PreviewSetting;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.navigation.ScreenRectangle;
@@ -104,7 +104,7 @@ public final class ClickGui extends Screen implements WidgetHost {
             pageReveal.set(1f);
         }
         selectedTab = tab;
-        modulesPage.setCategory(tab.category());
+        modulesPage.reloadRows();
         updateStates();
     }
 
@@ -158,7 +158,7 @@ public final class ClickGui extends Screen implements WidgetHost {
         if (reveal <= 0f) return;
         float centerX = layout.x() + layout.width() * 0.5f;
         float centerY = layout.y() + layout.height() * 0.5f;
-        Draw.popIn(graphics, centerX, centerY, reveal, 0.96f, () -> {
+        Transform.popIn(graphics, centerX, centerY, reveal, 0.96f, () -> {
             drawPanel(graphics);
             drawContent(graphics, mouseX, mouseY, delta);
             sidebar.draw(graphics, layout, selectedTab, mouseX, mouseY, delta);
@@ -173,12 +173,12 @@ public final class ClickGui extends Screen implements WidgetHost {
 
     private void drawPanel(GuiGraphicsExtractor graphics) {
         int radius = layout.atLeastOne(PanelLayout.RADIUS);
-        RectRenderer.draw(graphics, layout.x(), layout.y(), layout.width(), layout.height(), radius, Theme.SIDEBAR);
-        RectRenderer.draw(graphics, layout.contentX(), layout.contentY(), layout.contentWidth(), layout.contentHeight(),
+        Rects.draw(graphics, layout.x(), layout.y(), layout.width(), layout.height(), radius, Theme.SIDEBAR);
+        Rects.draw(graphics, layout.contentX(), layout.contentY(), layout.contentWidth(), layout.contentHeight(),
                 radius, Theme.MAIN);
         int join = Math.min(radius + 1, Math.min(layout.contentWidth(), layout.contentHeight()));
-        RectRenderer.draw(graphics, layout.right() - join, layout.contentY(), join, join, 0, Theme.MAIN);
-        RectRenderer.draw(graphics, layout.contentX(), layout.bottom() - join, join, join, 0, Theme.MAIN);
+        Rects.draw(graphics, layout.right() - join, layout.contentY(), join, join, 0, Theme.MAIN);
+        Rects.draw(graphics, layout.contentX(), layout.bottom() - join, join, join, 0, Theme.MAIN);
     }
 
     private void drawContent(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float delta) {
@@ -188,7 +188,7 @@ public final class ClickGui extends Screen implements WidgetHost {
         float dim = page == modulesPage ? modulesPage.dimAmount() : 1f;
         var clip = new ScreenRectangle(layout.contentX(), layout.contentY(), layout.contentWidth(), layout.contentHeight());
         Scissor.clip(clip, () -> {
-            Opacity.with(shown * dim, () -> Draw.translated(graphics, 0f, 6 * layout.scale() * (1f - shown),
+            Opacity.with(shown * dim, () -> Transform.translated(graphics, 0f, 6 * layout.scale() * (1f - shown),
                     () -> page.draw(graphics, mouseX, mouseY, delta)));
             if (page == modulesPage) modulesPage.drawOverlay(graphics, mouseX, mouseY, delta);
         });

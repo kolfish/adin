@@ -3,7 +3,7 @@ package dev.koifih.client.gui.component;
 import dev.koifih.client.gui.Theme;
 import dev.koifih.client.gui.animation.Easing;
 import dev.koifih.client.gui.animation.Transition;
-import dev.koifih.client.rendering.TextRenderer;
+import dev.koifih.client.render.gui.Text;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.narration.NarratedElementType;
 import net.minecraft.client.gui.narration.NarrationElementOutput;
@@ -42,7 +42,7 @@ public final class Slider extends Control {
     }
 
     private float valueWidth() {
-        float widest = Math.max(TextRenderer.width(format.apply(min), px(7)), TextRenderer.width(format.apply(max), px(7)));
+        float widest = Math.max(Text.width(format.apply(min), px(7)), Text.width(format.apply(max), px(7)));
         return Math.max(px(18), widest + px(8));
     }
 

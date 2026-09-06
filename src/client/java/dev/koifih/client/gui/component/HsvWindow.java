@@ -1,10 +1,10 @@
 package dev.koifih.client.gui.component;
 
 import dev.koifih.client.gui.Theme;
-import dev.koifih.client.utils.Colors;
-import dev.koifih.client.rendering.IconRenderer;
-import dev.koifih.client.rendering.RectRenderer;
-import dev.koifih.client.rendering.Draw;
+import dev.koifih.client.render.gui.Icons;
+import dev.koifih.client.render.gui.Rects;
+import dev.koifih.client.render.gui.Transform;
+import dev.koifih.client.util.Colors;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.input.KeyEvent;
@@ -104,22 +104,22 @@ final class HsvWindow {
         float height = px(HEIGHT);
         float anchorX = x + width / 2f;
         float anchorY = anchoredAbove ? y + height : y;
-        Draw.popIn(graphics, anchorX, anchorY, shown, 0.9f, () -> drawWindow(graphics, x, y, width, height));
+        Transform.popIn(graphics, anchorX, anchorY, shown, 0.9f, () -> drawWindow(graphics, x, y, width, height));
     }
 
     private void drawWindow(GuiGraphicsExtractor graphics, float x, float y, float width, float height) {
-        Draw.borderedBox(graphics, x, y, width, height, px(5), Theme.POPUP);
+        Rects.bordered(graphics, x, y, width, height, px(5), Theme.POPUP, Theme.POPUP_BORDER);
         int squareX = Math.round(x + px(MARGIN));
         int squareY = Math.round(y + px(MARGIN));
         int squareWidth = Math.round(width - 2 * px(MARGIN));
         int squareHeight = Math.round(px(SQUARE_HEIGHT));
-        RectRenderer.drawSaturationValue(graphics, squareX, squareY, squareWidth, squareHeight, Math.round(px(3)),
+        Rects.drawSaturationValue(graphics, squareX, squareY, squareWidth, squareHeight, Math.round(px(3)),
                 hsvToRgb(hue, 1f, 1f));
         marker(graphics, squareX + saturation * squareWidth, squareY + (1f - value) * squareHeight);
 
         int hueY = Math.round(y + px(MARGIN + SQUARE_HEIGHT + MARGIN));
         int hueHeight = Math.round(px(HUE_HEIGHT));
-        RectRenderer.drawHueBar(graphics, squareX, hueY, squareWidth, hueHeight, hueHeight / 2);
+        Rects.drawHueBar(graphics, squareX, hueY, squareWidth, hueHeight, hueHeight / 2);
         marker(graphics, squareX + hue * squareWidth, hueY + hueHeight / 2f);
 
         float buttonY = y + px(MARGIN + SQUARE_HEIGHT + MARGIN + HUE_HEIGHT + MARGIN);
@@ -132,7 +132,7 @@ final class HsvWindow {
     private void button(GuiGraphicsExtractor graphics, float x, float y, int icon) {
         owner.rect(graphics, x, y, px(BUTTON_WIDTH), px(BUTTON_HEIGHT), px(3), Theme.CONTROL);
         float iconSize = px(8);
-        IconRenderer.draw(graphics, icon, x + (px(BUTTON_WIDTH) - iconSize) / 2, y + (px(BUTTON_HEIGHT) - iconSize) / 2,
+        Icons.draw(graphics, icon, x + (px(BUTTON_WIDTH) - iconSize) / 2, y + (px(BUTTON_HEIGHT) - iconSize) / 2,
                 iconSize, Theme.DIM);
     }
 

@@ -1,13 +1,13 @@
 package dev.koifih.client.gui.component;
 
 import dev.koifih.client.gui.Theme;
-import dev.koifih.client.utils.Colors;
 import dev.koifih.client.gui.animation.Easing;
 import dev.koifih.client.gui.animation.Transition;
-import dev.koifih.client.rendering.Draw;
-import dev.koifih.client.rendering.Opacity;
-import dev.koifih.client.rendering.IconRenderer;
-import dev.koifih.client.rendering.TextRenderer;
+import dev.koifih.client.render.Opacity;
+import dev.koifih.client.render.gui.Icons;
+import dev.koifih.client.render.gui.Text;
+import dev.koifih.client.render.gui.Transform;
+import dev.koifih.client.util.Colors;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.input.KeyEvent;
 import net.minecraft.network.chat.Component;
@@ -93,13 +93,13 @@ abstract class OptionPopup extends RowPopup {
     protected void drawRowValue(GuiGraphicsExtractor graphics, float rightLimit, float available) {
         float size = px(7);
         String label = value();
-        float labelWidth = TextRenderer.width(label, size);
+        float labelWidth = Text.width(label, size);
         float labelX = rightLimit - labelWidth;
         if (labelWidth <= available) {
             text(graphics, label, labelX, centerY(), size, Theme.TEXT);
         } else {
             float fadeFrom = rightLimit - available;
-            TextRenderer.drawFaded(graphics, label, labelX, TextRenderer.centeredBaseline(label, size, centerY()),
+            Text.drawFaded(graphics, label, labelX, Text.centeredBaseline(label, size, centerY()),
                     size, Theme.TEXT, fadeFrom, fadeFrom + px(18));
         }
     }
@@ -127,10 +127,10 @@ abstract class OptionPopup extends RowPopup {
     private void drawOption(GuiGraphicsExtractor graphics, int option, float x, float center, float width, float shown) {
         float iconSize = px(8);
         float chosen = checks[option].value();
-        Draw.popIn(graphics, x + width * 0.5f, center, shown, OPTION_MIN_ZOOM, () -> {
+        Transform.popIn(graphics, x + width * 0.5f, center, shown, OPTION_MIN_ZOOM, () -> {
             if (chosen > 0f) {
                 float size = iconSize * (0.6f + 0.4f * chosen);
-                Opacity.with(chosen, () -> IconRenderer.draw(graphics, CHECK_ICON, x + px(9) + (iconSize - size) / 2,
+                Opacity.with(chosen, () -> Icons.draw(graphics, CHECK_ICON, x + px(9) + (iconSize - size) / 2,
                         center - size / 2, size, Theme.ACCENT));
             }
             text(graphics, fit(options[option], width - px(30), px(7)), x + px(22), center, px(7), Colors.lerp(Theme.DIM, Theme.TEXT, chosen));

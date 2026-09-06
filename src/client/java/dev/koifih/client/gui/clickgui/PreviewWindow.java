@@ -1,29 +1,27 @@
 package dev.koifih.client.gui.clickgui;
 
-import dev.koifih.client.feature.setting.PreviewSetting;
 import dev.koifih.client.gui.Theme;
 import dev.koifih.client.gui.animation.Easing;
 import dev.koifih.client.gui.animation.Transition;
-import dev.koifih.client.gui.Lang;
 import dev.koifih.client.gui.component.IconButton;
 import dev.koifih.client.gui.component.TextInput;
-import dev.koifih.client.rendering.Draw;
-import dev.koifih.client.rendering.GuiRenderQueue;
-import dev.koifih.client.rendering.Opacity;
-import dev.koifih.client.rendering.Previews;
-import dev.koifih.client.rendering.RectRenderer;
-import dev.koifih.client.rendering.Scissor;
-import dev.koifih.client.rendering.SkinLookup;
-import dev.koifih.client.rendering.TextRenderer;
-import dev.koifih.client.rendering.screen.HealthBar;
-import dev.koifih.client.rendering.screen.OverlayCollector;
-import dev.koifih.client.rendering.screen.RectStyle;
-import dev.koifih.client.rendering.screen.ScreenLineRenderState;
-import dev.koifih.client.rendering.screen.ScreenPoint;
-import dev.koifih.client.rendering.screen.ScreenQuadRenderState;
-import dev.koifih.client.rendering.screen.ScreenRect;
-import dev.koifih.client.rendering.screen.ScreenRectRenderState;
-import dev.koifih.client.rendering.world.BoxStyle;
+import dev.koifih.client.render.Opacity;
+import dev.koifih.client.render.Scissor;
+import dev.koifih.client.render.Style;
+import dev.koifih.client.render.gui.Rects;
+import dev.koifih.client.render.gui.Text;
+import dev.koifih.client.render.gui.Transform;
+import dev.koifih.client.render.preview.EntityPreview;
+import dev.koifih.client.render.preview.SkinCache;
+import dev.koifih.client.render.screen.HealthBar;
+import dev.koifih.client.render.screen.Projector;
+import dev.koifih.client.render.screen.ScreenBoxes;
+import dev.koifih.client.render.screen.ScreenBuffer;
+import dev.koifih.client.render.screen.ScreenPoint;
+import dev.koifih.client.render.screen.ScreenRect;
+import dev.koifih.client.render.screen.ScreenRenderer;
+import dev.koifih.client.setting.PreviewSetting;
+import dev.koifih.client.util.Lang;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.navigation.ScreenRectangle;
@@ -32,8 +30,6 @@ import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.player.PlayerSkin;
 import net.minecraft.world.phys.AABB;
-import org.joml.Matrix3x2f;
-import org.joml.Matrix3x2fc;
 import org.lwjgl.glfw.GLFW;
 
 public final class PreviewWindow {
@@ -52,15 +48,6 @@ public final class PreviewWindow {
     private static final int STATUS_HEIGHT = 10;
     private static final long FETCH_DELAY_NANOS = 600_000_000L;
     private static String skinName = DEFAULT_SKIN;
-    private static final int[] EDGES = {
-            0, 1, 2, 3, 4, 5, 6, 7,
-            0, 2, 1, 3, 4, 6, 5, 7,
-            0, 4, 1, 5, 2, 6, 3, 7
-    };
-    private static final int[][] FACES = {
-            {0, 1, 3, 2}, {4, 5, 7, 6}, {0, 1, 5, 4}, {2, 3, 7, 6}, {0, 2, 6, 4}, {1, 3, 7, 5}
-    };
-
     private final WidgetHost host;
     private final Transition reveal = new Transition(0f, REVEAL_MILLIS, Easing.EASE_OUT_CUBIC);
     private final Transition yaw = new Transition(DEFAULT_YAW, 200, Easing.EASE_OUT_CUBIC);
@@ -87,7 +74,7 @@ public final class PreviewWindow {
         nameInput = host.add(new TextInput(contentX(), inputY(), contentWidth(), layout.atLeastOne(INPUT_HEIGHT), layout.scale(),
                 Component.literal(Lang.get("preview.skin")), NAME_MAX_LENGTH, () -> skinName, this::setSkinName));
         nameInput.setPlaceholder(Lang.get("preview.skin"));
-        SkinLookup.request(skinName);
+        SkinCache.request(skinName);
         requestedName = skinName;
         updateStates(true);
     }
@@ -109,16 +96,16 @@ public final class PreviewWindow {
     private void pollSkin() {
         if (skinName.equals(requestedName) || System.nanoTime() - editedAt < FETCH_DELAY_NANOS) return;
         requestedName = skinName;
-        SkinLookup.request(skinName);
+        SkinCache.request(skinName);
     }
 
     private PlayerSkin currentSkin() {
-        return requestedName.isBlank() ? null : SkinLookup.skin(requestedName);
+        return requestedName.isBlank() ? null : SkinCache.skin(requestedName);
     }
 
     private String statusText() {
         if (requestedName.isBlank()) return "";
-        return switch (SkinLookup.status(requestedName)) {
+        return switch (SkinCache.status(requestedName)) {
             case LOADING -> Lang.get("preview.loading");
             case MISSING -> Lang.get("preview.missing");
             case READY -> "";
@@ -213,22 +200,22 @@ public final class PreviewWindow {
         float shown = reveal.value();
         if (shown <= 0f || preview == null) return;
         float slide = (onRight() ? -1f : 1f) * SLIDE * layout.scale() * (1f - shown);
-        Opacity.with(shown, () -> Draw.translated(graphics, slide, 0f, () -> drawWindow(graphics, mouseX, mouseY, delta)));
+        Opacity.with(shown, () -> Transform.translated(graphics, slide, 0f, () -> drawWindow(graphics, mouseX, mouseY, delta)));
     }
 
     private void drawWindow(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float delta) {
         int radius = layout.atLeastOne(PanelLayout.RADIUS);
-        RectRenderer.draw(graphics, x(), y(), width(), height(), radius, Theme.SIDEBAR);
-        RectRenderer.draw(graphics, x(), y() + layout.topBarHeight(), width(), height() - layout.topBarHeight(), radius, Theme.MAIN);
-        RectRenderer.draw(graphics, x(), y() + layout.topBarHeight(), width(), radius, 0, Theme.MAIN);
+        Rects.draw(graphics, x(), y(), width(), height(), radius, Theme.SIDEBAR);
+        Rects.draw(graphics, x(), y() + layout.topBarHeight(), width(), height() - layout.topBarHeight(), radius, Theme.MAIN);
+        Rects.draw(graphics, x(), y() + layout.topBarHeight(), width(), radius, 0, Theme.MAIN);
         float titleX = back.getX() + back.getWidth() + layout.scaled(PanelLayout.GAP);
-        TextRenderer.drawCentered(graphics, preview.name(), titleX, y() + layout.topBarHeight() * 0.5f, 8 * layout.scale(), Theme.TEXT);
+        Text.drawCentered(graphics, preview.name(), titleX, y() + layout.topBarHeight() * 0.5f, 8 * layout.scale(), Theme.TEXT);
         back.extractRenderState(graphics, mouseX, mouseY, delta);
         pollSkin();
         nameInput.extractRenderState(graphics, mouseX, mouseY, delta);
         String status = statusText();
         if (!status.isEmpty()) {
-            TextRenderer.drawCentered(graphics, status, contentX() + layout.scaled(2), inputY() + layout.atLeastOne(INPUT_HEIGHT) + layout.scaled(STATUS_HEIGHT) * 0.5f,
+            Text.drawCentered(graphics, status, contentX() + layout.scaled(2), inputY() + layout.atLeastOne(INPUT_HEIGHT) + layout.scaled(STATUS_HEIGHT) * 0.5f,
                     6.5f * layout.scale(), Theme.MUTED);
         }
         if (!open) return;
@@ -242,61 +229,30 @@ public final class PreviewWindow {
         int x1 = x0 + contentWidth();
         int y1 = y0 + contentHeight();
         float angle = yaw.value();
-        if (!Previews.drawPlayer(graphics, x0, y0, x1, y1, angle, currentSkin())) return;
-        Previews.Projector projector = Previews.playerProjector(x0, y0, x1, y1, angle);
-        AABB bounds = Previews.playerLocalBounds();
+        if (!EntityPreview.drawPlayer(graphics, x0, y0, x1, y1, angle, currentSkin())) return;
+        Projector projector = EntityPreview.playerProjector(x0, y0, x1, y1, angle);
+        AABB bounds = EntityPreview.playerLocalBounds();
         if (projector == null || bounds == null) return;
         bounds = preview.fit(bounds);
         float pixel = 1f / Math.max(1, Minecraft.getInstance().getWindow().getGuiScale());
-        Matrix3x2fc pose = new Matrix3x2f(graphics.pose());
-        ScreenRect rect = projector.bounds(bounds);
+        ScreenPoint[] corners = ScreenBoxes.project(projector, bounds);
+        ScreenRect rect = ScreenBoxes.bounds(corners);
+        ScreenBuffer buffer = new ScreenBuffer();
         float clearance = 0f;
-        if (preview.isFlat()) {
-            if (preview.isBoxShown()) {
-                RectStyle style = preview.rectStyle().scaled(pixel).mapColors(Opacity::apply);
-                clearance = style.widestStroke() * 0.5f;
-                GuiRenderQueue.submit(graphics, new ScreenRectRenderState(pose, rect, style, Scissor.current()));
-            }
-        } else {
-            drawBox(graphics, pose, projector, bounds, preview.boxStyle().scaled(pixel));
+        if (!preview.isFlat()) {
+            ScreenBoxes.collect(buffer, corners, preview.worldStyle().scaled(pixel));
+        } else if (preview.isBoxShown() && rect != null) {
+            Style style = preview.screenStyle().scaled(pixel);
+            clearance = style.widestStroke() * 0.5f;
+            buffer.rect(rect, style);
         }
         HealthBar.Side side = preview.healthSide();
-        if (side == null) return;
-        var player = Minecraft.getInstance().player;
-        float fraction = player.getMaxHealth() <= 0f ? 0f : player.getHealth() / player.getMaxHealth();
-        OverlayCollector shapes = new OverlayCollector();
-        HealthBar.collect(shapes, rect, side, fraction, clearance, pixel);
-        for (OverlayCollector.Rect bar : shapes.rects()) {
-            GuiRenderQueue.submit(graphics, new ScreenRectRenderState(pose, bar.bounds(), bar.style().mapColors(Opacity::apply), Scissor.current()));
+        if (side != null && rect != null) {
+            var player = Minecraft.getInstance().player;
+            float fraction = player.getMaxHealth() <= 0f ? 0f : player.getHealth() / player.getMaxHealth();
+            HealthBar.collect(buffer, rect, side, fraction, clearance, pixel);
         }
-    }
-
-    private void drawBox(GuiGraphicsExtractor graphics, Matrix3x2fc pose, Previews.Projector projector, AABB box, BoxStyle style) {
-        ScreenPoint[] corners = new ScreenPoint[8];
-        for (int i = 0; i < 8; i++) {
-            corners[i] = projector.project((i & 1) == 0 ? box.minX : box.maxX, (i & 2) == 0 ? box.minY : box.maxY,
-                    (i & 4) == 0 ? box.minZ : box.maxZ);
-        }
-        ScreenRectangle scissor = Scissor.current();
-        if (style.hasFill()) {
-            int fill = Opacity.apply(style.fill());
-            for (int[] face : FACES) {
-                GuiRenderQueue.submit(graphics, new ScreenQuadRenderState(pose, corners[face[0]], corners[face[1]],
-                        corners[face[2]], corners[face[3]], fill, scissor));
-            }
-        }
-        if (style.hasOutline()) drawEdges(graphics, pose, corners, Opacity.apply(style.outline()), style.outlineWidth(), scissor);
-        if (style.hasStroke()) drawEdges(graphics, pose, corners, Opacity.apply(style.stroke()), style.strokeWidth(), scissor);
-    }
-
-    private static void drawEdges(GuiGraphicsExtractor graphics, Matrix3x2fc pose, ScreenPoint[] corners, int color,
-                                  float width, ScreenRectangle scissor) {
-        for (int i = 0; i < EDGES.length; i += 2) {
-            ScreenPoint a = corners[EDGES[i]];
-            ScreenPoint b = corners[EDGES[i + 1]];
-            var line = new OverlayCollector.Line(a.x(), a.y(), b.x(), b.y(), color, width);
-            GuiRenderQueue.submit(graphics, new ScreenLineRenderState(pose, line, scissor));
-        }
+        ScreenRenderer.submit(graphics, buffer);
     }
 
     public boolean mouseClicked(MouseButtonEvent event) {

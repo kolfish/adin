@@ -1,12 +1,12 @@
 package dev.koifih.client.gui.component;
 
 import com.mojang.blaze3d.platform.InputConstants;
-import dev.koifih.client.gui.Lang;
 import dev.koifih.client.gui.Theme;
-import dev.koifih.client.utils.Colors;
 import dev.koifih.client.gui.animation.Easing;
 import dev.koifih.client.gui.animation.Transition;
-import dev.koifih.client.rendering.TextRenderer;
+import dev.koifih.client.render.gui.Text;
+import dev.koifih.client.util.Colors;
+import dev.koifih.client.util.Lang;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.narration.NarratedElementType;
 import net.minecraft.client.gui.narration.NarrationElementOutput;
@@ -69,14 +69,14 @@ public final class Keybind extends Control {
                 Colors.lerp(Theme.CONTROL, Theme.CONTROL_ACTIVE, amount));
         float size = px(7);
         String label = display();
-        float labelWidth = TextRenderer.width(label, size);
+        float labelWidth = Text.width(label, size);
         float available = getWidth() - px(8);
         int color = Colors.lerp(Theme.TEXT, Theme.ACCENT, amount);
         if (labelWidth <= available) {
             text(graphics, label, getX() + (getWidth() - labelWidth) / 2, centerY(), size, color);
         } else {
             float edge = getRight() - px(4);
-            TextRenderer.drawFaded(graphics, label, getX() + px(4), TextRenderer.centeredBaseline(label, size, centerY()),
+            Text.drawFaded(graphics, label, getX() + px(4), Text.centeredBaseline(label, size, centerY()),
                     size, color, edge, edge - px(12));
         }
     }
