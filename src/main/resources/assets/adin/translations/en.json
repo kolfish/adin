@@ -68,5 +68,8 @@
   "setting.esp.entities": "Entities",
   "setting.esp.preview": "Preview",
   "bind.help.toggle": "Toggle: pressing the key turns it on or off",
-  "bind.help.hold": "Hold: stays on only while the key is held"
+  "bind.help.hold": "Hold: stays on only while the key is held",
+  "preview.skin": "Username",
+  "preview.loading": "Loading skin…",
+  "preview.missing": "No skin found"
 }

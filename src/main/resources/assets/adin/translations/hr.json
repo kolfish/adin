@@ -68,5 +68,8 @@
   "setting.esp.entities": "Entiteti",
   "setting.esp.preview": "Pregled",
   "bind.help.toggle": "Prekidač: pritisak uključuje ili isključuje",
-  "bind.help.hold": "Držanje: radi samo dok je tipka pritisnuta"
+  "bind.help.hold": "Držanje: radi samo dok je tipka pritisnuta",
+  "preview.skin": "Korisničko ime",
+  "preview.loading": "Učitavanje skina…",
+  "preview.missing": "Skin nije pronađen"
 }

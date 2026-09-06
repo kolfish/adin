@@ -7,6 +7,7 @@ import dev.koifih.client.rendering.screen.ScreenRect;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.renderer.entity.EntityRenderer;
+import net.minecraft.client.renderer.entity.state.AvatarRenderState;
 import net.minecraft.client.renderer.entity.state.EntityRenderState;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntitySpawnReason;
@@ -14,6 +15,7 @@ import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.EntityTypes;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.item.FallingBlockEntity;
+import net.minecraft.world.entity.player.PlayerSkin;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.phys.AABB;
 import org.joml.Quaternionf;
@@ -67,7 +69,7 @@ public final class Previews {
             living.yHeadRot = yawDegrees;
             living.yHeadRotO = yawDegrees;
         }
-        if (!render(graphics, entity, x0, y0, x1, y1, 0f)) ENTITIES.put(type, Optional.empty());
+        if (!render(graphics, entity, x0, y0, x1, y1, 0f, null)) ENTITIES.put(type, Optional.empty());
     }
 
     public static void drawBlock(GuiGraphicsExtractor graphics, Block block, int x0, int y0, int x1, int y1, float yawDegrees) {
@@ -77,12 +79,12 @@ public final class Previews {
             fallingBlock = falling;
         }
         ((FallingBlockEntityAccessor) fallingBlock).adin$setBlockState(block.defaultBlockState());
-        render(graphics, fallingBlock, x0, y0, x1, y1, yawDegrees);
+        render(graphics, fallingBlock, x0, y0, x1, y1, yawDegrees, null);
     }
 
-    public static boolean drawPlayer(GuiGraphicsExtractor graphics, int x0, int y0, int x1, int y1, float sceneYawDegrees) {
+    public static boolean drawPlayer(GuiGraphicsExtractor graphics, int x0, int y0, int x1, int y1, float sceneYawDegrees, PlayerSkin skin) {
         var player = Minecraft.getInstance().player;
-        return player != null && render(graphics, player, x0, y0, x1, y1, sceneYawDegrees);
+        return player != null && render(graphics, player, x0, y0, x1, y1, sceneYawDegrees, skin);
     }
 
     public record Projector(float scale, Quaternionf rotation, Vector3f lift, float centerX, float centerY) {
@@ -133,7 +135,7 @@ public final class Previews {
         return new Quaternionf().rotateZ((float) Math.PI).mul(camera).rotateY((float) Math.toRadians(sceneYawDegrees));
     }
 
-    private static boolean render(GuiGraphicsExtractor graphics, Entity entity, int x0, int y0, int x1, int y1, float sceneYawDegrees) {
+    private static boolean render(GuiGraphicsExtractor graphics, Entity entity, int x0, int y0, int x1, int y1, float sceneYawDegrees, PlayerSkin skin) {
         var player = Minecraft.getInstance().player;
         if (player != null && entity != player) entity.setPos(player.getX(), player.getY(), player.getZ());
         EntityRenderState state;
@@ -146,6 +148,7 @@ public final class Previews {
         }
         state.shadowPieces.clear();
         state.outlineColor = 0;
+        if (skin != null && state instanceof AvatarRenderState avatar) avatar.skin = skin;
         float scale = fitScale(entity, x0, y0, x1, y1);
         Quaternionf camera = new Quaternionf().rotateX((float) Math.toRadians(15));
         graphics.entity(state, scale, new Vector3f(0f, entity.getBbHeight() / 2f, 0f), sceneRotation(sceneYawDegrees), camera, x0, y0, x1, y1);

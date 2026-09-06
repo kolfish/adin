@@ -68,5 +68,8 @@
   "setting.esp.entities": "Сущности",
   "setting.esp.preview": "Предпросмотр",
   "bind.help.toggle": "Переключение: нажатие включает или выключает",
-  "bind.help.hold": "Удержание: работает только пока клавиша зажата"
+  "bind.help.hold": "Удержание: работает только пока клавиша зажата",
+  "preview.skin": "Имя игрока",
+  "preview.loading": "Загрузка скина…",
+  "preview.missing": "Скин не найден"
 }

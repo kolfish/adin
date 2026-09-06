@@ -68,5 +68,8 @@
   "setting.esp.entities": "Byty",
   "setting.esp.preview": "Podgląd",
   "bind.help.toggle": "Przełącznik: naciśnięcie włącza lub wyłącza",
-  "bind.help.hold": "Przytrzymanie: działa tylko gdy klawisz jest wciśnięty"
+  "bind.help.hold": "Przytrzymanie: działa tylko gdy klawisz jest wciśnięty",
+  "preview.skin": "Nazwa gracza",
+  "preview.loading": "Wczytywanie skina…",
+  "preview.missing": "Nie znaleziono skina"
 }

@@ -60,7 +60,8 @@ dev.koifih
         ├── RectRenderer         rounded rectangles, hue bar and saturation square
         ├── TextRenderer         Comfortaa Bold MSDF text
         ├── IconRenderer         Material Icons MSDF glyphs
-        ├── Previews             spinning entity and block models
+        ├── Previews             spinning entity and block models, and the player model with any skin
+        ├── SkinLookup           username to skin through Mojang's services, cached per name
         ├── font/                MsdfFont loader and the Fonts registry
         ├── state/               RectRenderState and TextRenderState
         ├── world/               WorldRenderer, ShapeCollector, BoxStyle, BoxGeometry and
@@ -106,9 +107,11 @@ and head fit inside), and an entity picker that appears only while Entities is s
 2px in 3D (full width within 10 blocks, shrinking with distance so far boxes stay crisp) and a 1px
 anti-aliased line with a thin black ring in 2D. The health bar is black-bordered, colored from red
 through yellow to green by the target's health, and sits on the left in 3D. A Preview row opens a
-second window beside the panel with a back arrow in its top bar, showing your own player model
-with the box drawn exactly as the ESP would draw it in the current mode; drag to spin the model,
-click to step it 45 degrees, or use the arrow keys.
+second window beside the panel with a back arrow in its top bar, showing a player model with the
+box drawn exactly as the ESP would draw it in the current mode; drag to spin the model, click to
+step it 45 degrees, or use the arrow keys. A username field at the top loads that player's skin
+through Mojang's own profile and skin services (fetched off-thread and cached, with a loading or
+not-found note beneath the field); clear it to see your own skin.
 
 ## World rendering
 

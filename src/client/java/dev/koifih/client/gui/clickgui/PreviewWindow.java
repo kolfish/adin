@@ -4,13 +4,16 @@ import dev.koifih.client.feature.setting.PreviewSetting;
 import dev.koifih.client.gui.Theme;
 import dev.koifih.client.gui.animation.Easing;
 import dev.koifih.client.gui.animation.Transition;
+import dev.koifih.client.gui.Lang;
 import dev.koifih.client.gui.component.IconButton;
+import dev.koifih.client.gui.component.TextInput;
 import dev.koifih.client.rendering.Draw;
 import dev.koifih.client.rendering.GuiRenderQueue;
 import dev.koifih.client.rendering.Opacity;
 import dev.koifih.client.rendering.Previews;
 import dev.koifih.client.rendering.RectRenderer;
 import dev.koifih.client.rendering.Scissor;
+import dev.koifih.client.rendering.SkinLookup;
 import dev.koifih.client.rendering.TextRenderer;
 import dev.koifih.client.rendering.screen.HealthBar;
 import dev.koifih.client.rendering.screen.OverlayCollector;
@@ -27,6 +30,7 @@ import net.minecraft.client.gui.navigation.ScreenRectangle;
 import net.minecraft.client.input.KeyEvent;
 import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.network.chat.Component;
+import net.minecraft.world.entity.player.PlayerSkin;
 import net.minecraft.world.phys.AABB;
 import org.joml.Matrix3x2f;
 import org.joml.Matrix3x2fc;
@@ -42,6 +46,12 @@ public final class PreviewWindow {
     private static final float CLICK_STEP = 45f;
     private static final float DRAG_THRESHOLD = 3f;
     private static final float DEFAULT_YAW = -30f;
+    private static final String DEFAULT_SKIN = "cms3066";
+    private static final int NAME_MAX_LENGTH = 16;
+    private static final int INPUT_HEIGHT = 16;
+    private static final int STATUS_HEIGHT = 10;
+    private static final long FETCH_DELAY_NANOS = 600_000_000L;
+    private static String skinName = DEFAULT_SKIN;
     private static final int[] EDGES = {
             0, 1, 2, 3, 4, 5, 6, 7,
             0, 2, 1, 3, 4, 6, 5, 7,
@@ -56,7 +66,10 @@ public final class PreviewWindow {
     private final Transition yaw = new Transition(DEFAULT_YAW, 200, Easing.EASE_OUT_CUBIC);
     private PanelLayout layout;
     private IconButton back;
+    private TextInput nameInput;
     private PreviewSetting preview;
+    private String requestedName = "";
+    private long editedAt;
     private boolean open;
     private boolean dragging;
     private boolean dragged;
@@ -71,6 +84,11 @@ public final class PreviewWindow {
         this.layout = layout;
         back = host.add(new IconButton(backX(), backY(), layout.atLeastOne(BACK_SIZE), layout.scale(), BACK_ICON,
                 Component.literal("Back"), this::close));
+        nameInput = host.add(new TextInput(contentX(), inputY(), contentWidth(), layout.atLeastOne(INPUT_HEIGHT), layout.scale(),
+                Component.literal(Lang.get("preview.skin")), NAME_MAX_LENGTH, () -> skinName, this::setSkinName));
+        nameInput.setPlaceholder(Lang.get("preview.skin"));
+        SkinLookup.request(skinName);
+        requestedName = skinName;
         updateStates(true);
     }
 
@@ -78,6 +96,33 @@ public final class PreviewWindow {
         this.layout = layout;
         back.setX(backX());
         back.setY(backY());
+        nameInput.setX(contentX());
+        nameInput.setY(inputY());
+        nameInput.setWidth(contentWidth());
+    }
+
+    private void setSkinName(String name) {
+        skinName = name;
+        editedAt = System.nanoTime();
+    }
+
+    private void pollSkin() {
+        if (skinName.equals(requestedName) || System.nanoTime() - editedAt < FETCH_DELAY_NANOS) return;
+        requestedName = skinName;
+        SkinLookup.request(skinName);
+    }
+
+    private PlayerSkin currentSkin() {
+        return requestedName.isBlank() ? null : SkinLookup.skin(requestedName);
+    }
+
+    private String statusText() {
+        if (requestedName.isBlank()) return "";
+        return switch (SkinLookup.status(requestedName)) {
+            case LOADING -> Lang.get("preview.loading");
+            case MISSING -> Lang.get("preview.missing");
+            case READY -> "";
+        };
     }
 
     public void open(PreviewSetting preview) {
@@ -99,8 +144,11 @@ public final class PreviewWindow {
     }
 
     public void updateStates(boolean interactive) {
-        back.active = open && interactive && reveal.value() >= 1f;
+        boolean ready = open && interactive && reveal.value() >= 1f;
+        back.active = ready;
         back.visible = reveal.value() > 0f;
+        nameInput.active = ready;
+        nameInput.visible = reveal.value() > 0f;
     }
 
     private boolean onRight() {
@@ -136,8 +184,12 @@ public final class PreviewWindow {
         return x() + layout.padding();
     }
 
-    private int contentY() {
+    private int inputY() {
         return y() + layout.topBarHeight() + layout.padding();
+    }
+
+    private int contentY() {
+        return inputY() + layout.atLeastOne(INPUT_HEIGHT) + layout.scaled(STATUS_HEIGHT);
     }
 
     private int contentWidth() {
@@ -145,7 +197,7 @@ public final class PreviewWindow {
     }
 
     private int contentHeight() {
-        return height() - layout.topBarHeight() - 2 * layout.padding();
+        return y() + height() - layout.padding() - contentY();
     }
 
     public boolean contains(double pointX, double pointY) {
@@ -172,6 +224,13 @@ public final class PreviewWindow {
         float titleX = back.getX() + back.getWidth() + layout.scaled(PanelLayout.GAP);
         TextRenderer.drawCentered(graphics, preview.name(), titleX, y() + layout.topBarHeight() * 0.5f, 8 * layout.scale(), Theme.TEXT);
         back.extractRenderState(graphics, mouseX, mouseY, delta);
+        pollSkin();
+        nameInput.extractRenderState(graphics, mouseX, mouseY, delta);
+        String status = statusText();
+        if (!status.isEmpty()) {
+            TextRenderer.drawCentered(graphics, status, contentX() + layout.scaled(2), inputY() + layout.atLeastOne(INPUT_HEIGHT) + layout.scaled(STATUS_HEIGHT) * 0.5f,
+                    6.5f * layout.scale(), Theme.MUTED);
+        }
         if (!open) return;
         var clip = new ScreenRectangle(contentX(), contentY(), contentWidth(), contentHeight());
         Scissor.clip(clip, () -> drawModel(graphics));
@@ -183,7 +242,7 @@ public final class PreviewWindow {
         int x1 = x0 + contentWidth();
         int y1 = y0 + contentHeight();
         float angle = yaw.value();
-        if (!Previews.drawPlayer(graphics, x0, y0, x1, y1, angle)) return;
+        if (!Previews.drawPlayer(graphics, x0, y0, x1, y1, angle, currentSkin())) return;
         Previews.Projector projector = Previews.playerProjector(x0, y0, x1, y1, angle);
         AABB bounds = Previews.playerLocalBounds();
         if (projector == null || bounds == null) return;
@@ -249,7 +308,7 @@ public final class PreviewWindow {
             lastX = event.x();
             host.dropFocus();
         }
-        return !back.isMouseOver(event.x(), event.y());
+        return !back.isMouseOver(event.x(), event.y()) && !nameInput.isMouseOver(event.x(), event.y());
     }
 
     public boolean mouseDragged(MouseButtonEvent event) {
