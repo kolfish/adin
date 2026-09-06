@@ -73,7 +73,11 @@ public final class Esp extends Module {
     public Esp() {
         super("esp", Category.RENDER);
         entities.visibleWhen(() -> targets.get().contains(ENTITIES));
-        show.optionVisibleWhen(option -> (option != SHOW_FILL && option != SHOW_OUTLINE) || mode.get() == MODE_3D || show.get().contains(SHOW_BOX));
+        show.optionVisibleWhen(option -> switch (option) {
+            case SHOW_FILL -> mode.get() == MODE_3D || show.get().contains(SHOW_BOX);
+            case SHOW_OUTLINE -> show.get().contains(SHOW_BOX);
+            default -> true;
+        });
         fillOpacity.visibleWhen(() -> shows(SHOW_FILL));
         type.visibleWhen(() -> mode.get() == MODE_2D);
         healthPosition.visibleWhen(() -> mode.get() == MODE_2D && shows(SHOW_HEALTH));
@@ -88,6 +92,7 @@ public final class Esp extends Module {
     private void onWorldRender(WorldRenderEvent event) {
         if (mode.get() != MODE_3D) return;
         Style style = worldStyle();
+        if (!style.hasFill() && !style.hasStroke()) return;
         for (Target target : targets(event)) {
             event.buffer().box(target.bounds(), style.scaled(perspective(target.distanceSq())));
         }
@@ -160,16 +165,18 @@ public final class Esp extends Module {
     }
 
     private Style worldStyle() {
-        return styled(Style.stroke(Colors.opaque(color.get()), WORLD_LINE_WIDTH), WORLD_OUTLINE_WIDTH);
+        return styled(WORLD_LINE_WIDTH, WORLD_OUTLINE_WIDTH);
     }
 
     private Style screenStyle() {
-        Style style = styled(Style.stroke(Colors.opaque(color.get()), SCREEN_LINE_WIDTH), SCREEN_OUTLINE_WIDTH);
+        Style style = styled(SCREEN_LINE_WIDTH, SCREEN_OUTLINE_WIDTH);
         return type.get() == TYPE_CORNERED ? style.withEdges(Edges.CORNERED) : style;
     }
 
-    private Style styled(Style style, float outlineWidth) {
-        if (shows(SHOW_FILL)) style = style.withFill(Colors.withAlpha(Colors.opaque(color.get()), fillOpacity.get() / 100f));
+    private Style styled(float lineWidth, float outlineWidth) {
+        int rgb = Colors.opaque(color.get());
+        Style style = shows(SHOW_BOX) ? Style.stroke(rgb, lineWidth) : Style.EMPTY;
+        if (shows(SHOW_FILL)) style = style.withFill(Colors.withAlpha(rgb, fillOpacity.get() / 100f));
         if (shows(SHOW_OUTLINE)) style = style.withOutline(OUTLINE_COLOR, outlineWidth);
         return style;
     }

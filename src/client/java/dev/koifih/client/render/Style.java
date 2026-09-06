@@ -1,6 +1,8 @@
 package dev.koifih.client.render;
 
 public record Style(int fill, int stroke, float strokeWidth, int outline, float outlineWidth, Edges edges) {
+    public static final Style EMPTY = new Style(0, 0, 0f, 0, 0f, Edges.FULL);
+
     public static Style fill(int argb) {
         return new Style(argb, 0, 0f, 0, 0f, Edges.FULL);
     }
