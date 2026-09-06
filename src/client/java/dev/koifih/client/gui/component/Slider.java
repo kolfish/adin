@@ -3,6 +3,7 @@ package dev.koifih.client.gui.component;
 import dev.koifih.client.gui.Theme;
 import dev.koifih.client.gui.animation.Easing;
 import dev.koifih.client.gui.animation.Transition;
+import dev.koifih.client.rendering.TextRenderer;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.narration.NarratedElementType;
 import net.minecraft.client.gui.narration.NarrationElementOutput;
@@ -10,6 +11,7 @@ import net.minecraft.client.input.KeyEvent;
 import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.network.chat.Component;
 import java.util.function.IntConsumer;
+import java.util.function.IntFunction;
 import java.util.function.IntSupplier;
 
 public final class Slider extends Control {
@@ -19,6 +21,7 @@ public final class Slider extends Control {
     private final IntConsumer set;
     private boolean dragging;
     private final Transition position;
+    private IntFunction<String> format = Integer::toString;
 
     public Slider(int x, int y, int width, int height, float scale, Component label,
                   int min, int max, IntSupplier get, IntConsumer set) {
@@ -30,12 +33,17 @@ public final class Slider extends Control {
         this.position = new Transition(get.getAsInt(), 120, Easing.EASE_OUT_CUBIC);
     }
 
+    public void setFormat(IntFunction<String> format) {
+        this.format = format;
+    }
+
     private float knobWidth() {
         return px(10);
     }
 
     private float valueWidth() {
-        return px(18);
+        float widest = Math.max(TextRenderer.width(format.apply(min), px(7)), TextRenderer.width(format.apply(max), px(7)));
+        return Math.max(px(18), widest + px(8));
     }
 
     private float trackWidth() {
@@ -58,7 +66,7 @@ public final class Slider extends Control {
         rect(graphics, getX(), trackY, trackWidth(), trackHeight, trackHeight / 2, Theme.CONTROL);
         rect(graphics, getX(), trackY, knobX + knobWidth() / 2 - getX(), trackHeight, trackHeight / 2, Theme.ACCENT);
         rect(graphics, knobX, centerY() - knobHeight / 2, knobWidth(), knobHeight, px(2), Theme.ACCENT);
-        text(graphics, Integer.toString(get.getAsInt()), getRight() - valueWidth() + px(6), centerY(), px(7), Theme.TEXT);
+        text(graphics, format.apply(get.getAsInt()), getRight() - valueWidth() + px(6), centerY(), px(7), Theme.TEXT);
     }
 
     private void drag(double mouseX) {
@@ -94,7 +102,7 @@ public final class Slider extends Control {
 
     @Override
     protected void updateWidgetNarration(NarrationElementOutput output) {
-        output.add(NarratedElementType.TITLE, Component.literal(getMessage().getString() + ": " + get.getAsInt()));
+        output.add(NarratedElementType.TITLE, Component.literal(getMessage().getString() + ": " + format.apply(get.getAsInt())));
         output.add(NarratedElementType.USAGE, Component.literal("Arrow keys adjust the value."));
     }
 }

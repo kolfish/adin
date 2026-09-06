@@ -17,11 +17,15 @@ dev.koifih
 └── client
     ├── AdinClient               client entrypoint
     ├── keybind/Keybinds         key mapping registration and ClickGUI activation
-    ├── event/                   EventBus with typed Listener subscriptions; TickEvent
+    ├── event/                   EventBus with typed Listener subscriptions; TickEvent and
+    │                            WorldExtractEvent
     ├── feature/                 Feature base (enabled, keybind, hold, settings), Category,
     │   │                        Features registry and config snapshot/apply
-    │   ├── setting/             Setting types: Bool, Slider, Range, Enum, Multi, Color, Entity, Block
-    │   └── movement/Sprint      auto sprint with an omni-sprint setting
+    │   ├── setting/             Setting types: Bool, Slider, Range, Enum, Multi, Color, Entity, Block;
+    │   │                        visibleWhen hides a setting until its condition holds and a
+    │   │                        Slider's Measure formats its value in the chosen units
+    │   ├── movement/Sprint      auto sprint with an omni-sprint setting
+    │   └── render/Esp           see-through boxes around chosen entities
     ├── config/                  Config model and ConfigStore (load, save, apply)
     ├── mixin/                   accessors for GuiGraphicsExtractor, KeyMapping, FallingBlockEntity,
     │                            and the ClientInput hook for omni sprint
@@ -51,7 +55,9 @@ dev.koifih
         ├── IconRenderer         Material Icons MSDF glyphs
         ├── Previews             spinning entity and block models
         ├── font/                MsdfFont loader and the Fonts registry
-        └── state/               RectRenderState and TextRenderState
+        ├── state/               RectRenderState and TextRenderState
+        └── world/               WorldRenderer, ShapeCollector, BoxStyle, BoxGeometry and
+                                 WorldRenderTypes for see-through 3D shapes
 ```
 
 Shaders live in `assets/adin/shaders/core/`: `rect.{vsh,fsh}` draws the
@@ -67,18 +73,34 @@ The panel is centered, scales down on small windows, and can be dragged by its t
 The sidebar lists the feature categories (Combat, Movement, Render, Player, Misc) and a Configs
 tab, with a gear at the bottom that pops up a small settings menu holding a light/dark theme
 switch, a language dropdown (English, Russian, Polish, French, Croatian, always listed in
-English; strings live in `assets/adin/translations/`), accent presets with a custom picker,
-and the ClickGUI keybind.
+English; strings live in `assets/adin/translations/`), a size dropdown (100% to 200%, applied
+the next time the GUI opens), a units dropdown (metric or imperial, used wherever a slider
+shows a distance), accent presets with a custom picker, and the ClickGUI keybind.
 
 Each category page lists its features as rows with a master toggle and a gear that opens a
 settings box over the rows. The box always starts with the feature's keybind and toggle/hold
 mode, then one row per declared setting; the widget is picked from the setting type, so a
-feature only declares `add(new BoolSetting(...))` and the GUI does the rest.
+feature only declares `add(new BoolSetting(...))` and the GUI does the rest. A setting can
+call `visibleWhen` with a condition and the box hides it and reflows until the condition holds.
 
 Features live in `feature/` and subscribe to the event bus while enabled; subscriptions are
-dropped automatically on disable. The only feature so far is Sprint: it sprints whenever you
-move forward and are allowed to, and its Omni sprint setting hooks the client input's
-forward-impulse check so vanilla accepts sprinting sideways and backwards too.
+dropped automatically on disable. Sprint sprints whenever you move forward and are allowed
+to, and its Omni sprint setting hooks the client input's forward-impulse check so vanilla
+accepts sprinting sideways and backwards too. ESP draws accent-colored boxes through walls
+around entities within its distance in the ESP color: a mode dropdown (3D only for now), its own color picker, a
+Fill toggle for the translucent fill, an Outline toggle that borders the 2px colored edges in
+black (line widths are full within 10 blocks and shrink with distance so far boxes stay crisp), a Targets multi-select of Self, Players and Entities, and an entity picker that
+appears only while Entities is selected.
+
+## World rendering
+
+`rendering/world` is the 3D counterpart of the GUI renderers. Each frame `WorldRenderer`
+posts a `WorldExtractEvent` from Fabric's level extraction hook with the level, camera, delta
+tracker and a `ShapeCollector`; features add shapes with a `BoxStyle` (fill, stroke, stroke
+width, and an optional wider outline drawn behind the stroke) and the event helps with per-entity partial ticks and interpolated bounding boxes.
+During submit collection the renderer turns the collected boxes into camera-relative quads and
+lines through `submitCustomGeometry` using two render types built from the vanilla filled-box
+and lines pipeline snippets with depth testing disabled, so shapes show through terrain.
 
 The Configs page lists saved configs from `config/adin/configs/*.json`. Make config opens a
 dialog for a name, description and what to include (colors, settings or both); each card shows the

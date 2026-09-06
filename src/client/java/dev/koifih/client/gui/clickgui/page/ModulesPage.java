@@ -76,6 +76,7 @@ public final class ModulesPage implements Page {
     private final List<Control> settingControls = new ArrayList<>();
     private final List<String> settingLabels = new ArrayList<>();
     private final List<CatalogPicker> pickers = new ArrayList<>();
+    private List<Setting<?>> builtSettings = List.of();
     private PanelLayout layout;
     private Keybind bindControl;
     private Feature openFeature;
@@ -131,6 +132,7 @@ public final class ModulesPage implements Page {
         settingControls.clear();
         settingLabels.clear();
         pickers.clear();
+        builtSettings = visibleSettings(feature);
         float scale = layout.scale();
         int x = settingX();
         int width = settingWidth();
@@ -157,7 +159,7 @@ public final class ModulesPage implements Page {
         settingLabels.add(Lang.get("keybind"));
 
         int row = 1;
-        for (Setting<?> setting : feature.settings()) {
+        for (Setting<?> setting : builtSettings) {
             Component label = Component.literal(setting.name());
             Control control;
             String rowLabel = setting.name();
@@ -165,8 +167,10 @@ public final class ModulesPage implements Page {
                 control = new Bool(right - toggleWidth, settingY(row, toggleHeight), toggleWidth, toggleHeight, scale, label,
                         bool::get, bool::set);
             } else if (setting instanceof SliderSetting slider) {
-                control = new Slider(halfX, settingY(row, bindHeight), halfWidth, bindHeight, scale, label,
+                Slider sliderControl = new Slider(halfX, settingY(row, bindHeight), halfWidth, bindHeight, scale, label,
                         slider.min(), slider.max(), slider::get, slider::set);
+                sliderControl.setFormat(slider::format);
+                control = sliderControl;
             } else if (setting instanceof RangeSetting range) {
                 control = new RangeSlider(halfX, settingY(row, bindHeight), halfWidth, bindHeight, scale, label,
                         range.min(), range.max(), range::low, range::setLow, range::high, range::setHigh);
@@ -200,6 +204,18 @@ public final class ModulesPage implements Page {
         relayout(layout);
     }
 
+    private static List<Setting<?>> visibleSettings(Feature feature) {
+        List<Setting<?>> visible = new ArrayList<>();
+        for (Setting<?> setting : feature.settings()) if (setting.isVisible()) visible.add(setting);
+        return visible;
+    }
+
+    private void refreshSettings() {
+        if (openFeature == null || !overlayOpen || visibleSettings(openFeature).equals(builtSettings)) return;
+        buildSettings(openFeature);
+        setState(shown, interactive);
+    }
+
     private <T extends Popup> T bounded(T popup) {
         popup.setBottomLimit(layout.bottom());
         return popup;
@@ -229,7 +245,7 @@ public final class ModulesPage implements Page {
     }
 
     private int settingRowCount() {
-        return 1 + (openFeature == null ? 0 : openFeature.settings().size());
+        return 1 + builtSettings.size();
     }
 
     private int overlayX() {
@@ -350,6 +366,7 @@ public final class ModulesPage implements Page {
     }
 
     public void drawOverlay(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float delta) {
+        refreshSettings();
         float reveal = overlayReveal.value();
         if (reveal <= 0f || openFeature == null) return;
         graphics.nextStratum();

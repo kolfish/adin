@@ -55,6 +55,15 @@
   "feature.sprint": "Sprint",
   "feature.sprint.description": "Biega za ciebie",
   "setting.sprint.omni": "Sprint w każdą stronę",
+  "feature.esp": "ESP",
+  "feature.esp.description": "Pokazuje byty przez ściany",
+  "setting.esp.mode": "Tryb",
+  "setting.esp.distance": "Zasięg",
+  "setting.esp.color": "Kolor",
+  "setting.esp.fill": "Wypełnienie",
+  "setting.esp.outline": "Obrys",
+  "setting.esp.targets": "Cele",
+  "setting.esp.entities": "Byty",
   "bind.help.toggle": "Przełącznik: naciśnięcie włącza lub wyłącza",
   "bind.help.hold": "Przytrzymanie: działa tylko gdy klawisz jest wciśnięty"
 }

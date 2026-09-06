@@ -55,6 +55,15 @@
   "feature.sprint": "Sprint",
   "feature.sprint.description": "Sprinte pour toi",
   "setting.sprint.omni": "Sprint omnidirectionnel",
+  "feature.esp": "ESP",
+  "feature.esp.description": "Affiche les entités à travers les murs",
+  "setting.esp.mode": "Mode",
+  "setting.esp.distance": "Distance",
+  "setting.esp.color": "Couleur",
+  "setting.esp.fill": "Remplissage",
+  "setting.esp.outline": "Contour",
+  "setting.esp.targets": "Cibles",
+  "setting.esp.entities": "Entités",
   "bind.help.toggle": "Bascule : appuyer active ou désactive",
   "bind.help.hold": "Maintien : actif seulement tant que la touche est enfoncée"
 }

@@ -246,6 +246,7 @@ public final class ClickGui extends Screen implements WidgetHost {
         layout = PanelLayout.of(width, height, dragOffsetX, dragOffsetY, uiScale);
         for (Popup popup : popups()) popup.setBottomLimit(layout.bottom());
         for (Page page : pages) page.relayout(layout);
+        menu.relayout(layout);
         sidebar.resetPill();
         return true;
     }

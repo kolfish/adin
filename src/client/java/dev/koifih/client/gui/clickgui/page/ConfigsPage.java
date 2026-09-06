@@ -81,9 +81,14 @@ public final class ConfigsPage implements Page {
     }
 
     @Override
-    public void init(PanelLayout layout) {
+    public void relayout(PanelLayout layout) {
         this.area = new Area(layout.scale(), layout.contentX(), layout.contentY(),
                 layout.contentWidth(), layout.contentHeight(), layout.padding());
+    }
+
+    @Override
+    public void init(PanelLayout layout) {
+        relayout(layout);
         configs = ConfigStore.list();
         dialogOpen = false;
         dialogReveal.snap(0f);

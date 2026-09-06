@@ -2,11 +2,13 @@ package dev.koifih.client.feature.setting;
 
 import com.google.gson.JsonElement;
 import dev.koifih.client.gui.Lang;
+import java.util.function.BooleanSupplier;
 
 public abstract class Setting<T> {
     private final String id;
     private final T defaultValue;
     private String featureId = "";
+    private BooleanSupplier visible = () -> true;
     protected T value;
 
     protected Setting(String id, T defaultValue) {
@@ -21,6 +23,14 @@ public abstract class Setting<T> {
 
     public String id() {
         return id;
+    }
+
+    public void visibleWhen(BooleanSupplier condition) {
+        visible = condition;
+    }
+
+    public boolean isVisible() {
+        return visible.getAsBoolean();
     }
 
     public String name() {

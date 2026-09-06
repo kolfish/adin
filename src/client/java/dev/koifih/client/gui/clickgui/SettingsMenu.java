@@ -115,6 +115,10 @@ public final class SettingsMenu {
         controls.addAll(List.of(close, theme, language, size, units, accent, bind));
     }
 
+    public void relayout(PanelLayout layout) {
+        this.layout = layout;
+    }
+
     public int width() {
         return Math.min(layout.width() - 2 * layout.padding(), layout.scaled(WIDTH));
     }

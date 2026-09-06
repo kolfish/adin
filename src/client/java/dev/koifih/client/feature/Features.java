@@ -6,6 +6,7 @@ import dev.koifih.client.config.Config;
 import dev.koifih.client.event.EventBus;
 import dev.koifih.client.event.TickEvent;
 import dev.koifih.client.feature.movement.Sprint;
+import dev.koifih.client.feature.render.Esp;
 import dev.koifih.client.feature.setting.Setting;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
@@ -16,6 +17,7 @@ public final class Features {
     private static final List<Feature> ALL = new ArrayList<>();
 
     public static final Sprint SPRINT = register(new Sprint());
+    public static final Esp ESP = register(new Esp());
 
     private Features() {}
 

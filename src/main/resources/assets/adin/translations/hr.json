@@ -55,6 +55,15 @@
   "feature.sprint": "Sprint",
   "feature.sprint.description": "Sprinta za tebe",
   "setting.sprint.omni": "Sprint u svim smjerovima",
+  "feature.esp": "ESP",
+  "feature.esp.description": "Prikazuje entitete kroz zidove",
+  "setting.esp.mode": "Način",
+  "setting.esp.distance": "Udaljenost",
+  "setting.esp.color": "Boja",
+  "setting.esp.fill": "Ispuna",
+  "setting.esp.outline": "Obrub",
+  "setting.esp.targets": "Mete",
+  "setting.esp.entities": "Entiteti",
   "bind.help.toggle": "Prekidač: pritisak uključuje ili isključuje",
   "bind.help.hold": "Držanje: radi samo dok je tipka pritisnuta"
 }
