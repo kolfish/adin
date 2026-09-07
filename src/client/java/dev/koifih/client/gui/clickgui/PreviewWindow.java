@@ -5,6 +5,7 @@ import dev.koifih.client.gui.animation.Easing;
 import dev.koifih.client.gui.animation.Transition;
 import dev.koifih.client.gui.component.IconButton;
 import dev.koifih.client.gui.component.TextInput;
+import dev.koifih.client.render.EntityFill;
 import dev.koifih.client.render.Opacity;
 import dev.koifih.client.render.Scissor;
 import dev.koifih.client.render.Style;
@@ -21,6 +22,8 @@ import dev.koifih.client.render.screen.ScreenPoint;
 import dev.koifih.client.render.screen.ScreenRect;
 import dev.koifih.client.render.screen.ScreenRenderer;
 import dev.koifih.client.setting.PreviewSetting;
+import dev.koifih.client.setting.Setting;
+import dev.koifih.client.util.Colors;
 import dev.koifih.client.util.Lang;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
@@ -30,6 +33,7 @@ import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.player.PlayerSkin;
 import net.minecraft.world.phys.AABB;
+import net.minecraft.world.phys.Vec3;
 import org.lwjgl.glfw.GLFW;
 
 public final class PreviewWindow {
@@ -55,6 +59,7 @@ public final class PreviewWindow {
     private IconButton back;
     private TextInput nameInput;
     private PreviewSetting preview;
+    private Setting<?> highlighted;
     private String requestedName = "";
     private long editedAt;
     private boolean open;
@@ -196,7 +201,8 @@ public final class PreviewWindow {
                 && pointY >= contentY() && pointY < contentY() + contentHeight();
     }
 
-    public void draw(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float delta) {
+    public void draw(GuiGraphicsExtractor graphics, Setting<?> highlighted, int mouseX, int mouseY, float delta) {
+        this.highlighted = highlighted;
         float shown = reveal.value();
         if (shown <= 0f || preview == null) return;
         float slide = (onRight() ? -1f : 1f) * SLIDE * layout.scale() * (1f - shown);
@@ -229,10 +235,15 @@ public final class PreviewWindow {
         int x1 = x0 + contentWidth();
         int y1 = y0 + contentHeight();
         float angle = yaw.value();
-        if (!EntityPreview.drawPlayer(graphics, x0, y0, x1, y1, angle, currentSkin())) return;
         Projector projector = EntityPreview.playerProjector(x0, y0, x1, y1, angle);
         AABB bounds = EntityPreview.playerLocalBounds();
         if (projector == null || bounds == null) return;
+        PreviewSetting.Shade shade = preview.shade(highlighted);
+        if (shade != null) {
+            EntityPreview.drawPlayer(graphics, x0, y0, x1, y1, angle, currentSkin(), fill(shade, projector, bounds, y1));
+            return;
+        }
+        if (!EntityPreview.drawPlayer(graphics, x0, y0, x1, y1, angle, currentSkin(), null)) return;
         bounds = preview.fit(bounds);
         float pixel = 1f / Math.max(1, Minecraft.getInstance().getWindow().getGuiScale());
         ScreenPoint[] corners = ScreenBoxes.project(projector, bounds);
@@ -253,6 +264,20 @@ public final class PreviewWindow {
             HealthBar.collect(buffer, rect, side, fraction, clearance, pixel);
         }
         ScreenRenderer.submit(graphics, buffer);
+    }
+
+    private EntityFill fill(PreviewSetting.Shade shade, Projector projector, AABB bounds, int bottom) {
+        int color = Opacity.apply(Colors.opaque(shade.rgb()));
+        if (shade.effect() > 0) {
+            return EntityFill.effect(color, 0, shade.effect(), Vec3.ZERO, EntityPreview.playerScale(contentX(), contentY(),
+                    contentX() + contentWidth(), contentY() + contentHeight()));
+        }
+        if (!shade.gradient()) return EntityFill.solid(color, 0);
+        ScreenRect rect = ScreenBoxes.bounds(ScreenBoxes.project(projector, bounds));
+        int guiScale = Math.max(1, Minecraft.getInstance().getWindow().getGuiScale());
+        int minY = rect == null ? 0 : Math.round((bottom - rect.maxY()) * guiScale);
+        int maxY = rect == null ? 0 : Math.round((bottom - rect.minY()) * guiScale);
+        return EntityFill.gradient(color, shade.secondaryRgb(), 0, 0, minY, maxY);
     }
 
     public boolean mouseClicked(MouseButtonEvent event) {

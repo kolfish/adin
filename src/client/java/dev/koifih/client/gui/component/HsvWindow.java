@@ -1,6 +1,8 @@
 package dev.koifih.client.gui.component;
 
 import dev.koifih.client.gui.Theme;
+import dev.koifih.client.gui.animation.Easing;
+import dev.koifih.client.gui.animation.Transition;
 import dev.koifih.client.render.gui.Icons;
 import dev.koifih.client.render.gui.Rects;
 import dev.koifih.client.render.gui.Transform;
@@ -8,6 +10,7 @@ import dev.koifih.client.util.Colors;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.input.KeyEvent;
+import java.util.function.BooleanSupplier;
 import java.util.function.IntConsumer;
 import java.util.function.IntSupplier;
 
@@ -21,6 +24,8 @@ final class HsvWindow {
     private static final float BUTTON_GAP = 4f;
     private static final int COPY_ICON = 0xe14d;
     private static final int PASTE_ICON = 0xe14f;
+    private static final float SWATCH_GAP = 3f;
+    private static final int SWATCH_MILLIS = 150;
     static final float HEIGHT = MARGIN + SQUARE_HEIGHT + MARGIN + HUE_HEIGHT + MARGIN + BUTTON_HEIGHT + MARGIN;
 
     private enum Drag { NONE, SQUARE, HUE }
@@ -28,6 +33,11 @@ final class HsvWindow {
     private final Control owner;
     private final IntSupplier get;
     private final IntConsumer set;
+    private IntSupplier secondaryGet = () -> 0;
+    private IntConsumer secondarySet = rgb -> {};
+    private BooleanSupplier gradient = () -> false;
+    private boolean editingSecondary;
+    private final Transition selection = new Transition(0f, SWATCH_MILLIS, Easing.EASE_OUT_CUBIC);
     private float hue;
     private float saturation;
     private float value;
@@ -57,12 +67,33 @@ final class HsvWindow {
         return (Math.round((r + m) * 255) << 16) | (Math.round((g + m) * 255) << 8) | Math.round((b + m) * 255);
     }
 
+    void gradient(IntSupplier get, IntConsumer set, BooleanSupplier enabled) {
+        secondaryGet = get;
+        secondarySet = set;
+        gradient = enabled;
+    }
+
+    private boolean isGradient() {
+        return gradient.getAsBoolean();
+    }
+
+    private int current() {
+        return editingSecondary && isGradient() ? secondaryGet.getAsInt() : get.getAsInt();
+    }
+
+    private void setCurrent(int rgb) {
+        if (editingSecondary && isGradient()) secondarySet.accept(rgb);
+        else set.accept(rgb);
+    }
+
     private float px(float units) {
         return owner.px(units);
     }
 
     void readColor() {
-        int rgb = get.getAsInt();
+        if (!isGradient()) editingSecondary = false;
+        selection.set(editingSecondary ? 1f : 0f);
+        int rgb = current();
         float r = ((rgb >> 16) & 255) / 255f;
         float g = ((rgb >> 8) & 255) / 255f;
         float b = (rgb & 255) / 255f;
@@ -80,11 +111,11 @@ final class HsvWindow {
     }
 
     private void writeColor() {
-        set.accept(hsvToRgb(hue, saturation, value));
+        setCurrent(hsvToRgb(hue, saturation, value));
     }
 
     void copy() {
-        Minecraft.getInstance().keyboardHandler.setClipboard(Colors.hex(get.getAsInt()));
+        Minecraft.getInstance().keyboardHandler.setClipboard(Colors.hex(current()));
     }
 
     void paste() {
@@ -93,7 +124,7 @@ final class HsvWindow {
         else if (text.startsWith("0x") || text.startsWith("0X")) text = text.substring(2);
         if (text.length() != 6) return;
         try {
-            set.accept(Integer.parseInt(text, 16));
+            setCurrent(Integer.parseInt(text, 16));
             readColor();
         } catch (NumberFormatException ignored) {
         }
@@ -127,6 +158,16 @@ final class HsvWindow {
         float copyX = pasteX - px(BUTTON_GAP + BUTTON_WIDTH);
         button(graphics, copyX, buttonY, COPY_ICON);
         button(graphics, pasteX, buttonY, PASTE_ICON);
+        if (!isGradient()) return;
+        float size = px(BUTTON_HEIGHT);
+        float ringX = swatchX(x, selection.value());
+        owner.rect(graphics, ringX - px(1), buttonY - px(1), size + px(2), size + px(2), px(4), Theme.ACCENT);
+        owner.rect(graphics, swatchX(x, 0), buttonY, size, size, px(3), Colors.opaque(get.getAsInt()));
+        owner.rect(graphics, swatchX(x, 1), buttonY, size, size, px(3), Colors.opaque(secondaryGet.getAsInt()));
+    }
+
+    private float swatchX(float x, float index) {
+        return x + px(MARGIN) + index * px(BUTTON_HEIGHT + SWATCH_GAP);
     }
 
     private void button(GuiGraphicsExtractor graphics, float x, float y, int icon) {
@@ -152,6 +193,7 @@ final class HsvWindow {
             float copyX = pasteX - px(BUTTON_GAP + BUTTON_WIDTH);
             if (mouseX >= copyX && mouseX < copyX + px(BUTTON_WIDTH)) copy();
             else if (mouseX >= pasteX && mouseX < pasteX + px(BUTTON_WIDTH)) paste();
+            else if (isGradient()) selectSwatch(mouseX, x);
             drag = Drag.NONE;
             return;
         }
@@ -159,6 +201,16 @@ final class HsvWindow {
         else if (mouseY >= hueY - px(3) && mouseY < hueY + px(HUE_HEIGHT + 3)) drag = Drag.HUE;
         else drag = Drag.NONE;
         drag(mouseX, mouseY, x, y);
+    }
+
+    private void selectSwatch(double mouseX, float x) {
+        for (int index = 0; index < 2; index++) {
+            float swatchX = swatchX(x, index);
+            if (mouseX >= swatchX && mouseX < swatchX + px(BUTTON_HEIGHT)) {
+                editingSecondary = index == 1;
+                readColor();
+            }
+        }
     }
 
     void drag(double mouseX, double mouseY, float x, float y) {

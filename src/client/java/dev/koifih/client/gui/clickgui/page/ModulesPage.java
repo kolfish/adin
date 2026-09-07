@@ -190,7 +190,11 @@ public final class ModulesPage implements Page {
                     select.setOptionVisible(multi::isOptionVisible);
                     yield bounded(select);
                 }
-                case ColorSetting color -> bounded(new ColorPicker(x, 0, width, fieldHeight, scale, label, color::get, color::set));
+                case ColorSetting color -> {
+                    ColorPicker picker = new ColorPicker(x, 0, width, fieldHeight, scale, label, color::get, color::set);
+                    picker.gradient(color::secondary, color::setSecondary, color::isGradient);
+                    yield bounded(picker);
+                }
                 case EntitySetting entities ->
                         windowed(new CatalogPicker(x, 0, width, fieldHeight, scale, label, EntityCatalog.INSTANCE, entities::get));
                 case BlockSetting blocks ->
@@ -371,6 +375,17 @@ public final class ModulesPage implements Page {
         if (!overlayOpen && overlayReveal.value() <= 0f) return false;
         closeOverlay();
         return true;
+    }
+
+    public Setting<?> highlightedSetting(double mouseX, double mouseY) {
+        for (SettingRow row : settingRows) {
+            if (row.control() instanceof Popup popup && popup.isOpen()) return row.setting();
+        }
+        for (SettingRow row : settingRows) {
+            Control control = row.control();
+            if (control.visible && control.active && control.isMouseOver(mouseX, mouseY)) return row.setting();
+        }
+        return null;
     }
 
     public float dimAmount() {

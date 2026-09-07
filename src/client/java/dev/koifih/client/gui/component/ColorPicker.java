@@ -8,6 +8,7 @@ import net.minecraft.client.gui.narration.NarratedElementType;
 import net.minecraft.client.gui.narration.NarrationElementOutput;
 import net.minecraft.client.input.KeyEvent;
 import net.minecraft.network.chat.Component;
+import java.util.function.BooleanSupplier;
 import java.util.function.IntConsumer;
 import java.util.function.IntSupplier;
 
@@ -16,12 +17,20 @@ public final class ColorPicker extends RowPopup {
 
     private final IntSupplier get;
     private final HsvWindow window;
+    private IntSupplier secondary = () -> 0;
+    private BooleanSupplier gradient = () -> false;
 
     public ColorPicker(int x, int y, int width, int height, float scale, Component label,
                        IntSupplier get, IntConsumer set) {
         super(x, y, width, height, scale, label);
         this.get = get;
         this.window = new HsvWindow(this, get, set);
+    }
+
+    public void gradient(IntSupplier get, IntConsumer set, BooleanSupplier enabled) {
+        secondary = get;
+        gradient = enabled;
+        window.gradient(get, set, enabled);
     }
 
     @Override
@@ -56,11 +65,16 @@ public final class ColorPicker extends RowPopup {
 
     @Override
     protected void drawRowValue(GuiGraphicsExtractor graphics, float rightLimit, float available) {
+        float swatch = px(9);
+        if (gradient.getAsBoolean()) {
+            rect(graphics, rightLimit - swatch, centerY() - swatch / 2, swatch, swatch, px(2), Colors.opaque(secondary.getAsInt()));
+            rect(graphics, rightLimit - 2 * swatch - px(3), centerY() - swatch / 2, swatch, swatch, px(2), Colors.opaque(get.getAsInt()));
+            return;
+        }
         float size = px(7);
         String label = Colors.hex(get.getAsInt());
         float labelWidth = Text.width(label, size);
         text(graphics, label, rightLimit - labelWidth, centerY(), size, Theme.TEXT);
-        float swatch = px(9);
         rect(graphics, rightLimit - labelWidth - px(5) - swatch, centerY() - swatch / 2, swatch, swatch, px(2),
                 Colors.opaque(get.getAsInt()));
     }

@@ -69,6 +69,10 @@ public final class Projection implements Projector {
         return pixel;
     }
 
+    public int framebufferY(float y) {
+        return Math.round((height - y) / pixel);
+    }
+
     private Vector4f clip(double x, double y, double z, Vector4f dest) {
         return viewProjection.transform((float) (x - origin.x), (float) (y - origin.y), (float) (z - origin.z), 1f, dest);
     }

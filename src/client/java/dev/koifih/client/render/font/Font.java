@@ -8,7 +8,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 public final class Font {
-    private static final String METRICS_DIRECTORY = "/assets/adin/font/";
+    private static final String METRICS_DIRECTORY = "/assets/adin/msdf/";
 
     private final Identifier texture;
     private final int fallbackCodepoint;

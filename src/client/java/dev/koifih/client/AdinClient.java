@@ -6,7 +6,7 @@ import dev.koifih.client.input.Keybinds;
 import dev.koifih.client.module.ModuleManager;
 import dev.koifih.client.module.impl.hud.Notifications;
 import dev.koifih.client.module.impl.movement.Sprint;
-import dev.koifih.client.module.impl.render.Esp;
+import dev.koifih.client.module.impl.render.esp.Esp;
 import dev.koifih.client.render.preview.EntityPreview;
 import dev.koifih.client.render.screen.ScreenRenderer;
 import dev.koifih.client.render.world.WorldRenderer;

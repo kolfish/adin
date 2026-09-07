@@ -2,6 +2,8 @@ package dev.koifih.client.render.preview;
 
 import dev.koifih.Adin;
 import dev.koifih.client.mixin.FallingBlockEntityAccessor;
+import dev.koifih.client.render.EntityFill;
+import dev.koifih.client.render.FilledRenderState;
 import dev.koifih.client.render.screen.Projector;
 import dev.koifih.client.render.screen.ScreenPoint;
 import net.minecraft.client.Minecraft;
@@ -69,7 +71,7 @@ public final class EntityPreview {
             living.yHeadRot = yawDegrees;
             living.yHeadRotO = yawDegrees;
         }
-        if (!render(graphics, entity, x0, y0, x1, y1, 0f, null)) ENTITIES.put(type, Optional.empty());
+        if (!render(graphics, entity, x0, y0, x1, y1, 0f, null, null)) ENTITIES.put(type, Optional.empty());
     }
 
     public static void drawBlock(GuiGraphicsExtractor graphics, Block block, int x0, int y0, int x1, int y1, float yawDegrees) {
@@ -79,12 +81,12 @@ public final class EntityPreview {
             fallingBlock = falling;
         }
         ((FallingBlockEntityAccessor) fallingBlock).adin$setBlockState(block.defaultBlockState());
-        render(graphics, fallingBlock, x0, y0, x1, y1, yawDegrees, null);
+        render(graphics, fallingBlock, x0, y0, x1, y1, yawDegrees, null, null);
     }
 
-    public static boolean drawPlayer(GuiGraphicsExtractor graphics, int x0, int y0, int x1, int y1, float sceneYawDegrees, PlayerSkin skin) {
+    public static boolean drawPlayer(GuiGraphicsExtractor graphics, int x0, int y0, int x1, int y1, float sceneYawDegrees, PlayerSkin skin, EntityFill fill) {
         var player = Minecraft.getInstance().player;
-        return player != null && render(graphics, player, x0, y0, x1, y1, sceneYawDegrees, skin);
+        return player != null && render(graphics, player, x0, y0, x1, y1, sceneYawDegrees, skin, fill);
     }
 
     public static Projector playerProjector(int x0, int y0, int x1, int y1, float sceneYawDegrees) {
@@ -99,6 +101,11 @@ public final class EntityPreview {
             Vector3f point = rotation.transform(new Vector3f((float) x, (float) y, (float) z)).add(lift).mul(scale);
             return new ScreenPoint(centerX + point.x, centerY + point.y, point.z);
         };
+    }
+
+    public static float playerScale(int x0, int y0, int x1, int y1) {
+        var player = Minecraft.getInstance().player;
+        return player == null ? 1f : fitScale(player, x0, y0, x1, y1);
     }
 
     public static AABB playerLocalBounds() {
@@ -119,7 +126,7 @@ public final class EntityPreview {
         return new Quaternionf().rotateZ((float) Math.PI).mul(camera).rotateY((float) Math.toRadians(sceneYawDegrees));
     }
 
-    private static boolean render(GuiGraphicsExtractor graphics, Entity entity, int x0, int y0, int x1, int y1, float sceneYawDegrees, PlayerSkin skin) {
+    private static boolean render(GuiGraphicsExtractor graphics, Entity entity, int x0, int y0, int x1, int y1, float sceneYawDegrees, PlayerSkin skin, EntityFill fill) {
         var player = Minecraft.getInstance().player;
         if (player != null && entity != player) entity.setPos(player.getX(), player.getY(), player.getZ());
         EntityRenderState state;
@@ -133,6 +140,7 @@ public final class EntityPreview {
         state.shadowPieces.clear();
         state.outlineColor = 0;
         if (skin != null && state instanceof AvatarRenderState avatar) avatar.skin = skin;
+        ((FilledRenderState) state).adin$setFill(fill);
         float scale = fitScale(entity, x0, y0, x1, y1);
         Quaternionf camera = new Quaternionf().rotateX((float) Math.toRadians(15));
         graphics.entity(state, scale, new Vector3f(0f, entity.getBbHeight() / 2f, 0f), sceneRotation(sceneYawDegrees), camera, x0, y0, x1, y1);
