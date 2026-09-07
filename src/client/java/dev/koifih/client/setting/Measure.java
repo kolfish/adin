@@ -1,18 +1,21 @@
 package dev.koifih.client.setting;
 
 import dev.koifih.client.gui.Units;
+import java.util.Locale;
 
 public enum Measure {
     NONE,
     DISTANCE,
     PERCENT,
-    DEGREES;
+    DEGREES,
+    FRACTION;
 
     public String format(int value) {
         return switch (this) {
             case DISTANCE -> Units.current().distance(value);
             case PERCENT -> value + "%";
             case DEGREES -> value + "\u00b0";
+            case FRACTION -> String.format(Locale.ROOT, "%.2f", value / 100.0);
             case NONE -> Integer.toString(value);
         };
     }

@@ -1,5 +1,9 @@
 package dev.koifih.client.util;
 
+import net.minecraft.util.Mth;
+import net.minecraft.world.phys.Vec3;
+import java.util.concurrent.ThreadLocalRandom;
+
 public final class MathUtil {
     private static final float EPSILON = 1e-6f;
 
@@ -21,6 +25,15 @@ public final class MathUtil {
         float result = first;
         for (float value : rest) result = Math.min(result, value);
         return result;
+    }
+
+    public static double angle(Vec3 first, Vec3 second) {
+        double cosine = first.normalize().dot(second.normalize());
+        return Math.toDegrees(Math.acos(Mth.clamp(cosine, -1.0, 1.0)));
+    }
+
+    public static float random(float low, float high) {
+        return high > low ? ThreadLocalRandom.current().nextFloat(low, high) : low;
     }
 
     public static float max(float first, float... rest) {

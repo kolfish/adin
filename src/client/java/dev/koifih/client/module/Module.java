@@ -39,7 +39,7 @@ public abstract class Module {
     }
 
     public String name() {
-        return Lang.getOrDefault("module." + id, Character.toUpperCase(id.charAt(0)) + id.substring(1));
+        return Lang.getOrDefault("module." + id, Lang.capitalize(id));
     }
 
     public String description() {

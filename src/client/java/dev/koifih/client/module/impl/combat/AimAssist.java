@@ -11,25 +11,19 @@ import dev.koifih.client.rotation.RotationConfig;
 import dev.koifih.client.rotation.RotationTarget;
 import dev.koifih.client.rotation.Smoothing;
 import dev.koifih.client.setting.BoolSetting;
-import dev.koifih.client.setting.EntitySetting;
 import dev.koifih.client.setting.EnumSetting;
 import dev.koifih.client.setting.Measure;
 import dev.koifih.client.setting.MultiSetting;
 import dev.koifih.client.setting.SliderSetting;
+import dev.koifih.client.setting.TargetSettings;
+import dev.koifih.client.util.Entities;
+import dev.koifih.client.util.Game;
+import dev.koifih.client.util.MathUtil;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.LocalPlayer;
-import net.minecraft.core.component.DataComponents;
-import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.util.Mth;
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.phys.Vec3;
 
 public final class AimAssist extends Module {
-    private static final String[] TARGETS = {"Players", "Invisible", "Entities"};
-    private static final int PLAYERS = 0;
-    private static final int INVISIBLE = 1;
-    private static final int ENTITIES = 2;
     private static final String[] PRIORITIES = {"Closest to FOV", "Lowest health"};
     private static final int LOWEST_HEALTH = 1;
     private static final double RANGE = 6.0;
@@ -47,13 +41,11 @@ public final class AimAssist extends Module {
     private final BoolSetting onHold = add(new BoolSetting("onHold", false));
     private final BoolSetting weaponsOnly = add(new BoolSetting("weaponsOnly", false));
     private final EnumSetting target = add(new EnumSetting("target", 0, PRIORITIES));
-    private final MultiSetting targets = add(new MultiSetting("targets", TARGETS, PLAYERS));
-    private final EntitySetting entities = add(new EntitySetting("entities"));
+    private final TargetSettings targets = add(new TargetSettings());
     private final MultiSetting bones = add(new MultiSetting("bones", Bone.NAMES, Bone.HEAD.ordinal()));
 
     public AimAssist() {
         super("aimAssist", Category.COMBAT);
-        entities.visibleWhen(() -> targets.has(ENTITIES));
         bones.optionVisibleWhen(option -> option == Bone.MULTIPOINT.ordinal() || !bones.get().contains(Bone.MULTIPOINT.ordinal()));
     }
 
@@ -76,12 +68,8 @@ public final class AimAssist extends Module {
 
     private Aim aim(Minecraft client) {
         LocalPlayer player = client.player;
-        if (player == null || client.gui.screen() != null || !client.mouseHandler.isMouseGrabbed()) return null;
-        if (weaponsOnly.get() && !player.getMainHandItem().has(DataComponents.WEAPON)) return null;
-        return aim(player);
-    }
-
-    private Aim aim(LocalPlayer player) {
+        if (!Game.playing(client)) return null;
+        if (weaponsOnly.get() && !Entities.holdsWeapon(player)) return null;
         Aim best = null;
         double bestScore = Double.MAX_VALUE;
         for (LivingEntity entity : player.level().getEntitiesOfClass(LivingEntity.class, player.getBoundingBox().inflate(RANGE))) {
@@ -90,7 +78,7 @@ public final class AimAssist extends Module {
             double closestAngle = fov.get() * 0.5;
             for (Bone bone : Bone.ALL) {
                 if (!bones.has(bone.ordinal())) continue;
-                double angle = angle(player, bone.point(player, entity, 1f));
+                double angle = MathUtil.angle(player.getLookAngle(), bone.point(player, entity, 1f).subtract(player.getEyePosition()));
                 if (angle >= closestAngle) continue;
                 closest = bone;
                 closestAngle = angle;
@@ -105,15 +93,6 @@ public final class AimAssist extends Module {
     }
 
     private boolean targeted(LocalPlayer player, LivingEntity entity) {
-        if (entity == player || !entity.isAlive() || entity.isSpectator()) return false;
-        if (entity.isInvisible() && !targets.has(INVISIBLE)) return false;
-        if (player.distanceToSqr(entity) > RANGE * RANGE || !player.hasLineOfSight(entity)) return false;
-        if (entity instanceof Player) return targets.has(PLAYERS);
-        return targets.has(ENTITIES) && entities.get().contains(BuiltInRegistries.ENTITY_TYPE.getKey(entity.getType()).toString());
-    }
-
-    private static double angle(LocalPlayer player, Vec3 point) {
-        Vec3 direction = point.subtract(player.getEyePosition()).normalize();
-        return Math.toDegrees(Math.acos(Mth.clamp(player.getLookAngle().dot(direction), -1.0, 1.0)));
+        return targets.accepts(player, entity) && player.distanceToSqr(entity) <= RANGE * RANGE && player.hasLineOfSight(entity);
     }
 }

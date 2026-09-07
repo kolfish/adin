@@ -48,6 +48,10 @@ public final class Lang {
         return value == null ? fallback : value;
     }
 
+    public static String capitalize(String id) {
+        return Character.toUpperCase(id.charAt(0)) + id.substring(1);
+    }
+
     public static String get(String key) {
         String value = translations(current).get(key);
         if (value == null) value = translations(Language.ENGLISH).get(key);

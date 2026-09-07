@@ -37,8 +37,7 @@ final class WindMouse implements Rotator {
             return from.moved(deltaYaw, deltaPitch);
         }
         ThreadLocalRandom random = ThreadLocalRandom.current();
-        float calm = config.smoothness();
-        float base = SLOWEST + (FASTEST - SLOWEST) * (1f - calm) * (1f - calm);
+        float base = config.scaled(SLOWEST, FASTEST);
         float settle = base * SETTLE_TICKS;
         if (!travelling && distance >= settle) {
             float reach = Math.min(1f, distance / FULL_TURN);

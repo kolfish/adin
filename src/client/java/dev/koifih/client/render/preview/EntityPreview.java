@@ -7,6 +7,7 @@ import dev.koifih.client.render.FilledRenderState;
 import dev.koifih.client.render.screen.Projector;
 import dev.koifih.client.render.screen.ScreenPoint;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.renderer.entity.EntityRenderer;
 import net.minecraft.client.renderer.entity.state.AvatarRenderState;
@@ -36,6 +37,10 @@ public final class EntityPreview {
     public static void clear() {
         ENTITIES.clear();
         fallingBlock = null;
+    }
+
+    private static LocalPlayer player() {
+        return Minecraft.getInstance().player;
     }
 
     private static Optional<Entity> entity(EntityType<?> type) {
@@ -85,12 +90,12 @@ public final class EntityPreview {
     }
 
     public static boolean drawPlayer(GuiGraphicsExtractor graphics, int x0, int y0, int x1, int y1, float sceneYawDegrees, PlayerSkin skin, EntityFill fill) {
-        var player = Minecraft.getInstance().player;
+        var player = player();
         return player != null && render(graphics, player, x0, y0, x1, y1, sceneYawDegrees, skin, fill);
     }
 
     public static Projector playerProjector(int x0, int y0, int x1, int y1, float sceneYawDegrees) {
-        var player = Minecraft.getInstance().player;
+        var player = player();
         if (player == null) return null;
         float scale = fitScale(player, x0, y0, x1, y1);
         Quaternionf rotation = sceneRotation(sceneYawDegrees);
@@ -104,12 +109,12 @@ public final class EntityPreview {
     }
 
     public static float playerScale(int x0, int y0, int x1, int y1) {
-        var player = Minecraft.getInstance().player;
+        var player = player();
         return player == null ? 1f : fitScale(player, x0, y0, x1, y1);
     }
 
     public static AABB playerLocalBounds() {
-        var player = Minecraft.getInstance().player;
+        var player = player();
         if (player == null) return null;
         double half = player.getBbWidth() / 2.0;
         return new AABB(-half, 0.0, -half, half, player.getBbHeight(), half);
@@ -127,7 +132,7 @@ public final class EntityPreview {
     }
 
     private static boolean render(GuiGraphicsExtractor graphics, Entity entity, int x0, int y0, int x1, int y1, float sceneYawDegrees, PlayerSkin skin, EntityFill fill) {
-        var player = Minecraft.getInstance().player;
+        var player = player();
         if (player != null && entity != player) entity.setPos(player.getX(), player.getY(), player.getZ());
         EntityRenderState state;
         try {

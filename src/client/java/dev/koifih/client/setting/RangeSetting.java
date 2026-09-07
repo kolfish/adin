@@ -6,11 +6,21 @@ import com.google.gson.JsonElement;
 public final class RangeSetting extends Setting<int[]> {
     private final int min;
     private final int max;
+    private final Measure measure;
 
     public RangeSetting(String id, int defaultLow, int defaultHigh, int min, int max) {
+        this(id, defaultLow, defaultHigh, min, max, Measure.NONE);
+    }
+
+    public RangeSetting(String id, int defaultLow, int defaultHigh, int min, int max, Measure measure) {
         super(id, new int[] {defaultLow, defaultHigh});
         this.min = min;
         this.max = max;
+        this.measure = measure;
+    }
+
+    public String format(int value) {
+        return measure.format(value);
     }
 
     public int min() {

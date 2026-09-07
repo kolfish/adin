@@ -1,10 +1,12 @@
 package dev.koifih.client;
 
 import dev.koifih.client.event.EventBus;
+import dev.koifih.client.event.events.PreTickEvent;
 import dev.koifih.client.event.events.TickEvent;
 import dev.koifih.client.input.Keybinds;
 import dev.koifih.client.module.ModuleManager;
 import dev.koifih.client.module.impl.combat.AimAssist;
+import dev.koifih.client.module.impl.combat.Triggerbot;
 import dev.koifih.client.module.impl.hud.Notifications;
 import dev.koifih.client.module.impl.movement.Sprint;
 import dev.koifih.client.module.impl.render.esp.Esp;
@@ -24,6 +26,7 @@ public final class AdinClient implements ClientModInitializer {
     @Override
     public void onInitializeClient() {
         MODULES.register(new AimAssist());
+        MODULES.register(new Triggerbot());
         MODULES.register(new Sprint());
         MODULES.register(new Esp());
         MODULES.register(new Notifications());
@@ -32,6 +35,7 @@ public final class AdinClient implements ClientModInitializer {
         WorldRenderer.init();
         ScreenRenderer.init();
         EVENTS.subscribe(TickEvent.class, event -> MODULES.tickKeybinds(event.client()));
+        ClientTickEvents.START_CLIENT_TICK.register(client -> EVENTS.post(new PreTickEvent(client)));
         ClientTickEvents.END_CLIENT_TICK.register(client -> EVENTS.post(new TickEvent(client)));
         ClientPlayConnectionEvents.DISCONNECT.register((handler, client) -> EntityPreview.clear());
     }

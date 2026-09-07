@@ -4,6 +4,7 @@ import dev.koifih.client.AdinClient;
 import dev.koifih.client.event.Priority;
 import dev.koifih.client.event.events.TurnEvent;
 import dev.koifih.client.event.events.TickEvent;
+import dev.koifih.client.util.Entities;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.util.Mth;
@@ -58,11 +59,11 @@ public final class RotationManager {
     }
 
     public Vec3 viewVector(Entity entity) {
-        return current != null && local(entity) ? current.direction() : null;
+        return current != null && Entities.isLocal(entity) ? current.direction() : null;
     }
 
     public float movementYaw(Entity entity, float actual) {
-        return correctsMovement() && local(entity) ? current.yaw() : actual;
+        return correctsMovement() && Entities.isLocal(entity) ? current.yaw() : actual;
     }
 
     public Vec2 correctInput(Vec2 input, float actualYaw) {
@@ -87,10 +88,6 @@ public final class RotationManager {
 
     private boolean correctsMovement() {
         return current != null && config.moveFix();
-    }
-
-    private static boolean local(Entity entity) {
-        return entity == Minecraft.getInstance().player;
     }
 
     private static float snap(float value) {

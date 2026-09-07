@@ -10,6 +10,7 @@ import net.minecraft.client.input.KeyEvent;
 import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.network.chat.Component;
 import java.util.function.IntConsumer;
+import java.util.function.IntFunction;
 import java.util.function.IntSupplier;
 
 public final class RangeSlider extends Control {
@@ -21,6 +22,7 @@ public final class RangeSlider extends Control {
     private final IntConsumer highSet;
     private boolean draggingHigh;
     private boolean dragging;
+    private IntFunction<String> format = Integer::toString;
     private final Transition lowPosition;
     private final Transition highPosition;
 
@@ -35,6 +37,10 @@ public final class RangeSlider extends Control {
         this.highSet = highSet;
         this.lowPosition = new Transition(lowGet.getAsInt(), 120, Easing.EASE_OUT_CUBIC);
         this.highPosition = new Transition(highGet.getAsInt(), 120, Easing.EASE_OUT_CUBIC);
+    }
+
+    public void setFormat(IntFunction<String> format) {
+        this.format = format;
     }
 
     private float knobWidth() {
@@ -72,7 +78,7 @@ public final class RangeSlider extends Control {
         rect(graphics, lowX + knobWidth() / 2, trackY, highX - lowX, trackHeight, trackHeight / 2, Theme.ACCENT);
         rect(graphics, lowX, centerY() - knobHeight / 2, knobWidth(), knobHeight, px(2), Theme.ACCENT);
         rect(graphics, highX, centerY() - knobHeight / 2, knobWidth(), knobHeight, px(2), Theme.ACCENT);
-        text(graphics, lowGet.getAsInt() + "-" + highGet.getAsInt(), getRight() - valueWidth() + px(6), centerY(),
+        text(graphics, format.apply(lowGet.getAsInt()) + "-" + format.apply(highGet.getAsInt()), getRight() - valueWidth() + px(6), centerY(),
                 px(7), Theme.TEXT);
     }
 
@@ -133,7 +139,7 @@ public final class RangeSlider extends Control {
     @Override
     protected void updateWidgetNarration(NarrationElementOutput output) {
         output.add(NarratedElementType.TITLE, Component.literal(
-                getMessage().getString() + ": " + lowGet.getAsInt() + " to " + highGet.getAsInt()));
+                getMessage().getString() + ": " + format.apply(lowGet.getAsInt()) + " to " + format.apply(highGet.getAsInt())));
         output.add(NarratedElementType.USAGE, Component.literal(
                 "Up and down pick a knob. Left and right move it."));
     }

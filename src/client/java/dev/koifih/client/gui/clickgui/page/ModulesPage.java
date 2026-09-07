@@ -181,8 +181,12 @@ public final class ModulesPage implements Page {
                     slider.setFormat(value::format);
                     yield slider;
                 }
-                case RangeSetting range -> new RangeSlider(halfX, 0, halfWidth, bindHeight, scale, label,
-                        range.min(), range.max(), range::low, range::setLow, range::high, range::setHigh);
+                case RangeSetting range -> {
+                    RangeSlider slider = new RangeSlider(halfX, 0, halfWidth, bindHeight, scale, label,
+                            range.min(), range.max(), range::low, range::setLow, range::high, range::setHigh);
+                    slider.setFormat(range::format);
+                    yield slider;
+                }
                 case EnumSetting choice ->
                         bounded(new Dropdown(x, 0, width, fieldHeight, scale, label, choice.options(), choice::get, choice::set));
                 case MultiSetting multi -> {

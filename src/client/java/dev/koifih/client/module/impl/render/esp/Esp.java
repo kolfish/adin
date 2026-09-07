@@ -21,7 +21,7 @@ import dev.koifih.client.setting.SliderSetting;
 import net.minecraft.client.Camera;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.LocalPlayer;
-import net.minecraft.core.registries.BuiltInRegistries;
+import dev.koifih.client.util.Entities;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.phys.AABB;
@@ -144,10 +144,6 @@ public final class Esp extends Module {
         if (entity == camera.entity() && !camera.isDetached()) return false;
         if (entity instanceof LocalPlayer) return targets.get().contains(SELF);
         if (entity instanceof Player) return targets.get().contains(PLAYERS);
-        return targets.get().contains(ENTITIES) && entities.get().contains(typeId(entity));
-    }
-
-    private static String typeId(Entity entity) {
-        return BuiltInRegistries.ENTITY_TYPE.getKey(entity.getType()).toString();
+        return targets.get().contains(ENTITIES) && entities.get().contains(Entities.id(entity));
     }
 }
