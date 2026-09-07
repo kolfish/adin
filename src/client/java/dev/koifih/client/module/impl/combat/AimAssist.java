@@ -30,6 +30,8 @@ public final class AimAssist extends Module {
     private static final int PLAYERS = 0;
     private static final int INVISIBLE = 1;
     private static final int ENTITIES = 2;
+    private static final String[] PRIORITIES = {"Closest to FOV", "Lowest health"};
+    private static final int LOWEST_HEALTH = 1;
     private static final double RANGE = 6.0;
 
     private record Aim(LocalPlayer player, LivingEntity entity, Bone bone) implements RotationTarget {
@@ -44,6 +46,7 @@ public final class AimAssist extends Module {
     private final SliderSetting smoothness = add(new SliderSetting("smoothness", 50, 0, 100, Measure.PERCENT));
     private final BoolSetting onHold = add(new BoolSetting("onHold", false));
     private final BoolSetting weaponsOnly = add(new BoolSetting("weaponsOnly", false));
+    private final EnumSetting target = add(new EnumSetting("target", 0, PRIORITIES));
     private final MultiSetting targets = add(new MultiSetting("targets", TARGETS, PLAYERS));
     private final EntitySetting entities = add(new EntitySetting("entities"));
     private final MultiSetting bones = add(new MultiSetting("bones", Bone.NAMES, Bone.HEAD.ordinal()));
@@ -78,19 +81,26 @@ public final class AimAssist extends Module {
     }
 
     private Aim aim(LocalPlayer player) {
-        Aim closest = null;
-        double closestAngle = fov.get() * 0.5;
+        Aim best = null;
+        double bestScore = Double.MAX_VALUE;
         for (LivingEntity entity : player.level().getEntitiesOfClass(LivingEntity.class, player.getBoundingBox().inflate(RANGE))) {
             if (!targeted(player, entity)) continue;
+            Bone closest = null;
+            double closestAngle = fov.get() * 0.5;
             for (Bone bone : Bone.ALL) {
                 if (!bones.has(bone.ordinal())) continue;
                 double angle = angle(player, bone.center(entity, 1f));
                 if (angle >= closestAngle) continue;
-                closest = new Aim(player, entity, bone);
+                closest = bone;
                 closestAngle = angle;
             }
+            if (closest == null) continue;
+            double score = target.get() == LOWEST_HEALTH ? entity.getHealth() : closestAngle;
+            if (score >= bestScore) continue;
+            best = new Aim(player, entity, closest);
+            bestScore = score;
         }
-        return closest;
+        return best;
     }
 
     private boolean targeted(LocalPlayer player, LivingEntity entity) {
