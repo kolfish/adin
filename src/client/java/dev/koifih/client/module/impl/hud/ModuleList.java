@@ -9,10 +9,9 @@ import dev.koifih.client.module.Module;
 import dev.koifih.client.render.gui.Rects;
 import dev.koifih.client.render.gui.Text;
 import dev.koifih.client.setting.BoolSetting;
-import dev.koifih.client.setting.ColorSetting;
-import dev.koifih.client.setting.EnumSetting;
 import dev.koifih.client.setting.Measure;
 import dev.koifih.client.setting.SliderSetting;
+import dev.koifih.client.setting.TextColorSettings;
 import dev.koifih.client.util.Colors;
 import net.minecraft.client.Minecraft;
 import java.util.ArrayList;
@@ -27,23 +26,15 @@ public final class ModuleList extends Module {
     private static final float RADIUS = 4f;
     private static final float TEXT_SIZE = 8f;
     private static final float ALPHA = 0.8f;
-    private static final String[] COLORS = {"Accent", "Solid", "Gradient"};
-    private static final int ACCENT = 0;
-    private static final int GRADIENT = 2;
-    private static final float WAVE_LENGTH = 120f;
-    private static final float WAVE_SECONDS = 2f;
 
     private record Row(String name, String info, float width) {}
 
     private final BoolSetting prefix = add(new BoolSetting("prefix", true));
     private final SliderSetting size = add(new SliderSetting("scale", 100, 50, 200, Measure.PERCENT));
-    private final EnumSetting color = add(new EnumSetting("color", ACCENT, COLORS));
-    private final ColorSetting textColor = add(new ColorSetting("textColor", Theme.DEFAULT_ACCENT, 0xB7CCE8));
+    private final TextColorSettings colors = add(new TextColorSettings());
 
     public ModuleList() {
         super("arraylist", Category.HUD);
-        textColor.visibleWhen(() -> color.get() != ACCENT);
-        textColor.gradientWhen(() -> color.get() == GRADIENT);
     }
 
     @Override
@@ -85,23 +76,9 @@ public final class ModuleList extends Module {
             Row row = rows.get(i);
             float textX = lefts[i] + padding;
             float centerY = i * height + height * 0.5f;
-            Text.drawCentered(event.graphics(), row.name(), textX, centerY, textSize, nameColor(scale));
+            Text.drawCentered(event.graphics(), row.name(), textX, centerY, textSize, colors.colorAt(scale));
             if (row.info().isEmpty()) continue;
             Text.drawCentered(event.graphics(), row.info(), textX + Text.width(row.name(), textSize) + gap, centerY, textSize, Theme.MUTED);
         }
-    }
-
-    private Text.ColorAt nameColor(float scale) {
-        if (color.get() == ACCENT) return x -> Theme.ACCENT;
-        int primary = Colors.opaque(textColor.get());
-        if (color.get() != GRADIENT) return x -> primary;
-        int secondary = Colors.opaque(textColor.secondary());
-        float phase = (System.nanoTime() / 1_000_000_000f) / WAVE_SECONDS;
-        float length = WAVE_LENGTH * scale;
-        return x -> {
-            float wave = (x / length - phase) % 1f;
-            if (wave < 0f) wave += 1f;
-            return Colors.lerp(primary, secondary, wave < 0.5f ? wave * 2f : 2f - wave * 2f);
-        };
     }
 }

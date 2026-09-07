@@ -14,6 +14,12 @@ public final class Text {
 
     public record Span(String text, int color) {}
 
+    public record Ink(float left, float right) {
+        public float width() {
+            return right - left;
+        }
+    }
+
     @FunctionalInterface
     public interface ColorAt {
         int at(float x);
@@ -30,6 +36,25 @@ public final class Text {
             previous = glyph.unicode();
         }
         return advance * size;
+    }
+
+    public static Ink ink(String text, float size) {
+        float advance = 0;
+        int previous = -1;
+        float left = Float.MAX_VALUE;
+        float right = -Float.MAX_VALUE;
+        for (int codepoint : text.codePoints().toArray()) {
+            Font.Glyph glyph = FONT.glyph(codepoint);
+            advance += FONT.kerning(previous, glyph.unicode());
+            Font.Bounds plane = glyph.planeBounds();
+            if (plane != null) {
+                left = Math.min(left, advance + plane.left());
+                right = Math.max(right, advance + plane.right());
+            }
+            advance += glyph.advance();
+            previous = glyph.unicode();
+        }
+        return left > right ? new Ink(0f, 0f) : new Ink(left * size, right * size);
     }
 
     private static final Font.Bounds CAP_BOUNDS = FONT.glyph('H').planeBounds();
