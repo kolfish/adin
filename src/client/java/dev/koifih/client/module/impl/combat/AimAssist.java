@@ -37,7 +37,7 @@ public final class AimAssist extends Module {
     private record Aim(LocalPlayer player, LivingEntity entity, Bone bone) implements RotationTarget {
         @Override
         public Rotation at(float partialTick) {
-            return Rotation.toward(player.getEyePosition(partialTick), bone.center(entity, partialTick));
+            return Rotation.toward(player.getEyePosition(partialTick), bone.point(player, entity, partialTick));
         }
     }
 
@@ -54,6 +54,7 @@ public final class AimAssist extends Module {
     public AimAssist() {
         super("aimAssist", Category.COMBAT);
         entities.visibleWhen(() -> targets.has(ENTITIES));
+        bones.optionVisibleWhen(option -> option == Bone.MULTIPOINT.ordinal() || !bones.get().contains(Bone.MULTIPOINT.ordinal()));
     }
 
     public boolean blocksBreaking() {
@@ -89,7 +90,7 @@ public final class AimAssist extends Module {
             double closestAngle = fov.get() * 0.5;
             for (Bone bone : Bone.ALL) {
                 if (!bones.has(bone.ordinal())) continue;
-                double angle = angle(player, bone.center(entity, 1f));
+                double angle = angle(player, bone.point(player, entity, 1f));
                 if (angle >= closestAngle) continue;
                 closest = bone;
                 closestAngle = angle;
