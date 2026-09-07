@@ -13,7 +13,15 @@
 		"RenderSetupAccessor",
 		"TextureBindingAccessor",
 		"SubmitNodeCollectionMixin",
-		"ItemInHandRendererMixin"
+		"ItemInHandRendererMixin",
+		"LocalPlayerMixin",
+		"ServerboundUseItemPacketMixin",
+		"EntityMixin",
+		"LivingEntityMixin",
+		"KeyboardInputMixin",
+		"ClientPacketListenerMixin",
+		"MouseHandlerMixin",
+		"MinecraftMixin"
 	],
 	"injectors": {
 		"defaultRequire": 1

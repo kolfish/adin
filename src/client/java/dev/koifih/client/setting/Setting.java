@@ -34,7 +34,8 @@ public abstract class Setting<T> {
     }
 
     public String name() {
-        return Lang.getOrDefault("setting." + moduleId + "." + id, Character.toUpperCase(id.charAt(0)) + id.substring(1));
+        String fallback = Lang.getOrDefault("setting." + id, Character.toUpperCase(id.charAt(0)) + id.substring(1));
+        return Lang.getOrDefault("setting." + moduleId + "." + id, fallback);
     }
 
     public T get() {

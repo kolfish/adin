@@ -8,6 +8,7 @@ import dev.koifih.client.event.Priority;
 import dev.koifih.client.event.Subscription;
 import dev.koifih.client.event.events.ModuleToggleEvent;
 import dev.koifih.client.setting.Setting;
+import dev.koifih.client.setting.SettingGroup;
 import dev.koifih.client.util.Lang;
 import net.minecraft.client.Minecraft;
 import org.lwjgl.glfw.GLFW;
@@ -49,6 +50,11 @@ public abstract class Module {
         setting.attach(id);
         settings.add(setting);
         return setting;
+    }
+
+    protected <G extends SettingGroup> G add(G group) {
+        for (Setting<?> setting : group.settings()) add(setting);
+        return group;
     }
 
     public List<Setting<?>> settings() {
