@@ -15,8 +15,8 @@ public final class Text {
     public record Span(String text, int color) {}
 
     @FunctionalInterface
-    private interface AlphaAt {
-        float at(float x);
+    public interface ColorAt {
+        int at(float x);
     }
 
     private Text() {}
@@ -47,6 +47,11 @@ public final class Text {
         draw(graphics, text, x, centeredBaseline(text, size, centerY), size, color);
     }
 
+    public static void drawCentered(GuiGraphicsExtractor graphics, String text, float x, float centerY,
+                                    float size, ColorAt color) {
+        draw(graphics, List.of(new Span(text, 0xFFFFFFFF)), x, centeredBaseline(text, size, centerY), size, color);
+    }
+
     public static void drawCenteredX(GuiGraphicsExtractor graphics, String text, float centerX, float centerY,
                                      float size, int color) {
         drawCentered(graphics, text, centerX - width(text, size) / 2, centerY, size, color);
@@ -66,7 +71,7 @@ public final class Text {
         if (fadeWidth == 0f) fadeWidth = 0.001f;
         float width = fadeWidth;
         draw(graphics, List.of(new Span(text, color)), x, baseline, size,
-                glyphX -> Math.clamp((glyphX - transparentX) / width, 0f, 1f));
+                glyphX -> Colors.withAlpha(color, Math.clamp((glyphX - transparentX) / width, 0f, 1f)));
     }
 
     public static void draw(GuiGraphicsExtractor graphics, List<Span> spans, float x, float baseline, float size) {
@@ -74,7 +79,7 @@ public final class Text {
     }
 
     private static void draw(GuiGraphicsExtractor graphics, List<Span> spans, float x, float baseline, float size,
-                             AlphaAt alpha) {
+                             ColorAt colorAt) {
         if (!Float.isFinite(size) || size <= 0) return;
         List<TextRenderState.Quad> quads = new ArrayList<>();
         float cursor = x;
@@ -89,8 +94,8 @@ public final class Text {
                     Font.Bounds uv = FONT.uv(glyph);
                     float left = cursor + plane.left() * size;
                     float right = cursor + plane.right() * size;
-                    int leftColor = alpha == null ? color : Colors.withAlpha(color, alpha.at(left));
-                    int rightColor = alpha == null ? color : Colors.withAlpha(color, alpha.at(right));
+                    int leftColor = colorAt == null ? color : Opacity.apply(colorAt.at(left));
+                    int rightColor = colorAt == null ? color : Opacity.apply(colorAt.at(right));
                     if ((leftColor >>> 24) != 0 || (rightColor >>> 24) != 0) {
                         quads.add(new TextRenderState.Quad(
                                 left, baseline + plane.top() * size, right, baseline + plane.bottom() * size,

@@ -6,6 +6,7 @@ in vec4 vertexColor;
 in vec2 localPosition;
 flat in vec2 rectSize;
 flat in float cornerRadius;
+flat in int shape;
 
 out vec4 fragColor;
 
@@ -15,7 +16,7 @@ vec3 hueToRgb(float hue) {
 }
 
 void main() {
-    float coverage = rectCoverage(localPosition, rectSize, cornerRadius);
+    float coverage = rectCoverage(localPosition, rectSize, cornerRadius, shape);
     float hue = clamp(localPosition.x / rectSize.x, 0.0, 1.0);
     fragColor = vec4(hueToRgb(hue), vertexColor.a * coverage);
 }

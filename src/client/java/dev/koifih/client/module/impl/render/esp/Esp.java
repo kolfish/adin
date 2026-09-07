@@ -58,6 +58,11 @@ public final class Esp extends Module {
         targets.optionVisibleWhen(option -> option != HAND || shaded());
     }
 
+    @Override
+    public String info() {
+        return mode.selected();
+    }
+
     <S extends Setting<?>> S setting(S setting) {
         return add(setting);
     }

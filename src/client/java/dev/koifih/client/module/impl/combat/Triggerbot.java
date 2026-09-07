@@ -28,6 +28,11 @@ public final class Triggerbot extends Module {
         super("triggerbot", Category.COMBAT);
     }
 
+    @Override
+    public String info() {
+        return cooldown.format(cooldown.low()) + " - " + cooldown.format(cooldown.high());
+    }
+
     public boolean holdsSprint() {
         return isEnabled() && holdingSprint;
     }

@@ -42,6 +42,10 @@ public abstract class Module {
         return Lang.getOrDefault("module." + id, Lang.capitalize(id));
     }
 
+    public String info() {
+        return "";
+    }
+
     public String description() {
         return Lang.getOrDefault("module." + id + ".description", "");
     }

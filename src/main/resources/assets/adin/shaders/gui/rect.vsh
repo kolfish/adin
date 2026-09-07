@@ -13,6 +13,7 @@ out vec4 vertexColor;
 out vec2 localPosition;
 flat out vec2 rectSize;
 flat out float cornerRadius;
+flat out int shape;
 
 void main() {
     gl_Position = ProjMat * ModelViewMat * vec4(Position, 1.0);
@@ -20,4 +21,5 @@ void main() {
     localPosition = UV0;
     rectSize = vec2(UV2);
     cornerRadius = float(UV1.x);
+    shape = UV1.y;
 }

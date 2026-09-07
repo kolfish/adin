@@ -49,6 +49,11 @@ public final class AimAssist extends Module {
         bones.optionVisibleWhen(option -> option == Bone.MULTIPOINT.ordinal() || !bones.get().contains(Bone.MULTIPOINT.ordinal()));
     }
 
+    @Override
+    public String info() {
+        return Smoothing.NAMES[mode.get()];
+    }
+
     public boolean blocksBreaking() {
         return isEnabled() && onHold.get();
     }

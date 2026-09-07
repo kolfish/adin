@@ -13,6 +13,11 @@ public final class Sprint extends Module {
         super("sprint", Category.MOVEMENT);
     }
 
+    @Override
+    public String info() {
+        return omni.get() ? "Omni" : "";
+    }
+
     public boolean omniActive() {
         return isEnabled() && omni.get();
     }

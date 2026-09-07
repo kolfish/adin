@@ -7,6 +7,7 @@ import dev.koifih.client.input.Keybinds;
 import dev.koifih.client.module.ModuleManager;
 import dev.koifih.client.module.impl.combat.AimAssist;
 import dev.koifih.client.module.impl.combat.Triggerbot;
+import dev.koifih.client.module.impl.hud.ModuleList;
 import dev.koifih.client.module.impl.hud.Notifications;
 import dev.koifih.client.module.impl.movement.Sprint;
 import dev.koifih.client.module.impl.render.esp.Esp;
@@ -30,6 +31,7 @@ public final class AdinClient implements ClientModInitializer {
         MODULES.register(new Sprint());
         MODULES.register(new Esp());
         MODULES.register(new Notifications());
+        MODULES.register(new ModuleList());
         Keybinds.register();
         ROTATIONS.init();
         WorldRenderer.init();

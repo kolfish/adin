@@ -8,10 +8,25 @@ import net.minecraft.client.gui.GuiGraphicsExtractor;
 import org.joml.Matrix3x2f;
 
 public final class Rects {
+    public static final int TOP_LEFT = 1;
+    public static final int TOP_RIGHT = 2;
+    public static final int BOTTOM_RIGHT = 4;
+    public static final int BOTTOM_LEFT = 8;
+    public static final int ALL_CORNERS = 15;
+    private static final int FILLET = 16;
+
     private Rects() {}
 
     public static void draw(GuiGraphicsExtractor graphics, int x, int y, int width, int height, int radius, int color) {
-        draw(graphics, x, y, width, height, radius, color, Pipelines.RECT);
+        draw(graphics, x, y, width, height, radius, ALL_CORNERS, color, Pipelines.RECT);
+    }
+
+    public static void draw(GuiGraphicsExtractor graphics, int x, int y, int width, int height, int radius, int corners, int color) {
+        draw(graphics, x, y, width, height, radius, corners, color, Pipelines.RECT);
+    }
+
+    public static void fillet(GuiGraphicsExtractor graphics, int x, int y, int width, int height, int radius, int corner, int color) {
+        draw(graphics, x, y, width, height, radius, FILLET | corner, color, Pipelines.RECT);
     }
 
     public static void draw(GuiGraphicsExtractor graphics, float x, float y, float width, int height,
@@ -36,23 +51,23 @@ public final class Rects {
     }
 
     public static void drawHueBar(GuiGraphicsExtractor graphics, int x, int y, int width, int height, int radius) {
-        draw(graphics, x, y, width, height, radius, 0xFFFFFFFF, Pipelines.HUE_BAR);
+        draw(graphics, x, y, width, height, radius, ALL_CORNERS, 0xFFFFFFFF, Pipelines.HUE_BAR);
     }
 
     public static void drawSaturationValue(GuiGraphicsExtractor graphics, int x, int y, int width, int height,
                                            int radius, int hueColor) {
-        draw(graphics, x, y, width, height, radius, hueColor | 0xFF000000, Pipelines.SATURATION_VALUE);
+        draw(graphics, x, y, width, height, radius, ALL_CORNERS, hueColor | 0xFF000000, Pipelines.SATURATION_VALUE);
     }
 
-    private static void draw(GuiGraphicsExtractor graphics, int x, int y, int width, int height, int radius, int color,
+    private static void draw(GuiGraphicsExtractor graphics, int x, int y, int width, int height, int radius, int shape, int color,
                              RenderPipeline pipeline) {
         color = Opacity.apply(color);
         if (width <= 0 || height <= 0 || (color >>> 24) == 0) return;
         if (width > Short.MAX_VALUE || height > Short.MAX_VALUE) {
             throw new IllegalArgumentException("Rectangle dimensions exceed the vertex format's range");
         }
-        int clampedRadius = Math.clamp(radius, 0, Math.min(width, height) / 2);
-        var state = new RectRenderState(new Matrix3x2f(graphics.pose()), x, y, width, height, clampedRadius, color, pipeline);
+        int limit = (shape & FILLET) != 0 ? Math.max(width, height) : Math.min(width, height) / 2;
+        var state = new RectRenderState(new Matrix3x2f(graphics.pose()), x, y, width, height, Math.clamp(radius, 0, limit), shape, color, pipeline);
         GuiElements.submit(graphics, state);
     }
 }
