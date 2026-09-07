@@ -54,13 +54,7 @@ public final class AimAssist extends Module {
     }
 
     public boolean blocksBreaking() {
-        Minecraft client = Minecraft.getInstance();
-        LocalPlayer player = client.player;
-        dev.koifih.Adin.LOGGER.info("BREAK enabled={} onHold={} screen={} grabbed={} weaponOk={} aim={} hit={}", isEnabled(), onHold.get(),
-                client.gui.screen(), client.mouseHandler.isMouseGrabbed(),
-                player != null && (!weaponsOnly.get() || player.getMainHandItem().has(DataComponents.WEAPON)),
-                player == null ? null : aim(player), client.hitResult);
-        return isEnabled() && onHold.get() && aim(client) != null;
+        return isEnabled() && onHold.get();
     }
 
     @Override

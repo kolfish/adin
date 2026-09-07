@@ -6,6 +6,7 @@ import dev.koifih.client.event.events.TurnEvent;
 import dev.koifih.client.event.events.TickEvent;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.LocalPlayer;
+import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.phys.Vec2;
 import net.minecraft.world.phys.Vec3;
@@ -45,11 +46,11 @@ public final class RotationManager {
     }
 
     public float sentYaw(float actual) {
-        return engaged() ? quantized(current != null ? current.yaw() : actual, lastSent.yaw()) : actual;
+        return quantized(current != null ? current.yaw() : actual, lastSent.yaw());
     }
 
     public float sentPitch(float actual) {
-        return engaged() ? quantized(current != null ? current.pitch() : actual, lastSent.pitch()) : actual;
+        return Mth.clamp(quantized(current != null ? current.pitch() : actual, lastSent.pitch()), -90f, 90f);
     }
 
     public void sent(Rotation rotation) {
@@ -73,13 +74,10 @@ public final class RotationManager {
     }
 
     public void sync(Rotation rotation) {
+        lastSent = rotation;
         if (current == null) return;
         current = rotation;
         rotator = null;
-    }
-
-    private boolean engaged() {
-        return current != null || visible != null;
     }
 
     private static float quantized(float value, float base) {
