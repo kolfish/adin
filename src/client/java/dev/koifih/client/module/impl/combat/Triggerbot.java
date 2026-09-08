@@ -69,7 +69,7 @@ public final class Triggerbot extends Module {
                 player.setSprinting(false);
                 return;
             }
-        } else if (held || (crits.get() && client.options.keyJump.isDown())) {
+        } else if (held || (crits.get() && (client.options.keyJump.isDown() || launched(player) || waitingForSprint(player)))) {
             return;
         }
         if (charge < threshold) return;
@@ -81,6 +81,14 @@ public final class Triggerbot extends Module {
 
     private float roll() {
         return MathUtil.random(cooldown.low() / 100f, cooldown.high() / 100f);
+    }
+
+    private static boolean launched(LocalPlayer player) {
+        return player.getDeltaMovement().y > 0.0;
+    }
+
+    private static boolean waitingForSprint(LocalPlayer player) {
+        return !player.isSprinting() && player.input.getMoveVector().lengthSquared() > 1.0E-10f;
     }
 
     private static boolean falling(LocalPlayer player) {
