@@ -7,6 +7,7 @@ import dev.koifih.client.gui.hud.HudEditor;
 import dev.koifih.client.input.Keybinds;
 import dev.koifih.client.module.ModuleManager;
 import dev.koifih.client.module.impl.combat.AimAssist;
+import dev.koifih.client.module.impl.combat.ShieldBreaker;
 import dev.koifih.client.module.impl.combat.Triggerbot;
 import dev.koifih.client.module.impl.hud.KeybindList;
 import dev.koifih.client.module.impl.hud.ModuleList;
@@ -31,6 +32,7 @@ public final class AdinClient implements ClientModInitializer {
     public void onInitializeClient() {
         MODULES.register(new AimAssist());
         MODULES.register(new Triggerbot());
+        MODULES.register(new ShieldBreaker());
         MODULES.register(new Sprint());
         MODULES.register(new Esp());
         MODULES.register(new Notifications());
