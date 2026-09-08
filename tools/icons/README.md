@@ -32,10 +32,10 @@ of the example mod's CC0 license.
 | Units row | straighten | E41C |
 | ESP preview | open_in_new | E89E |
 | Preview window back | arrow_back | E5C4 |
+| Keybind list header | keyboard | E312 |
 
 `material-icons.codepoints` contains the relevant entries from Google's upstream
-codepoint list. `charset.txt` selects these twenty-four glyphs for a 216 x 216 MSDF
-atlas. Icons share `text.vsh` / `text.fsh` with the Comfortaa renderer, including
+codepoint list. `charset.txt` selects these twenty-five glyphs for the MSDF atlas. Icons share `text.vsh` / `text.fsh` with the Comfortaa renderer, including
 the four-pixel distance range and linear texture filtering. No runtime download
 or font generation is needed.
 

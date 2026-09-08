@@ -1,27 +1,23 @@
 package dev.koifih.client.module.impl.hud;
 
-import dev.koifih.Adin;
 import dev.koifih.client.event.events.HudRenderEvent;
 import dev.koifih.client.gui.Theme;
 import dev.koifih.client.gui.UiScale;
-import dev.koifih.client.module.Category;
-import dev.koifih.client.module.Module;
+import dev.koifih.client.module.HudModule;
+import dev.koifih.client.render.gui.Logo;
 import dev.koifih.client.render.gui.Rects;
 import dev.koifih.client.render.gui.Text;
 import dev.koifih.client.setting.Measure;
+import dev.koifih.client.setting.PositionSetting.Anchor;
 import dev.koifih.client.setting.SliderSetting;
 import dev.koifih.client.setting.TextColorSettings;
 import dev.koifih.client.util.Colors;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
-import net.minecraft.client.renderer.RenderPipelines;
-import net.minecraft.resources.Identifier;
 
-public final class Watermark extends Module {
+public final class Watermark extends HudModule {
     private static final String NAME = "adin";
     private static final String SUFFIX = ".lol";
-    private static final Identifier STAR = Adin.id("textures/hud/logo_star.png");
-    private static final Identifier BAND = Adin.id("textures/hud/logo_band.png");
-    private static final int TEXTURE_SIZE = 64;
     private static final float MARGIN = 4f;
     private static final float HEIGHT = 14f;
     private static final float GAP = 3f;
@@ -35,7 +31,7 @@ public final class Watermark extends Module {
     private final TextColorSettings colors = add(new TextColorSettings());
 
     public Watermark() {
-        super("watermark", Category.HUD);
+        super("watermark", Anchor.START, Anchor.START, MARGIN, MARGIN);
     }
 
     @Override
@@ -47,7 +43,6 @@ public final class Watermark extends Module {
         Theme.update();
         GuiGraphicsExtractor graphics = event.graphics();
         float scale = UiScale.current().factor() * size.get() / 100f;
-        int margin = Math.round(MARGIN * scale);
         int box = Math.max(1, Math.round(HEIGHT * scale));
         int radius = Math.round(RADIUS * scale);
         int inset = Math.round(LOGO_INSET * scale);
@@ -55,16 +50,20 @@ public final class Watermark extends Module {
         float textSize = TEXT_SIZE * scale;
         int background = Colors.withAlpha(Theme.MAIN, ALPHA);
         Text.ColorAt color = colors.colorAt(scale);
-        Rects.draw(graphics, margin, margin, box, box, radius, background);
-        int logo = box - 2 * inset;
-        int logoX = margin + inset;
-        graphics.blit(RenderPipelines.GUI_TEXTURED, BAND, logoX, logoX, 0f, 0f, logo, logo, TEXTURE_SIZE, TEXTURE_SIZE, TEXTURE_SIZE, TEXTURE_SIZE, 0xFFFFFFFF);
-        graphics.blit(RenderPipelines.GUI_TEXTURED, STAR, logoX, logoX, 0f, 0f, logo, logo, TEXTURE_SIZE, TEXTURE_SIZE, TEXTURE_SIZE, TEXTURE_SIZE, color.at(logoX + logo * 0.5f));
         Text.Ink ink = Text.ink(NAME + SUFFIX, textSize);
-        int textBox = margin + box + Math.round(GAP * scale);
-        Rects.draw(graphics, textBox, margin, Math.round(ink.width() + 2f * padding), box, radius, background);
+        int gap = Math.round(GAP * scale);
+        int textWidth = Math.round(ink.width() + 2f * padding);
+        var window = Minecraft.getInstance().getWindow();
+        int x = Math.round(left(box + gap + textWidth, window.getGuiScaledWidth()));
+        int y = Math.round(top(box, window.getGuiScaledHeight()));
+        placed(x, y, box + gap + textWidth, box);
+        Rects.draw(graphics, x, y, box, box, radius, background);
+        int logo = box - 2 * inset;
+        Logo.draw(graphics, x + inset, y + inset, logo, color.at(x + box * 0.5f));
+        int textBox = x + box + gap;
+        Rects.draw(graphics, textBox, y, textWidth, box, radius, background);
         float textX = textBox + padding - ink.left();
-        float centerY = margin + box * 0.5f;
+        float centerY = y + box * 0.5f;
         Text.drawCentered(graphics, NAME, textX, centerY, textSize, color);
         Text.drawCentered(graphics, SUFFIX, textX + Text.width(NAME, textSize), centerY, textSize, Theme.MUTED);
     }

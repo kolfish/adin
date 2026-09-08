@@ -29,12 +29,14 @@ final class Box {
     private static final double PLAYER_SIDE_PADDING = 0.12;
     private static final double PLAYER_TOP_PADDING = 0.06;
 
+    private final Esp esp;
     private final EnumSetting type;
     private final ColorSetting color;
     private final MultiSetting show;
     private final SliderSetting fillOpacity;
 
     Box(Esp esp) {
+        this.esp = esp;
         type = esp.setting(new EnumSetting("type", 0, TYPES));
         color = esp.setting(new ColorSetting("color", Theme.DEFAULT_ACCENT));
         show = esp.setting(new MultiSetting("show", SHOW, SHOW_BOX, SHOW_FILL, SHOW_OUTLINE));
@@ -69,6 +71,7 @@ final class Box {
 
     private Style styled(float lineWidth, float outlineWidth) {
         int rgb = Colors.opaque(color.get());
+        if (esp.shaded()) return Style.EMPTY;
         Style style = shown() ? Style.stroke(rgb, lineWidth) : Style.EMPTY;
         if (shows(SHOW_FILL)) style = style.withFill(Colors.withAlpha(rgb, fillOpacity.get() / 100f));
         if (shows(SHOW_OUTLINE)) style = style.withOutline(OUTLINE_COLOR, outlineWidth);

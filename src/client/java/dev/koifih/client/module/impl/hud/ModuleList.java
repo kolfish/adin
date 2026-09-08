@@ -4,24 +4,26 @@ import dev.koifih.client.AdinClient;
 import dev.koifih.client.event.events.HudRenderEvent;
 import dev.koifih.client.gui.Theme;
 import dev.koifih.client.gui.UiScale;
-import dev.koifih.client.module.Category;
+import dev.koifih.client.module.HudModule;
 import dev.koifih.client.module.Module;
 import dev.koifih.client.render.gui.Rects;
 import dev.koifih.client.render.gui.Text;
 import dev.koifih.client.setting.BoolSetting;
 import dev.koifih.client.setting.Measure;
+import dev.koifih.client.setting.PositionSetting.Anchor;
 import dev.koifih.client.setting.SliderSetting;
 import dev.koifih.client.setting.TextColorSettings;
 import dev.koifih.client.util.Colors;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 
-public final class ModuleList extends Module {
+public final class ModuleList extends HudModule {
     private static final float HEIGHT = 12f;
     private static final float PADDING = 4f;
-    private static final float RIGHT_PADDING = 2f;
+    private static final float EDGE_PADDING = 2f;
     private static final float GAP = 3f;
     private static final float RADIUS = 4f;
     private static final float TEXT_SIZE = 8f;
@@ -34,7 +36,7 @@ public final class ModuleList extends Module {
     private final TextColorSettings colors = add(new TextColorSettings());
 
     public ModuleList() {
-        super("arraylist", Category.HUD);
+        super("arraylist", Anchor.END, Anchor.START, 0f, 0f);
     }
 
     @Override
@@ -44,41 +46,65 @@ public final class ModuleList extends Module {
 
     private void onHudRender(HudRenderEvent event) {
         Theme.update();
+        GuiGraphicsExtractor graphics = event.graphics();
         float scale = UiScale.current().factor() * size.get() / 100f;
         float textSize = TEXT_SIZE * scale;
         float padding = PADDING * scale;
+        float edgePadding = EDGE_PADDING * scale;
         float gap = GAP * scale;
         List<Row> rows = new ArrayList<>();
         for (Module module : AdinClient.MODULES.all()) {
             if (!module.isEnabled()) continue;
             String info = prefix.get() ? module.info() : "";
             float width = Text.width(module.name(), textSize) + (info.isEmpty() ? 0f : gap + Text.width(info, textSize));
-            rows.add(new Row(module.name(), info, width + padding + RIGHT_PADDING * scale));
+            rows.add(new Row(module.name(), info, width + padding + edgePadding));
         }
-        if (rows.isEmpty()) return;
+        if (rows.isEmpty()) {
+            placed(0f, 0f, 0f, 0f);
+            return;
+        }
         rows.sort(Comparator.comparingDouble(Row::width).reversed().thenComparing(Row::name));
-        int right = Minecraft.getInstance().getWindow().getGuiScaledWidth();
+        var window = Minecraft.getInstance().getWindow();
+        int screenWidth = window.getGuiScaledWidth();
         int height = Math.max(1, Math.round(HEIGHT * scale));
         int radius = Math.round(RADIUS * scale);
-        int[] lefts = new int[rows.size()];
-        for (int i = 0; i < lefts.length; i++) lefts[i] = right - Math.round(rows.get(i).width());
+        int[] widths = new int[rows.size()];
+        for (int i = 0; i < widths.length; i++) widths[i] = Math.round(rows.get(i).width());
+        int listWidth = widths[0];
+        int listHeight = height * widths.length;
+        int x = Math.round(left(listWidth, screenWidth));
+        int y = Math.round(top(listHeight, window.getGuiScaledHeight()));
+        placed(x, y, listWidth, listHeight);
+        boolean rightAligned = position().horizontal() != Anchor.START;
+        int edge = rightAligned ? x + listWidth : x;
+        boolean flushSide = rightAligned ? edge >= screenWidth : edge <= 0;
+        boolean flushTop = y <= 0;
         int background = Colors.withAlpha(Theme.MAIN, ALPHA);
-        for (int i = 0; i < lefts.length; i++) {
-            int x = lefts[i];
-            int y = i * height;
-            int below = i + 1 < lefts.length ? Math.min(radius, (lefts[i + 1] - x) / 2) : radius;
-            Rects.draw(event.graphics(), x, y, right - x, height, below, Rects.BOTTOM_LEFT, background);
+        for (int i = 0; i < widths.length; i++) {
+            int rowWidth = widths[i];
+            int rowX = rightAligned ? edge - rowWidth : edge;
+            int rowY = y + i * height;
+            int step = i + 1 < widths.length ? Math.min(radius, (rowWidth - widths[i + 1]) / 2) : radius;
+            int corners = rightAligned ? Rects.BOTTOM_LEFT : Rects.BOTTOM_RIGHT;
+            if (i == 0 && !flushTop) corners |= rightAligned ? Rects.TOP_LEFT : Rects.TOP_RIGHT;
+            if (i == 0 && !flushTop && !flushSide) corners |= rightAligned ? Rects.TOP_RIGHT : Rects.TOP_LEFT;
+            if (i == widths.length - 1 && !flushSide) corners |= rightAligned ? Rects.BOTTOM_RIGHT : Rects.BOTTOM_LEFT;
+            Rects.draw(graphics, rowX, rowY, rowWidth, height, step, corners, background);
             if (i == 0) continue;
-            int fillet = Math.min(radius, (x - lefts[i - 1]) / 2);
-            if (fillet > 0) Rects.fillet(event.graphics(), x - fillet, y, fillet, fillet, fillet, Rects.BOTTOM_LEFT, background);
+            int fillet = Math.min(radius, (widths[i - 1] - rowWidth) / 2);
+            if (fillet <= 0) continue;
+            if (rightAligned) Rects.fillet(graphics, rowX - fillet, rowY, fillet, fillet, fillet, Rects.BOTTOM_LEFT, background);
+            else Rects.fillet(graphics, rowX + rowWidth, rowY, fillet, fillet, fillet, Rects.BOTTOM_RIGHT, background);
         }
-        for (int i = 0; i < lefts.length; i++) {
+        Text.ColorAt color = colors.colorAt(scale);
+        for (int i = 0; i < widths.length; i++) {
             Row row = rows.get(i);
-            float textX = lefts[i] + padding;
-            float centerY = i * height + height * 0.5f;
-            Text.drawCentered(event.graphics(), row.name(), textX, centerY, textSize, colors.colorAt(scale));
+            int rowX = rightAligned ? edge - widths[i] : edge;
+            float textX = rowX + (rightAligned ? padding : edgePadding);
+            float centerY = y + i * height + height * 0.5f;
+            Text.drawCentered(graphics, row.name(), textX, centerY, textSize, color);
             if (row.info().isEmpty()) continue;
-            Text.drawCentered(event.graphics(), row.info(), textX + Text.width(row.name(), textSize) + gap, centerY, textSize, Theme.MUTED);
+            Text.drawCentered(graphics, row.info(), textX + Text.width(row.name(), textSize) + gap, centerY, textSize, Theme.MUTED);
         }
     }
 }
