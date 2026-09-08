@@ -21,6 +21,8 @@ public final class Triggerbot extends Module {
     private final BoolSetting weaponsOnly = add(new BoolSetting("weaponsOnly", true));
     private final TargetSettings targets = add(new TargetSettings());
     private final BoolSetting crits = add(new BoolSetting("crits", true));
+    private static final float NEXT_TICK = 1.5f;
+
     private float threshold;
     private boolean holdingSprint;
 
@@ -60,18 +62,21 @@ public final class Triggerbot extends Module {
         float charge = player.getAttackStrengthScale(0.5f);
         if (crits.get() && !player.onGround()) {
             if (!falling(player)) return;
-            holdingSprint = true;
+            holdingSprint = held;
             if (player.isSprinting()) {
+                if (player.getAttackStrengthScale(NEXT_TICK) < threshold) return;
+                holdingSprint = true;
                 player.setSprinting(false);
                 return;
             }
-        } else if (held) {
+        } else if (held || (crits.get() && client.options.keyJump.isDown())) {
             return;
         }
         if (charge < threshold) return;
         client.gameMode.attack(player, target);
         player.swing(InteractionHand.MAIN_HAND);
         threshold = roll();
+        holdingSprint = false;
     }
 
     private float roll() {
