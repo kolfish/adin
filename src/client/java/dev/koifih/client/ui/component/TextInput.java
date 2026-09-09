@@ -1,7 +1,8 @@
-package dev.koifih.client.gui.component;
+package dev.koifih.client.ui.component;
 
-import dev.koifih.client.gui.Theme;
-import dev.koifih.client.render.gui.Text;
+import dev.koifih.client.render.Text;
+import dev.koifih.client.ui.Theme;
+import dev.koifih.client.util.Time;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.narration.NarratedElementType;
@@ -15,7 +16,7 @@ import java.util.function.Consumer;
 import java.util.function.Supplier;
 
 public final class TextInput extends Control {
-    private static final long BLINK_NANOS = 500_000_000L;
+    private static final long BLINK_MILLIS = 500L;
 
     private final int maxLength;
     private final Supplier<String> get;
@@ -54,7 +55,7 @@ public final class TextInput extends Control {
         field(graphics);
         if (value.isEmpty()) text(graphics, fit(placeholder, getWidth() - px(14), size), textX, centerY(), size, Theme.MUTED);
         else text(graphics, fit(value, getWidth() - px(14), size), textX, centerY(), size, selectAll ? Theme.ACCENT : Theme.TEXT);
-        boolean blinkVisible = (System.nanoTime() / BLINK_NANOS) % 2 == 0;
+        boolean blinkVisible = Time.blink(BLINK_MILLIS);
         if (isFocused() && blinkVisible) {
             String beforeCursor = value.substring(0, Math.min(cursor, value.length()));
             float cursorX = Math.min(getRight() - px(5), textX + Text.width(beforeCursor, size));

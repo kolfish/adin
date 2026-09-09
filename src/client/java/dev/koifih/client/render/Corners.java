@@ -2,7 +2,7 @@ package dev.koifih.client.render;
 
 import net.minecraft.world.phys.AABB;
 
-public final class BoxCorners {
+public final class Corners {
     public static final int COUNT = 8;
     public static final int[] EDGES = {
             0, 1, 2, 3, 4, 5, 6, 7,
@@ -13,7 +13,7 @@ public final class BoxCorners {
             {0, 1, 3, 2}, {4, 5, 7, 6}, {0, 1, 5, 4}, {2, 3, 7, 6}, {0, 2, 6, 4}, {1, 3, 7, 5}
     };
 
-    private BoxCorners() {}
+    private Corners() {}
 
     public static double x(AABB box, int corner) {
         return (corner & 1) == 0 ? box.minX : box.maxX;

@@ -1,4 +1,4 @@
-package dev.koifih.client.gui.component;
+package dev.koifih.client.ui.component;
 
 import net.minecraft.client.input.KeyEvent;
 import net.minecraft.client.input.MouseButtonEvent;

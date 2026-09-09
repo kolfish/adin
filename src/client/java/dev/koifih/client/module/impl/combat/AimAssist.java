@@ -18,7 +18,7 @@ import dev.koifih.client.setting.SliderSetting;
 import dev.koifih.client.setting.TargetSettings;
 import dev.koifih.client.util.Entities;
 import dev.koifih.client.util.Game;
-import dev.koifih.client.util.MathUtil;
+import dev.koifih.client.util.Maths;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.world.entity.LivingEntity;
@@ -83,7 +83,7 @@ public final class AimAssist extends Module {
             double closestAngle = fov.get() * 0.5;
             for (Bone bone : Bone.ALL) {
                 if (!bones.has(bone.ordinal())) continue;
-                double angle = MathUtil.angle(player.getLookAngle(), bone.point(player, entity, 1f).subtract(player.getEyePosition()));
+                double angle = Maths.angle(player.getLookAngle(), bone.point(player, entity, 1f).subtract(player.getEyePosition()));
                 if (angle >= closestAngle) continue;
                 closest = bone;
                 closestAngle = angle;

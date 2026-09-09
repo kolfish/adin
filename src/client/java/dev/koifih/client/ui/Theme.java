@@ -1,7 +1,7 @@
-package dev.koifih.client.gui;
+package dev.koifih.client.ui;
 
-import dev.koifih.client.gui.animation.Easing;
-import dev.koifih.client.gui.animation.Transition;
+import dev.koifih.client.ui.animation.Easing;
+import dev.koifih.client.ui.animation.Transition;
 import dev.koifih.client.util.Colors;
 
 public final class Theme {
@@ -73,7 +73,7 @@ public final class Theme {
     }
 
     public static void setAccent(int rgb) {
-        accentRgb = rgb & 0xFFFFFF;
+        accentRgb = Colors.rgb(rgb);
         accentFrom = ACCENT;
         accentTo = Colors.opaque(mode == Mode.LIGHT ? Colors.darken(accentRgb, 0.28f) : accentRgb);
         accentBlend.snap(0f);

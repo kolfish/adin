@@ -1,10 +1,10 @@
-package dev.koifih.client.gui.component;
+package dev.koifih.client.ui.component;
 
 import com.mojang.blaze3d.platform.InputConstants;
-import dev.koifih.client.gui.Theme;
-import dev.koifih.client.gui.animation.Easing;
-import dev.koifih.client.gui.animation.Transition;
-import dev.koifih.client.render.gui.Text;
+import dev.koifih.client.render.Text;
+import dev.koifih.client.ui.Theme;
+import dev.koifih.client.ui.animation.Easing;
+import dev.koifih.client.ui.animation.Transition;
 import dev.koifih.client.util.Colors;
 import dev.koifih.client.util.Lang;
 import net.minecraft.client.gui.GuiGraphicsExtractor;

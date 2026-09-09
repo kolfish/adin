@@ -4,9 +4,12 @@ import dev.koifih.Adin;
 import dev.koifih.client.AdinClient;
 import dev.koifih.client.event.events.HudRenderEvent;
 import dev.koifih.client.event.events.ScreenRenderEvent;
-import dev.koifih.client.render.GuiElements;
 import dev.koifih.client.render.Opacity;
 import dev.koifih.client.render.Scissor;
+import dev.koifih.client.render.state.LineState;
+import dev.koifih.client.render.state.QuadState;
+import dev.koifih.client.render.state.ShapeState;
+import dev.koifih.client.render.state.Submit;
 import net.fabricmc.fabric.api.client.rendering.v1.hud.HudElementRegistry;
 import net.minecraft.client.DeltaTracker;
 import net.minecraft.client.Minecraft;
@@ -26,15 +29,16 @@ public final class ScreenRenderer {
         if (buffer.isEmpty()) return;
         Matrix3x2fc pose = new Matrix3x2f(graphics.pose());
         ScreenRectangle scissor = Scissor.current();
-        for (ScreenBuffer.Rect rect : buffer.rects()) {
-            GuiElements.submit(graphics, new ScreenRectRenderState(pose, rect.bounds(), Opacity.apply(rect.style()), scissor));
+        for (ScreenBuffer.Shape shape : buffer.shapes()) {
+            Submit.submit(graphics, new ShapeState(pose, shape.bounds(), Opacity.apply(shape.style()), scissor));
         }
         for (ScreenBuffer.Quad quad : buffer.quads()) {
-            GuiElements.submit(graphics, new ScreenQuadRenderState(pose, quad.a(), quad.b(), quad.c(), quad.d(),
+            Submit.submit(graphics, new QuadState(pose, quad.a(), quad.b(), quad.c(), quad.d(),
                     Opacity.apply(quad.color()), scissor));
         }
         for (ScreenBuffer.Line line : buffer.lines()) {
-            GuiElements.submit(graphics, new ScreenLineRenderState(pose, line, Opacity.apply(line.color()), scissor));
+            Submit.submit(graphics, new LineState(pose, line.x0(), line.y0(), line.x1(), line.y1(), line.width(),
+                    Opacity.apply(line.color()), scissor));
         }
     }
 

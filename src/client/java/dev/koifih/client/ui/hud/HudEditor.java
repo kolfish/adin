@@ -1,13 +1,13 @@
-package dev.koifih.client.gui.hud;
+package dev.koifih.client.ui.hud;
 
 import com.mojang.blaze3d.platform.Window;
 import dev.koifih.client.AdinClient;
 import dev.koifih.client.event.Priority;
 import dev.koifih.client.event.events.HudRenderEvent;
-import dev.koifih.client.gui.Theme;
 import dev.koifih.client.module.HudModule;
 import dev.koifih.client.module.Module;
-import dev.koifih.client.render.gui.Rects;
+import dev.koifih.client.render.Draw;
+import dev.koifih.client.ui.Theme;
 import dev.koifih.client.util.Colors;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.ChatScreen;
@@ -60,8 +60,8 @@ public final class HudEditor {
         y = Mth.clamp(snap(y, height, screenHeight), 0f, screenHeight - height);
         dragging.moveTo(x, y, screenWidth, screenHeight);
         int guide = Colors.withAlpha(Theme.ACCENT, GUIDE_ALPHA);
-        Rects.draw(event.graphics(), screenWidth / 2, 0, 1, screenHeight, 0, guide);
-        Rects.draw(event.graphics(), 0, screenHeight / 2, screenWidth, 1, 0, guide);
+        Draw.rect(event.graphics(), screenWidth / 2, 0, 1, screenHeight, 0, guide);
+        Draw.rect(event.graphics(), 0, screenHeight / 2, screenWidth, 1, 0, guide);
     }
 
     private static float snap(float start, float size, float screen) {

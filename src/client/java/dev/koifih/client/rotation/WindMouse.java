@@ -1,6 +1,6 @@
 package dev.koifih.client.rotation;
 
-import dev.koifih.client.util.MathUtil;
+import dev.koifih.client.util.Maths;
 import java.util.concurrent.ThreadLocalRandom;
 
 final class WindMouse implements Rotator {
@@ -29,7 +29,7 @@ final class WindMouse implements Rotator {
     public Rotation step(Rotation from, Rotation target, RotationConfig config, float deltaTicks) {
         float deltaYaw = from.yawTo(target);
         float deltaPitch = from.pitchTo(target);
-        float distance = MathUtil.length(deltaYaw, deltaPitch);
+        float distance = Maths.length(deltaYaw, deltaPitch);
         if (distance < DONE) {
             velocityYaw = 0f;
             velocityPitch = 0f;
@@ -60,7 +60,7 @@ final class WindMouse implements Rotator {
         float gravity = speed * GRAVITY;
         velocityYaw += (windYaw + gravity * deltaYaw / distance) * deltaTicks;
         velocityPitch += (windPitch + gravity * deltaPitch / distance) * deltaTicks;
-        float magnitude = MathUtil.length(velocityYaw, velocityPitch);
+        float magnitude = Maths.length(velocityYaw, velocityPitch);
         if (magnitude > cap) {
             float clipped = cap * (0.5f + 0.5f * random.nextFloat());
             velocityYaw *= clipped / magnitude;

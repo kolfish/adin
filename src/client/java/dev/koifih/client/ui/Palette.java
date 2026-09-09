@@ -1,4 +1,4 @@
-package dev.koifih.client.gui;
+package dev.koifih.client.ui;
 
 public enum Palette {
     ON_ACCENT(0xFF101010, 0xFF101010),

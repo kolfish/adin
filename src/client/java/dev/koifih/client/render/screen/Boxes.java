@@ -1,35 +1,37 @@
 package dev.koifih.client.render.screen;
 
-import dev.koifih.client.render.BoxCorners;
+import dev.koifih.client.render.Corners;
+import dev.koifih.client.render.Point;
+import dev.koifih.client.render.Rect;
 import dev.koifih.client.render.Style;
 import net.minecraft.world.phys.AABB;
 
-public final class ScreenBoxes {
-    private ScreenBoxes() {}
+public final class Boxes {
+    private Boxes() {}
 
-    public static ScreenPoint[] project(Projector projector, AABB box) {
-        ScreenPoint[] corners = new ScreenPoint[BoxCorners.COUNT];
+    public static Point[] project(Projector projector, AABB box) {
+        Point[] corners = new Point[Corners.COUNT];
         for (int i = 0; i < corners.length; i++) {
-            corners[i] = projector.project(BoxCorners.x(box, i), BoxCorners.y(box, i), BoxCorners.z(box, i));
+            corners[i] = projector.project(Corners.x(box, i), Corners.y(box, i), Corners.z(box, i));
         }
         return corners;
     }
 
-    public static ScreenRect bounds(ScreenPoint[] corners) {
-        ScreenExtent extent = new ScreenExtent();
-        for (ScreenPoint corner : corners) {
+    public static Rect bounds(Point[] corners) {
+        Extent extent = new Extent();
+        for (Point corner : corners) {
             if (corner != null) extent.add(corner);
         }
         return extent.toRect();
     }
 
-    public static void collect(ScreenBuffer buffer, ScreenPoint[] corners, Style style) {
+    public static void collect(ScreenBuffer buffer, Point[] corners, Style style) {
         if (style.hasFill()) {
-            for (int[] face : BoxCorners.FACES) {
-                ScreenPoint a = corners[face[0]];
-                ScreenPoint b = corners[face[1]];
-                ScreenPoint c = corners[face[2]];
-                ScreenPoint d = corners[face[3]];
+            for (int[] face : Corners.FACES) {
+                Point a = corners[face[0]];
+                Point b = corners[face[1]];
+                Point c = corners[face[2]];
+                Point d = corners[face[3]];
                 if (a != null && b != null && c != null && d != null) buffer.quad(a, b, c, d, style.fill());
             }
         }
@@ -37,10 +39,10 @@ public final class ScreenBoxes {
         if (style.hasStroke()) edges(buffer, corners, style.stroke(), style.strokeWidth());
     }
 
-    private static void edges(ScreenBuffer buffer, ScreenPoint[] corners, int color, float width) {
-        for (int i = 0; i < BoxCorners.EDGES.length; i += 2) {
-            ScreenPoint a = corners[BoxCorners.EDGES[i]];
-            ScreenPoint b = corners[BoxCorners.EDGES[i + 1]];
+    private static void edges(ScreenBuffer buffer, Point[] corners, int color, float width) {
+        for (int i = 0; i < Corners.EDGES.length; i += 2) {
+            Point a = corners[Corners.EDGES[i]];
+            Point b = corners[Corners.EDGES[i + 1]];
             if (a != null && b != null) buffer.line(a, b, color, width);
         }
     }

@@ -1,17 +1,17 @@
-package dev.koifih.client.gui.component;
+package dev.koifih.client.ui.component;
 
-import dev.koifih.client.gui.Theme;
-import dev.koifih.client.gui.animation.Easing;
-import dev.koifih.client.gui.animation.Transition;
-import dev.koifih.client.gui.catalog.Catalog;
+import dev.koifih.client.render.Draw;
 import dev.koifih.client.render.Opacity;
 import dev.koifih.client.render.Scissor;
-import dev.koifih.client.render.gui.Icons;
-import dev.koifih.client.render.gui.Rects;
-import dev.koifih.client.render.gui.Text;
-import dev.koifih.client.render.gui.Transform;
+import dev.koifih.client.render.Text;
+import dev.koifih.client.render.Transform;
+import dev.koifih.client.ui.Theme;
+import dev.koifih.client.ui.animation.Easing;
+import dev.koifih.client.ui.animation.Transition;
+import dev.koifih.client.ui.catalog.Catalog;
 import dev.koifih.client.util.Colors;
 import dev.koifih.client.util.Lang;
+import dev.koifih.client.util.Time;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.narration.NarratedElementType;
 import net.minecraft.client.gui.narration.NarrationElementOutput;
@@ -39,7 +39,7 @@ public final class CatalogPicker extends RowPopup implements Windowed {
     private static final float SEARCH_HEIGHT = 14f;
     private static final int SEARCH_MAX_LENGTH = 24;
     private static final float SPIN_DEGREES_PER_SECOND = 60f;
-    private static final long BLINK_NANOS = 500_000_000L;
+    private static final long BLINK_MILLIS = 500L;
 
     private final Catalog catalog;
     private final Supplier<Set<String>> selected;
@@ -224,7 +224,7 @@ public final class CatalogPicker extends RowPopup implements Windowed {
     }
 
     private void drawWindow(GuiGraphicsExtractor graphics, float x, float y, float width, float height) {
-        Rects.bordered(graphics, x, y, width, height, px(6), Theme.OVERLAY, Theme.POPUP_BORDER);
+        Draw.bordered(graphics, x, y, width, height, px(6), Theme.OVERLAY, Theme.POPUP_BORDER);
         drawGroups(graphics);
         drawSearch(graphics);
         drawList(graphics);
@@ -272,7 +272,7 @@ public final class CatalogPicker extends RowPopup implements Windowed {
         rect(graphics, x, y, listWidth(), px(SEARCH_HEIGHT), px(4), Theme.FIELD);
         float centerY = y + px(SEARCH_HEIGHT) / 2;
         float iconSize = px(8);
-        Icons.draw(graphics, SEARCH_ICON, x + px(4), centerY - iconSize / 2, iconSize, Theme.DIM);
+        Draw.icon(graphics, SEARCH_ICON, x + px(4), centerY - iconSize / 2, iconSize, Theme.DIM);
         rect(graphics, x + px(16), centerY - px(4), Math.max(0.5f, scale), px(8), 0, Theme.CONTROL);
         float textX = x + px(21);
         if (query.isEmpty()) {
@@ -280,7 +280,7 @@ public final class CatalogPicker extends RowPopup implements Windowed {
         } else {
             text(graphics, fit(query, listWidth() - px(27), size), textX, centerY, size, Theme.TEXT);
         }
-        boolean blinkVisible = (System.nanoTime() / BLINK_NANOS) % 2 == 0;
+        boolean blinkVisible = Time.blink(BLINK_MILLIS);
         if (isOpen() && blinkVisible) {
             float caretX = Math.min(x + listWidth() - px(5), textX + Text.width(query, size));
             rect(graphics, caretX, centerY - px(4), Math.max(0.5f, scale), px(8), 0, Theme.ACCENT);
@@ -317,7 +317,7 @@ public final class CatalogPicker extends RowPopup implements Windowed {
                 float rowCenter = rowY + px(ROW_HEIGHT) / 2;
                 if (shownCheck > 0f) {
                     float checkSize = iconSize * (0.6f + 0.4f * shownCheck);
-                    Opacity.with(shownCheck, () -> Icons.draw(graphics, CHECK_ICON, listX + px(6) + (iconSize - checkSize) / 2,
+                    Opacity.with(shownCheck, () -> Draw.icon(graphics, CHECK_ICON, listX + px(6) + (iconSize - checkSize) / 2,
                             rowCenter - checkSize / 2, checkSize, Theme.ACCENT));
                 }
                 text(graphics, fit(entry.name(), listWidth() - px(24), px(6.5f)), listX + px(17), rowCenter, px(6.5f),
@@ -340,7 +340,7 @@ public final class CatalogPicker extends RowPopup implements Windowed {
     private void drawPreview(GuiGraphicsExtractor graphics) {
         Catalog.Entry shownEntry = shownEntry();
         if (shownEntry == null || !catalog.canPreview(shownEntry)) return;
-        float yaw = (float) ((System.nanoTime() / 1_000_000_000.0 * SPIN_DEGREES_PER_SECOND) % 360.0);
+        float yaw = (Time.seconds() * SPIN_DEGREES_PER_SECOND) % 360f;
         int x0 = Math.round(previewX() + px(4));
         int y0 = Math.round(columnTop() + px(4));
         int x1 = Math.round(previewX() + previewWidth() - px(4));

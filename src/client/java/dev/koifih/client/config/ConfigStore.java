@@ -4,7 +4,7 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import dev.koifih.Adin;
 import dev.koifih.client.AdinClient;
-import dev.koifih.client.gui.Theme;
+import dev.koifih.client.ui.Theme;
 import net.minecraft.client.Minecraft;
 import java.io.IOException;
 import java.io.Reader;

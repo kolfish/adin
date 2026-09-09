@@ -1,8 +1,8 @@
 package dev.koifih.client.module.impl.render.esp;
 
+import dev.koifih.client.render.Rect;
 import dev.koifih.client.render.screen.HealthBar;
 import dev.koifih.client.render.screen.ScreenBuffer;
-import dev.koifih.client.render.screen.ScreenRect;
 import dev.koifih.client.setting.EnumSetting;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
@@ -27,7 +27,7 @@ final class Health {
         return esp.flat() ? SIDES[position.get()] : HealthBar.Side.LEFT;
     }
 
-    static void collect(ScreenBuffer buffer, Entity entity, ScreenRect rect, HealthBar.Side side, float clearance, float pixel) {
+    static void collect(ScreenBuffer buffer, Entity entity, Rect rect, HealthBar.Side side, float clearance, float pixel) {
         if (!(entity instanceof LivingEntity living)) return;
         float fraction = living.getMaxHealth() <= 0f ? 0f : living.getHealth() / living.getMaxHealth();
         HealthBar.collect(buffer, rect, side, fraction, clearance, pixel);

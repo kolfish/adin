@@ -1,11 +1,11 @@
-package dev.koifih.client.gui.component;
+package dev.koifih.client.ui.component;
 
-import dev.koifih.client.gui.Theme;
-import dev.koifih.client.gui.animation.Easing;
-import dev.koifih.client.gui.animation.Transition;
-import dev.koifih.client.gui.clickgui.Sidebar;
-import dev.koifih.client.render.gui.Icons;
-import dev.koifih.client.render.gui.Text;
+import dev.koifih.client.render.Draw;
+import dev.koifih.client.render.Text;
+import dev.koifih.client.ui.Theme;
+import dev.koifih.client.ui.animation.Easing;
+import dev.koifih.client.ui.animation.Transition;
+import dev.koifih.client.ui.clickgui.Sidebar;
 import dev.koifih.client.util.Colors;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.narration.NarratedElementType;
@@ -52,7 +52,7 @@ public final class TabButton extends Clickable {
     protected void extractWidgetRenderState(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float delta) {
         float covered = onPill.value();
         float iconSize = ICON_SIZE * scale;
-        Icons.draw(graphics, tab.icon(), getX() + ICON_INSET * scale,
+        Draw.icon(graphics, tab.icon(), getX() + ICON_INSET * scale,
                 getY() + (getHeight() - iconSize) * 0.5f, iconSize, Colors.lerp(Theme.DIM, 0xFF000000, covered));
         String label = getMessage().getString();
         float textX = getX() + TEXT_INSET * scale;

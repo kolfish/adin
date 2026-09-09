@@ -1,4 +1,4 @@
-package dev.koifih.client.gui.catalog;
+package dev.koifih.client.ui.catalog;
 
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import java.util.List;

@@ -80,8 +80,8 @@ vec3 stars(vec3 p) {
     return c * c * 0.8;
 }
 
-vec3 auroras(vec3 base, float time) {
-    vec2 p = surfaceUv() * 0.3;
+vec3 auroras(vec2 uv, vec3 base, float time) {
+    vec2 p = uv * 0.3;
     vec3 ro = vec3(0.0, 0.0, -6.7);
     vec3 rd = normalize(vec3(p, 1.3));
     rd.xz *= mm2(sin(time * 0.05) * 0.2);

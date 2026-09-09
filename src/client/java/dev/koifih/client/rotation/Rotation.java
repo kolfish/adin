@@ -1,6 +1,6 @@
 package dev.koifih.client.rotation;
 
-import dev.koifih.client.util.MathUtil;
+import dev.koifih.client.util.Maths;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.phys.Vec3;
@@ -30,7 +30,7 @@ public record Rotation(float yaw, float pitch) {
     }
 
     public float distanceTo(Rotation target) {
-        return MathUtil.length(yawTo(target), pitchTo(target));
+        return Maths.length(yawTo(target), pitchTo(target));
     }
 
     public Rotation moved(float deltaYaw, float deltaPitch) {

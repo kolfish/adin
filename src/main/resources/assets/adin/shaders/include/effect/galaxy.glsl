@@ -12,8 +12,8 @@ const float DARKMATTER = 0.300;
 const float DISTFADING = 0.760;
 const float SATURATION = 0.800;
 
-vec3 starNest(vec3 base, float time) {
-    vec2 uv = surfaceUv() * 0.35;
+vec3 starNest(vec2 uv, vec3 base, float time) {
+    uv *= 0.35;
     vec3 dir = vec3(uv * ZOOM, 1.0);
     float t = time * SPEED + 0.25;
     float a1 = 0.5;

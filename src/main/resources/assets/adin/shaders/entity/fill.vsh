@@ -13,6 +13,7 @@ in vec3 Normal;
 out vec4 vertexColor;
 out vec2 texCoord0;
 out vec3 relativePosition;
+out vec3 worldNormal;
 out vec3 viewPosition;
 out vec3 viewNormal;
 flat out ivec2 packedA;
@@ -24,6 +25,7 @@ void main() {
     vertexColor = Color;
     texCoord0 = UV0;
     relativePosition = Position;
+    worldNormal = Normal;
     viewPosition = view.xyz;
     viewNormal = mat3(ModelViewMat) * Normal;
     packedA = UV1;

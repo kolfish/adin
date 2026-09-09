@@ -1,4 +1,4 @@
-package dev.koifih.client.gui;
+package dev.koifih.client.ui;
 
 public enum UiScale {
     PERCENT_100(1f),

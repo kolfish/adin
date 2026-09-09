@@ -1,34 +1,35 @@
-package dev.koifih.client.render.screen;
+package dev.koifih.client.render.state;
 
 import com.mojang.blaze3d.vertex.VertexConsumer;
-import dev.koifih.client.util.MathUtil;
+import dev.koifih.client.render.Rect;
+import dev.koifih.client.util.Maths;
 import net.minecraft.client.gui.navigation.ScreenRectangle;
 import org.joml.Matrix3x2f;
 import org.joml.Matrix3x2fc;
 
-final class ScreenGeometry {
+final class Geometry {
     static final float PADDING = 1f;
     private static final float FIXED_POINT = 8f;
 
-    private ScreenGeometry() {}
+    private Geometry() {}
 
-    static ScreenRectangle bounds(ScreenRect rect, Matrix3x2fc pose) {
-        ScreenRect outer = rect.expand(PADDING);
+    static ScreenRectangle bounds(Rect rect, Matrix3x2fc pose) {
+        Rect outer = rect.expand(PADDING);
         return new ScreenRectangle((int) Math.floor(outer.minX()), (int) Math.floor(outer.minY()),
                 (int) Math.ceil(outer.width()) + 1, (int) Math.ceil(outer.height()) + 1).transformMaxBounds(pose);
     }
 
-    static void fill(VertexConsumer consumer, Matrix3x2fc pose, ScreenRect rect, int color) {
+    static void fill(VertexConsumer consumer, Matrix3x2fc pose, Rect rect, int color) {
         shape(consumer, pose, rect.minX(), rect.minY(), rect.width(), rect.height(), 0f, color);
     }
 
-    static void border(VertexConsumer consumer, Matrix3x2fc pose, ScreenRect rect, float width, int color) {
-        ScreenRect outer = rect.expand(width * 0.5f);
+    static void border(VertexConsumer consumer, Matrix3x2fc pose, Rect rect, float width, int color) {
+        Rect outer = rect.expand(width * 0.5f);
         shape(consumer, pose, outer.minX(), outer.minY(), outer.width(), outer.height(), width, color);
     }
 
-    static void corners(VertexConsumer consumer, Matrix3x2fc pose, ScreenRect rect, float width, float length, int color) {
-        ScreenRect outer = rect.expand(width * 0.5f);
+    static void corners(VertexConsumer consumer, Matrix3x2fc pose, Rect rect, float width, float length, int color) {
+        Rect outer = rect.expand(width * 0.5f);
         float reach = Math.min(length, Math.min(outer.width(), outer.height()) * 0.5f);
         float x0 = outer.minX();
         float y0 = outer.minY();
@@ -47,8 +48,8 @@ final class ScreenGeometry {
     static void line(VertexConsumer consumer, Matrix3x2fc pose, float x0, float y0, float x1, float y1, float width, int color) {
         float dx = x1 - x0;
         float dy = y1 - y0;
-        float length = MathUtil.length(dx, dy);
-        if (MathUtil.nearlyZero(length)) return;
+        float length = Maths.length(dx, dy);
+        if (Maths.nearlyZero(length)) return;
         Matrix3x2f along = new Matrix3x2f(pose).translate(x0, y0).rotate((float) Math.atan2(dy, dx));
         shape(consumer, along, 0f, -width * 0.5f, length, width, 0f, color);
     }

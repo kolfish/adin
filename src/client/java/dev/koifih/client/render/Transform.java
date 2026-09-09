@@ -1,4 +1,4 @@
-package dev.koifih.client.render.gui;
+package dev.koifih.client.render;
 
 import dev.koifih.client.render.Opacity;
 import net.minecraft.client.gui.GuiGraphicsExtractor;

@@ -1,16 +1,15 @@
 package dev.koifih.client.module.impl.hud;
 
 import dev.koifih.client.event.events.HudRenderEvent;
-import dev.koifih.client.gui.Theme;
-import dev.koifih.client.gui.UiScale;
 import dev.koifih.client.module.HudModule;
-import dev.koifih.client.render.gui.Logo;
-import dev.koifih.client.render.gui.Rects;
-import dev.koifih.client.render.gui.Text;
+import dev.koifih.client.render.Draw;
+import dev.koifih.client.render.Text;
 import dev.koifih.client.setting.Measure;
 import dev.koifih.client.setting.PositionSetting.Anchor;
 import dev.koifih.client.setting.SliderSetting;
 import dev.koifih.client.setting.TextColorSettings;
+import dev.koifih.client.ui.Theme;
+import dev.koifih.client.ui.UiScale;
 import dev.koifih.client.util.Colors;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
@@ -57,11 +56,11 @@ public final class Watermark extends HudModule {
         int x = Math.round(left(box + gap + textWidth, window.getGuiScaledWidth()));
         int y = Math.round(top(box, window.getGuiScaledHeight()));
         placed(x, y, box + gap + textWidth, box);
-        Rects.draw(graphics, x, y, box, box, radius, background);
+        Draw.rect(graphics, x, y, box, box, radius, background);
         int logo = box - 2 * inset;
-        Logo.draw(graphics, x + inset, y + inset, logo, color.at(x + box * 0.5f));
+        Draw.logo(graphics, x + inset, y + inset, logo, color.at(x + box * 0.5f));
         int textBox = x + box + gap;
-        Rects.draw(graphics, textBox, y, textWidth, box, radius, background);
+        Draw.rect(graphics, textBox, y, textWidth, box, radius, background);
         float textX = textBox + padding - ink.left();
         float centerY = y + box * 0.5f;
         Text.drawCentered(graphics, NAME, textX, centerY, textSize, color);

@@ -1,8 +1,9 @@
-package dev.koifih.client.render;
+package dev.koifih.client.render.entity;
 
 import net.minecraft.world.phys.Vec3;
 
 public record EntityFill(int visible, int occluded, int visibleOverlay, int occludedOverlay, int light, int effect) {
+    /** The origin is packed as {@code short * ORIGIN_UNITS}, so it wraps every 128 blocks; entity/fill.fsh unwraps it. */
     private static final float ORIGIN_UNITS = 512f;
     private static final float SCALE_UNITS = 256f;
 
@@ -19,6 +20,12 @@ public record EntityFill(int visible, int occluded, int visibleOverlay, int occl
         int overlay = (wrapped(origin.x, ORIGIN_UNITS) & 0xFFFF) | (wrapped(origin.y, ORIGIN_UNITS) << 16);
         int light = (wrapped(origin.z, ORIGIN_UNITS) & 0xFFFF) | (fixed(scale, SCALE_UNITS) << 16);
         return new EntityFill(visible, occluded, overlay, overlay, light, effect);
+    }
+
+    /** The same effect fill re-anchored at {@code origin}, keeping its scale. Solid and gradient fills have no origin. */
+    public EntityFill anchored(Vec3 origin) {
+        if (effect == 0) return this;
+        return effect(visible, occluded, effect, origin, (light >>> 16) / SCALE_UNITS);
     }
 
     private static int color(int rgb) {

@@ -1,9 +1,9 @@
-package dev.koifih.client.gui.component;
+package dev.koifih.client.ui.component;
 
-import dev.koifih.client.gui.Theme;
-import dev.koifih.client.gui.animation.Easing;
-import dev.koifih.client.gui.animation.Transition;
-import dev.koifih.client.render.gui.Icons;
+import dev.koifih.client.render.Draw;
+import dev.koifih.client.ui.Theme;
+import dev.koifih.client.ui.animation.Easing;
+import dev.koifih.client.ui.animation.Transition;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.narration.NarratedElementType;
 import net.minecraft.client.gui.narration.NarrationElementOutput;
@@ -37,9 +37,9 @@ public final class BindMode extends Control {
         rect(graphics, getX() + half * highlight.value(), getY(), half, getHeight(), px(3), Theme.CONTROL_ACTIVE);
         float iconSize = getHeight() * 0.7f;
         float iconY = getY() + (getHeight() - iconSize) / 2;
-        Icons.draw(graphics, TOGGLE_ICON, getX() + (half - iconSize) / 2, iconY, iconSize,
+        Draw.icon(graphics, TOGGLE_ICON, getX() + (half - iconSize) / 2, iconY, iconSize,
                 holding ? Theme.DIM : Theme.TEXT);
-        Icons.draw(graphics, HOLD_ICON, getX() + half + (half - iconSize) / 2, iconY, iconSize,
+        Draw.icon(graphics, HOLD_ICON, getX() + half + (half - iconSize) / 2, iconY, iconSize,
                 holding ? Theme.TEXT : Theme.DIM);
     }
 

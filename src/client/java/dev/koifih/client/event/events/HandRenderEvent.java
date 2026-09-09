@@ -1,7 +1,7 @@
 package dev.koifih.client.event.events;
 
 import dev.koifih.client.event.Event;
-import dev.koifih.client.render.EntityFill;
+import dev.koifih.client.render.entity.EntityFill;
 
 public final class HandRenderEvent implements Event {
     private EntityFill fill;

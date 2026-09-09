@@ -1,29 +1,19 @@
-package dev.koifih.client.render.gui;
+package dev.koifih.client.render.state;
 
 import com.mojang.blaze3d.pipeline.RenderPipeline;
 import com.mojang.blaze3d.vertex.VertexConsumer;
-import dev.koifih.client.render.Pipelines;
 import dev.koifih.client.render.Scissor;
 import net.minecraft.client.gui.navigation.ScreenRectangle;
 import net.minecraft.client.gui.render.TextureSetup;
 import net.minecraft.client.renderer.state.gui.GuiElementRenderState;
 import org.joml.Matrix3x2fc;
 
-public record RectRenderState(Matrix3x2fc pose, int x, int y, int width, int height, int radius, int shape, int color,
-                              RenderPipeline pipeline, ScreenRectangle scissorArea) implements GuiElementRenderState {
+public record RectState(Matrix3x2fc pose, int x, int y, int width, int height, int radius, int shape, int color,
+                        RenderPipeline pipeline, ScreenRectangle scissorArea) implements GuiElementRenderState {
     private static final int ANTIALIAS_PADDING = 1;
 
-    public RectRenderState(Matrix3x2fc pose, int x, int y, int width, int height, int radius, int color) {
-        this(pose, x, y, width, height, radius, color, Pipelines.RECT);
-    }
-
-    public RectRenderState(Matrix3x2fc pose, int x, int y, int width, int height, int radius, int color,
-                           RenderPipeline pipeline) {
-        this(pose, x, y, width, height, radius, Rects.ALL_CORNERS, color, pipeline, Scissor.current());
-    }
-
-    public RectRenderState(Matrix3x2fc pose, int x, int y, int width, int height, int radius, int shape, int color,
-                           RenderPipeline pipeline) {
+    public RectState(Matrix3x2fc pose, int x, int y, int width, int height, int radius, int shape, int color,
+                     RenderPipeline pipeline) {
         this(pose, x, y, width, height, radius, shape, color, pipeline, Scissor.current());
     }
 

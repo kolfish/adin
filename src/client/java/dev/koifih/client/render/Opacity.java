@@ -1,5 +1,7 @@
 package dev.koifih.client.render;
 
+import dev.koifih.client.util.Colors;
+
 public final class Opacity {
     private static final ThreadLocal<Float> CURRENT = ThreadLocal.withInitial(() -> 1f);
 
@@ -18,8 +20,7 @@ public final class Opacity {
     public static int apply(int argb) {
         float alpha = CURRENT.get();
         if (alpha >= 1f) return argb;
-        int scaled = Math.round((argb >>> 24) * alpha);
-        return (scaled << 24) | (argb & 0xFFFFFF);
+        return Colors.withAlpha(argb, alpha);
     }
 
     public static Style apply(Style style) {

@@ -1,7 +1,7 @@
-package dev.koifih.client.gui.clickgui;
+package dev.koifih.client.ui.clickgui;
 
-import dev.koifih.client.gui.animation.Easing;
-import dev.koifih.client.gui.animation.Transition;
+import dev.koifih.client.ui.animation.Easing;
+import dev.koifih.client.ui.animation.Transition;
 
 final class SelectionPill {
     private static final int DURATION_MILLIS = 150;

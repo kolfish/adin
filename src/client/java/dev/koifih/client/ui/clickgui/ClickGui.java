@@ -1,21 +1,21 @@
-package dev.koifih.client.gui.clickgui;
+package dev.koifih.client.ui.clickgui;
 
-import dev.koifih.client.gui.Theme;
-import dev.koifih.client.gui.UiScale;
-import dev.koifih.client.gui.animation.Easing;
-import dev.koifih.client.gui.animation.Transition;
-import dev.koifih.client.gui.clickgui.page.ConfigsPage;
-import dev.koifih.client.gui.clickgui.page.ModulesPage;
-import dev.koifih.client.gui.clickgui.page.Page;
-import dev.koifih.client.gui.component.Control;
-import dev.koifih.client.gui.component.Popup;
-import dev.koifih.client.gui.component.TextInput;
 import dev.koifih.client.input.Keybinds;
+import dev.koifih.client.render.Draw;
 import dev.koifih.client.render.Opacity;
 import dev.koifih.client.render.Scissor;
-import dev.koifih.client.render.gui.Rects;
-import dev.koifih.client.render.gui.Transform;
+import dev.koifih.client.render.Transform;
 import dev.koifih.client.setting.PreviewSetting;
+import dev.koifih.client.ui.Theme;
+import dev.koifih.client.ui.UiScale;
+import dev.koifih.client.ui.animation.Easing;
+import dev.koifih.client.ui.animation.Transition;
+import dev.koifih.client.ui.clickgui.page.ConfigsPage;
+import dev.koifih.client.ui.clickgui.page.ModulesPage;
+import dev.koifih.client.ui.clickgui.page.Page;
+import dev.koifih.client.ui.component.Control;
+import dev.koifih.client.ui.component.Popup;
+import dev.koifih.client.ui.component.TextInput;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.navigation.ScreenRectangle;
@@ -173,12 +173,12 @@ public final class ClickGui extends Screen implements WidgetHost {
 
     private void drawPanel(GuiGraphicsExtractor graphics) {
         int radius = layout.atLeastOne(PanelLayout.RADIUS);
-        Rects.draw(graphics, layout.x(), layout.y(), layout.width(), layout.height(), radius, Theme.SIDEBAR);
-        Rects.draw(graphics, layout.contentX(), layout.contentY(), layout.contentWidth(), layout.contentHeight(),
+        Draw.rect(graphics, layout.x(), layout.y(), layout.width(), layout.height(), radius, Theme.SIDEBAR);
+        Draw.rect(graphics, layout.contentX(), layout.contentY(), layout.contentWidth(), layout.contentHeight(),
                 radius, Theme.MAIN);
         int join = Math.min(radius + 1, Math.min(layout.contentWidth(), layout.contentHeight()));
-        Rects.draw(graphics, layout.right() - join, layout.contentY(), join, join, 0, Theme.MAIN);
-        Rects.draw(graphics, layout.contentX(), layout.bottom() - join, join, join, 0, Theme.MAIN);
+        Draw.rect(graphics, layout.right() - join, layout.contentY(), join, join, 0, Theme.MAIN);
+        Draw.rect(graphics, layout.contentX(), layout.bottom() - join, join, join, 0, Theme.MAIN);
     }
 
     private void drawContent(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float delta) {

@@ -7,10 +7,10 @@ import dev.koifih.client.event.events.ScreenRenderEvent;
 import dev.koifih.client.event.events.WorldRenderEvent;
 import dev.koifih.client.module.Category;
 import dev.koifih.client.module.Module;
-import dev.koifih.client.render.FilledRenderState;
+import dev.koifih.client.render.Rect;
 import dev.koifih.client.render.Style;
+import dev.koifih.client.render.entity.Filled;
 import dev.koifih.client.render.screen.HealthBar;
-import dev.koifih.client.render.screen.ScreenRect;
 import dev.koifih.client.setting.EntitySetting;
 import dev.koifih.client.setting.EnumSetting;
 import dev.koifih.client.setting.Measure;
@@ -18,10 +18,10 @@ import dev.koifih.client.setting.MultiSetting;
 import dev.koifih.client.setting.PreviewSetting;
 import dev.koifih.client.setting.Setting;
 import dev.koifih.client.setting.SliderSetting;
+import dev.koifih.client.util.Entities;
 import net.minecraft.client.Camera;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.LocalPlayer;
-import dev.koifih.client.util.Entities;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.phys.AABB;
@@ -105,7 +105,7 @@ public final class Esp extends Module {
         float clearance = boxes ? style.widestStroke() * 0.5f : 0f;
         for (Target target : targets(event)) {
             AABB bounds = flat() ? fitted(target.entity(), target.bounds()) : target.bounds();
-            ScreenRect rect = event.projection().bounds(bounds);
+            Rect rect = event.projection().bounds(bounds);
             if (rect == null) continue;
             if (boxes) event.buffer().rect(rect, style);
             if (side != null) Health.collect(event.buffer(), target.entity(), rect, side, clearance, pixel);
@@ -117,7 +117,7 @@ public final class Esp extends Module {
         Camera camera = Minecraft.getInstance().gameRenderer.mainCamera();
         Entity entity = event.entity();
         if (!targeted(entity, camera) || entity.distanceToSqr(camera.position()) > range()) return;
-        ((FilledRenderState) event.state()).adin$setFill(shader.entityFill(event.renderPosition(), camera, event.state()));
+        ((Filled) event.state()).adin$setFill(shader.entityFill(event.renderPosition(), camera, event.state()));
     }
 
     private void onHandRender(HandRenderEvent event) {

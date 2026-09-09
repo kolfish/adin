@@ -1,9 +1,9 @@
-package dev.koifih.client.gui.component;
+package dev.koifih.client.ui.component;
 
-import dev.koifih.client.gui.Theme;
-import dev.koifih.client.gui.animation.Easing;
-import dev.koifih.client.gui.animation.Transition;
-import dev.koifih.client.render.gui.Rects;
+import dev.koifih.client.render.Draw;
+import dev.koifih.client.ui.Theme;
+import dev.koifih.client.ui.animation.Easing;
+import dev.koifih.client.ui.animation.Transition;
 import dev.koifih.client.util.Colors;
 import dev.koifih.client.util.Lang;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
@@ -49,7 +49,7 @@ public final class AccentPicker extends Popup {
     }
 
     private int presetIndex() {
-        int current = get.getAsInt() & 0xFFFFFF;
+        int current = Colors.rgb(get.getAsInt());
         for (int i = 0; i < PRESETS.length; i++) if (PRESETS[i] == current) return i;
         return -1;
     }
@@ -77,7 +77,7 @@ public final class AccentPicker extends Popup {
         }
         float dividerX = dotX(PRESETS.length) + px(GAP) / 2 - px(3);
         rect(graphics, dividerX, centerY() - px(4), Math.max(0.5f, scale), px(8), 0, Theme.CONTROL);
-        Rects.drawHueBar(graphics, Math.round(customX()), Math.round(top), Math.round(dot), Math.round(dot), Math.round(dot) / 2);
+        Draw.hueBar(graphics, Math.round(customX()), Math.round(top), Math.round(dot), Math.round(dot), Math.round(dot) / 2);
     }
 
     @Override

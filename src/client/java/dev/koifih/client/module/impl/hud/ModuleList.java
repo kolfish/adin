@@ -2,17 +2,17 @@ package dev.koifih.client.module.impl.hud;
 
 import dev.koifih.client.AdinClient;
 import dev.koifih.client.event.events.HudRenderEvent;
-import dev.koifih.client.gui.Theme;
-import dev.koifih.client.gui.UiScale;
 import dev.koifih.client.module.HudModule;
 import dev.koifih.client.module.Module;
-import dev.koifih.client.render.gui.Rects;
-import dev.koifih.client.render.gui.Text;
+import dev.koifih.client.render.Draw;
+import dev.koifih.client.render.Text;
 import dev.koifih.client.setting.BoolSetting;
 import dev.koifih.client.setting.Measure;
 import dev.koifih.client.setting.PositionSetting.Anchor;
 import dev.koifih.client.setting.SliderSetting;
 import dev.koifih.client.setting.TextColorSettings;
+import dev.koifih.client.ui.Theme;
+import dev.koifih.client.ui.UiScale;
 import dev.koifih.client.util.Colors;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
@@ -85,16 +85,16 @@ public final class ModuleList extends HudModule {
             int rowX = rightAligned ? edge - rowWidth : edge;
             int rowY = y + i * height;
             int step = i + 1 < widths.length ? Math.min(radius, (rowWidth - widths[i + 1]) / 2) : radius;
-            int corners = rightAligned ? Rects.BOTTOM_LEFT : Rects.BOTTOM_RIGHT;
-            if (i == 0 && !flushTop) corners |= rightAligned ? Rects.TOP_LEFT : Rects.TOP_RIGHT;
-            if (i == 0 && !flushTop && !flushSide) corners |= rightAligned ? Rects.TOP_RIGHT : Rects.TOP_LEFT;
-            if (i == widths.length - 1 && !flushSide) corners |= rightAligned ? Rects.BOTTOM_RIGHT : Rects.BOTTOM_LEFT;
-            Rects.draw(graphics, rowX, rowY, rowWidth, height, step, corners, background);
+            int corners = rightAligned ? Draw.BOTTOM_LEFT : Draw.BOTTOM_RIGHT;
+            if (i == 0 && !flushTop) corners |= rightAligned ? Draw.TOP_LEFT : Draw.TOP_RIGHT;
+            if (i == 0 && !flushTop && !flushSide) corners |= rightAligned ? Draw.TOP_RIGHT : Draw.TOP_LEFT;
+            if (i == widths.length - 1 && !flushSide) corners |= rightAligned ? Draw.BOTTOM_RIGHT : Draw.BOTTOM_LEFT;
+            Draw.rect(graphics, rowX, rowY, rowWidth, height, step, corners, background);
             if (i == 0) continue;
             int fillet = Math.min(radius, (widths[i - 1] - rowWidth) / 2);
             if (fillet <= 0) continue;
-            if (rightAligned) Rects.fillet(graphics, rowX - fillet, rowY, fillet, fillet, fillet, Rects.BOTTOM_LEFT, background);
-            else Rects.fillet(graphics, rowX + rowWidth, rowY, fillet, fillet, fillet, Rects.BOTTOM_RIGHT, background);
+            if (rightAligned) Draw.fillet(graphics, rowX - fillet, rowY, fillet, fillet, fillet, Draw.BOTTOM_LEFT, background);
+            else Draw.fillet(graphics, rowX + rowWidth, rowY, fillet, fillet, fillet, Draw.BOTTOM_RIGHT, background);
         }
         Text.ColorAt color = colors.colorAt(scale);
         for (int i = 0; i < widths.length; i++) {

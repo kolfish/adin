@@ -1,8 +1,8 @@
-package dev.koifih.client.gui.component;
+package dev.koifih.client.ui.component;
 
-import dev.koifih.client.gui.Theme;
-import dev.koifih.client.render.gui.Icons;
-import dev.koifih.client.render.gui.Text;
+import dev.koifih.client.render.Draw;
+import dev.koifih.client.render.Text;
+import dev.koifih.client.ui.Theme;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.network.chat.Component;
 
@@ -27,7 +27,7 @@ public final class Button extends Clickable {
         if (icon >= 0) {
             rect(graphics, getX(), getY(), getWidth(), getHeight(), px(5), Theme.ROW);
             float iconSize = px(10);
-            Icons.draw(graphics, icon, getX() + (getWidth() - iconSize) / 2, getY() + (getHeight() - iconSize) / 2,
+            Draw.icon(graphics, icon, getX() + (getWidth() - iconSize) / 2, getY() + (getHeight() - iconSize) / 2,
                     iconSize, Theme.DIM);
             return;
         }

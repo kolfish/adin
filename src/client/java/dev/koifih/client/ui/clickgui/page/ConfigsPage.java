@@ -1,21 +1,21 @@
-package dev.koifih.client.gui.clickgui.page;
+package dev.koifih.client.ui.clickgui.page;
 
 import dev.koifih.client.config.Config;
 import dev.koifih.client.config.ConfigStore;
-import dev.koifih.client.gui.Theme;
-import dev.koifih.client.gui.animation.Easing;
-import dev.koifih.client.gui.animation.Transition;
-import dev.koifih.client.gui.clickgui.PanelLayout;
-import dev.koifih.client.gui.clickgui.WidgetHost;
-import dev.koifih.client.gui.component.Button;
-import dev.koifih.client.gui.component.Control;
-import dev.koifih.client.gui.component.IconButton;
-import dev.koifih.client.gui.component.Segmented;
-import dev.koifih.client.gui.component.TextInput;
+import dev.koifih.client.render.Draw;
 import dev.koifih.client.render.Opacity;
-import dev.koifih.client.render.gui.Rects;
-import dev.koifih.client.render.gui.Text;
-import dev.koifih.client.render.gui.Transform;
+import dev.koifih.client.render.Text;
+import dev.koifih.client.render.Transform;
+import dev.koifih.client.ui.Theme;
+import dev.koifih.client.ui.animation.Easing;
+import dev.koifih.client.ui.animation.Transition;
+import dev.koifih.client.ui.clickgui.PanelLayout;
+import dev.koifih.client.ui.clickgui.WidgetHost;
+import dev.koifih.client.ui.component.Button;
+import dev.koifih.client.ui.component.Control;
+import dev.koifih.client.ui.component.IconButton;
+import dev.koifih.client.ui.component.Segmented;
+import dev.koifih.client.ui.component.TextInput;
 import dev.koifih.client.util.Lang;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.AbstractWidget;
@@ -309,7 +309,7 @@ public final class ConfigsPage implements Page {
         for (int i = 0; i < visibleCount(); i++) {
             Config config = configs.get(i);
             int y = cardY(i);
-            Rects.draw(graphics, area.rowX(), y, area.rowWidth(), cardHeight, radius, Theme.ROW);
+            Draw.rect(graphics, area.rowX(), y, area.rowWidth(), cardHeight, radius, Theme.ROW);
             Control loadButton = cardControls.get(i * 2);
             float textX = area.rowX() + 10 * scale;
             float textWidth = loadButton.getX() - GAP * scale - textX;
@@ -335,7 +335,7 @@ public final class ConfigsPage implements Page {
         Transform.popIn(graphics, x + width * 0.5f, y + height * 0.5f, reveal, 0.96f, () -> {
             float scale = area.scale();
             int radius = Math.max(1, area.scaled(6));
-            Rects.bordered(graphics, x, y, width, height, radius, Theme.OVERLAY, Theme.POPUP_BORDER);
+            Draw.bordered(graphics, x, y, width, height, radius, Theme.OVERLAY, Theme.POPUP_BORDER);
             float textX = x + DIALOG_PADDING * scale;
             float titleY = y + (DIALOG_PADDING + DIALOG_TITLE * 0.5f) * scale;
             Text.drawCentered(graphics, Lang.get("configs.new"), textX, titleY, 8 * scale, Theme.TEXT);

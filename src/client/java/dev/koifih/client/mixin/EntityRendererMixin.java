@@ -2,7 +2,7 @@ package dev.koifih.client.mixin;
 
 import dev.koifih.client.AdinClient;
 import dev.koifih.client.event.events.EntityRenderStateEvent;
-import dev.koifih.client.render.FilledRenderState;
+import dev.koifih.client.render.entity.Filled;
 import net.minecraft.client.renderer.entity.EntityRenderer;
 import net.minecraft.client.renderer.entity.state.EntityRenderState;
 import net.minecraft.world.entity.Entity;
@@ -16,7 +16,7 @@ public abstract class EntityRendererMixin {
     @Inject(method = "createRenderState(Lnet/minecraft/world/entity/Entity;F)Lnet/minecraft/client/renderer/entity/state/EntityRenderState;", at = @At("RETURN"))
     private void adin$extracted(Entity entity, float partialTicks, CallbackInfoReturnable<EntityRenderState> info) {
         EntityRenderState state = info.getReturnValue();
-        ((FilledRenderState) state).adin$setFill(null);
+        ((Filled) state).adin$setFill(null);
         AdinClient.EVENTS.post(new EntityRenderStateEvent(entity, state, partialTicks));
     }
 }

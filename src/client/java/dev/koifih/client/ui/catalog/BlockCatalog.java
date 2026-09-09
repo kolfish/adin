@@ -1,6 +1,6 @@
-package dev.koifih.client.gui.catalog;
+package dev.koifih.client.ui.catalog;
 
-import dev.koifih.client.render.preview.EntityPreview;
+import dev.koifih.client.ui.preview.EntityPreview;
 import dev.koifih.client.util.Lang;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.core.registries.BuiltInRegistries;

@@ -1,6 +1,6 @@
 # Shader credits
 
-`world/entity_fill.fsh` ports the following shaders. Each keeps its original license.
+`entity/fill.fsh` ports the following shaders. Each keeps its original license.
 
 - **Star Nest** by Pablo Román Andrioli (Kali), https://www.shadertoy.com/view/XlfGRj, MIT License.
 - **Metallic** shading model and **Lava** crack pattern from Conduit's chams mesh shader, `src/render/passes/chams/shaders/mesh.frag`.

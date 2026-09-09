@@ -2,7 +2,7 @@ package dev.koifih.client.mixin;
 
 import dev.koifih.client.AdinClient;
 import dev.koifih.client.event.events.HandRenderEvent;
-import dev.koifih.client.render.world.EntityFills;
+import dev.koifih.client.render.entity.EntityFills;
 import net.minecraft.client.renderer.ItemInHandRenderer;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;

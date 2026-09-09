@@ -1,10 +1,10 @@
-package dev.koifih.client.gui.component;
+package dev.koifih.client.ui.component;
 
-import dev.koifih.client.gui.Theme;
+import dev.koifih.client.render.Draw;
 import dev.koifih.client.render.Opacity;
 import dev.koifih.client.render.Scissor;
-import dev.koifih.client.render.gui.Icons;
-import dev.koifih.client.render.gui.Transform;
+import dev.koifih.client.render.Transform;
+import dev.koifih.client.ui.Theme;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.navigation.ScreenRectangle;
 import net.minecraft.network.chat.Component;
@@ -39,14 +39,14 @@ abstract class RowPopup extends Popup {
         float labelX = getX() + px(10);
         if (icon >= 0) {
             float size = px(9);
-            Icons.draw(graphics, icon, getX() + px(8), centerY() - size / 2, size, Theme.DIM);
+            Draw.icon(graphics, icon, getX() + px(8), centerY() - size / 2, size, Theme.DIM);
             labelX += px(13);
         }
         text(graphics, getMessage().getString(), labelX, centerY(), px(7), Theme.TEXT);
         float iconSize = px(9);
         float iconCenterX = getRight() - px(8) - iconSize / 2;
         Transform.rotatedAbout(graphics, (float) Math.PI * shown, iconCenterX, centerY(), () ->
-                Icons.draw(graphics, CHEVRON_ICON, iconCenterX - iconSize / 2, centerY() - iconSize / 2, iconSize, Theme.DIM));
+                Draw.icon(graphics, CHEVRON_ICON, iconCenterX - iconSize / 2, centerY() - iconSize / 2, iconSize, Theme.DIM));
         rect(graphics, getRight() - px(24), centerY() - px(5), Math.max(0.5f, scale), px(10), 0, Theme.CONTROL);
         drawRowValue(graphics, getRight() - px(30), getWidth() / 2f - px(30));
     }

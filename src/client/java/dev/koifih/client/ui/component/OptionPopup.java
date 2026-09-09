@@ -1,12 +1,12 @@
-package dev.koifih.client.gui.component;
+package dev.koifih.client.ui.component;
 
-import dev.koifih.client.gui.Theme;
-import dev.koifih.client.gui.animation.Easing;
-import dev.koifih.client.gui.animation.Transition;
+import dev.koifih.client.render.Draw;
 import dev.koifih.client.render.Opacity;
-import dev.koifih.client.render.gui.Icons;
-import dev.koifih.client.render.gui.Text;
-import dev.koifih.client.render.gui.Transform;
+import dev.koifih.client.render.Text;
+import dev.koifih.client.render.Transform;
+import dev.koifih.client.ui.Theme;
+import dev.koifih.client.ui.animation.Easing;
+import dev.koifih.client.ui.animation.Transition;
 import dev.koifih.client.util.Colors;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.input.KeyEvent;
@@ -130,7 +130,7 @@ abstract class OptionPopup extends RowPopup {
         Transform.popIn(graphics, x + width * 0.5f, center, shown, OPTION_MIN_ZOOM, () -> {
             if (chosen > 0f) {
                 float size = iconSize * (0.6f + 0.4f * chosen);
-                Opacity.with(chosen, () -> Icons.draw(graphics, CHECK_ICON, x + px(9) + (iconSize - size) / 2,
+                Opacity.with(chosen, () -> Draw.icon(graphics, CHECK_ICON, x + px(9) + (iconSize - size) / 2,
                         center - size / 2, size, Theme.ACCENT));
             }
             text(graphics, fit(options[option], width - px(30), px(7)), x + px(22), center, px(7), Colors.lerp(Theme.DIM, Theme.TEXT, chosen));

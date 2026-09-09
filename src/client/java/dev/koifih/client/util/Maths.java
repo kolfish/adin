@@ -4,10 +4,10 @@ import net.minecraft.util.Mth;
 import net.minecraft.world.phys.Vec3;
 import java.util.concurrent.ThreadLocalRandom;
 
-public final class MathUtil {
+public final class Maths {
     private static final float EPSILON = 1e-6f;
 
-    private MathUtil() {}
+    private Maths() {}
 
     public static float length(float x, float y) {
         return (float) Math.sqrt(x * x + y * y);

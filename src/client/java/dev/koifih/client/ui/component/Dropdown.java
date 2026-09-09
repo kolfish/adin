@@ -1,4 +1,4 @@
-package dev.koifih.client.gui.component;
+package dev.koifih.client.ui.component;
 
 import net.minecraft.client.gui.narration.NarratedElementType;
 import net.minecraft.client.gui.narration.NarrationElementOutput;

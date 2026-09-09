@@ -1,30 +1,32 @@
-package dev.koifih.client.gui.clickgui;
+package dev.koifih.client.ui.clickgui;
 
-import dev.koifih.client.gui.Theme;
-import dev.koifih.client.gui.animation.Easing;
-import dev.koifih.client.gui.animation.Transition;
-import dev.koifih.client.gui.component.IconButton;
-import dev.koifih.client.gui.component.TextInput;
-import dev.koifih.client.render.EntityFill;
+import dev.koifih.client.render.Draw;
 import dev.koifih.client.render.Opacity;
+import dev.koifih.client.render.Point;
+import dev.koifih.client.render.Rect;
 import dev.koifih.client.render.Scissor;
 import dev.koifih.client.render.Style;
-import dev.koifih.client.render.gui.Rects;
-import dev.koifih.client.render.gui.Text;
-import dev.koifih.client.render.gui.Transform;
-import dev.koifih.client.render.preview.EntityPreview;
-import dev.koifih.client.render.preview.SkinCache;
+import dev.koifih.client.render.Text;
+import dev.koifih.client.render.Transform;
+import dev.koifih.client.render.entity.EntityFill;
+import dev.koifih.client.render.screen.Boxes;
 import dev.koifih.client.render.screen.HealthBar;
 import dev.koifih.client.render.screen.Projector;
-import dev.koifih.client.render.screen.ScreenBoxes;
 import dev.koifih.client.render.screen.ScreenBuffer;
-import dev.koifih.client.render.screen.ScreenPoint;
-import dev.koifih.client.render.screen.ScreenRect;
 import dev.koifih.client.render.screen.ScreenRenderer;
 import dev.koifih.client.setting.PreviewSetting;
 import dev.koifih.client.setting.Setting;
+import dev.koifih.client.ui.Theme;
+import dev.koifih.client.ui.animation.Easing;
+import dev.koifih.client.ui.animation.Transition;
+import dev.koifih.client.ui.component.IconButton;
+import dev.koifih.client.ui.component.TextInput;
+import dev.koifih.client.ui.preview.EntityPreview;
+import dev.koifih.client.ui.preview.SkinCache;
 import dev.koifih.client.util.Colors;
+import dev.koifih.client.util.Game;
 import dev.koifih.client.util.Lang;
+import dev.koifih.client.util.Time;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.navigation.ScreenRectangle;
@@ -50,7 +52,7 @@ public final class PreviewWindow {
     private static final int NAME_MAX_LENGTH = 16;
     private static final int INPUT_HEIGHT = 16;
     private static final int STATUS_HEIGHT = 10;
-    private static final long FETCH_DELAY_NANOS = 600_000_000L;
+    private static final long FETCH_DELAY_MILLIS = 600L;
     private static String skinName = DEFAULT_SKIN;
     private final WidgetHost host;
     private final Transition reveal = new Transition(0f, REVEAL_MILLIS, Easing.EASE_OUT_CUBIC);
@@ -61,7 +63,7 @@ public final class PreviewWindow {
     private PreviewSetting preview;
     private Setting<?> highlighted;
     private String requestedName = "";
-    private long editedAt;
+    private final Time.Stopwatch sinceEdit = new Time.Stopwatch();
     private boolean open;
     private boolean dragging;
     private boolean dragged;
@@ -95,11 +97,11 @@ public final class PreviewWindow {
 
     private void setSkinName(String name) {
         skinName = name;
-        editedAt = System.nanoTime();
+        sinceEdit.reset();
     }
 
     private void pollSkin() {
-        if (skinName.equals(requestedName) || System.nanoTime() - editedAt < FETCH_DELAY_NANOS) return;
+        if (skinName.equals(requestedName) || !sinceEdit.elapsed(FETCH_DELAY_MILLIS)) return;
         requestedName = skinName;
         SkinCache.request(skinName);
     }
@@ -211,9 +213,9 @@ public final class PreviewWindow {
 
     private void drawWindow(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float delta) {
         int radius = layout.atLeastOne(PanelLayout.RADIUS);
-        Rects.draw(graphics, x(), y(), width(), height(), radius, Theme.SIDEBAR);
-        Rects.draw(graphics, x(), y() + layout.topBarHeight(), width(), height() - layout.topBarHeight(), radius, Theme.MAIN);
-        Rects.draw(graphics, x(), y() + layout.topBarHeight(), width(), radius, 0, Theme.MAIN);
+        Draw.rect(graphics, x(), y(), width(), height(), radius, Theme.SIDEBAR);
+        Draw.rect(graphics, x(), y() + layout.topBarHeight(), width(), height() - layout.topBarHeight(), radius, Theme.MAIN);
+        Draw.rect(graphics, x(), y() + layout.topBarHeight(), width(), radius, 0, Theme.MAIN);
         float titleX = back.getX() + back.getWidth() + layout.scaled(PanelLayout.GAP);
         Text.drawCentered(graphics, preview.name(), titleX, y() + layout.topBarHeight() * 0.5f, 8 * layout.scale(), Theme.TEXT);
         back.extractRenderState(graphics, mouseX, mouseY, delta);
@@ -246,12 +248,12 @@ public final class PreviewWindow {
         if (!EntityPreview.drawPlayer(graphics, x0, y0, x1, y1, angle, currentSkin(), null)) return;
         bounds = preview.fit(bounds);
         float pixel = 1f / Math.max(1, Minecraft.getInstance().getWindow().getGuiScale());
-        ScreenPoint[] corners = ScreenBoxes.project(projector, bounds);
-        ScreenRect rect = ScreenBoxes.bounds(corners);
+        Point[] corners = Boxes.project(projector, bounds);
+        Rect rect = Boxes.bounds(corners);
         ScreenBuffer buffer = new ScreenBuffer();
         float clearance = 0f;
         if (!preview.isFlat()) {
-            ScreenBoxes.collect(buffer, corners, preview.worldStyle().scaled(pixel));
+            Boxes.collect(buffer, corners, preview.worldStyle().scaled(pixel));
         } else if (preview.isBoxShown() && rect != null) {
             Style style = preview.screenStyle().scaled(pixel);
             clearance = style.widestStroke() * 0.5f;
@@ -259,7 +261,7 @@ public final class PreviewWindow {
         }
         HealthBar.Side side = preview.healthSide();
         if (side != null && rect != null) {
-            var player = Minecraft.getInstance().player;
+            var player = Game.player();
             float fraction = player.getMaxHealth() <= 0f ? 0f : player.getHealth() / player.getMaxHealth();
             HealthBar.collect(buffer, rect, side, fraction, clearance, pixel);
         }
@@ -273,7 +275,7 @@ public final class PreviewWindow {
                     contentX() + contentWidth(), contentY() + contentHeight()));
         }
         if (!shade.gradient()) return EntityFill.solid(color, 0);
-        ScreenRect rect = ScreenBoxes.bounds(ScreenBoxes.project(projector, bounds));
+        Rect rect = Boxes.bounds(Boxes.project(projector, bounds));
         int guiScale = Math.max(1, Minecraft.getInstance().getWindow().getGuiScale());
         int minY = rect == null ? 0 : Math.round((bottom - rect.maxY()) * guiScale);
         int maxY = rect == null ? 0 : Math.round((bottom - rect.minY()) * guiScale);

@@ -1,4 +1,4 @@
-package dev.koifih.client.render.world;
+package dev.koifih.client.render.entity;
 
 import com.mojang.blaze3d.PrimitiveTopology;
 import com.mojang.blaze3d.pipeline.BlendFunction;
@@ -8,7 +8,6 @@ import com.mojang.blaze3d.pipeline.RenderPipeline;
 import com.mojang.blaze3d.platform.CompareOp;
 import com.mojang.blaze3d.vertex.DefaultVertexFormat;
 import dev.koifih.Adin;
-import dev.koifih.client.render.EntityFill;
 import dev.koifih.client.mixin.RenderSetupAccessor;
 import dev.koifih.client.mixin.RenderTypeAccessor;
 import dev.koifih.client.mixin.TextureBindingAccessor;
@@ -25,13 +24,15 @@ public final class EntityFills {
     public static final int EFFECTS = 6;
 
     private static final String TEXTURE = "Sampler0";
+    private static final ColorTargetState TRANSLUCENT = new ColorTargetState(BlendFunction.TRANSLUCENT);
     private static final RenderPipeline[] OCCLUDED = pipelines("occluded", ColorTargetState.DEFAULT,
-            new DepthStencilState(CompareOp.LESS_THAN, false));
-    private static final RenderPipeline[] VISIBLE = pipelines("visible", new ColorTargetState(BlendFunction.TRANSLUCENT),
-            DepthStencilState.DEFAULT);
+            new DepthStencilState(CompareOp.LESS_THAN, false), false);
+    private static final RenderPipeline[] VISIBLE = pipelines("visible", TRANSLUCENT, DepthStencilState.DEFAULT, false);
+    private static final RenderPipeline[] HAND = pipelines("hand", TRANSLUCENT, DepthStencilState.DEFAULT, true);
     private static final Set<RenderPipeline> ALL = new HashSet<>();
     private static final Map<Key, RenderType> VISIBLE_TYPES = new HashMap<>();
     private static final Map<Key, RenderType> OCCLUDED_TYPES = new HashMap<>();
+    private static final Map<Key, RenderType> HAND_TYPES = new HashMap<>();
 
     private static EntityFill hand;
 
@@ -40,6 +41,7 @@ public final class EntityFills {
     static {
         for (RenderPipeline pipeline : OCCLUDED) ALL.add(pipeline);
         for (RenderPipeline pipeline : VISIBLE) ALL.add(pipeline);
+        for (RenderPipeline pipeline : HAND) ALL.add(pipeline);
     }
 
     private EntityFills() {}
@@ -58,6 +60,11 @@ public final class EntityFills {
 
     public static RenderType visible(Identifier texture, int effect) {
         return VISIBLE_TYPES.computeIfAbsent(new Key(texture, effect), key -> create("visible", VISIBLE[key.effect()], key));
+    }
+
+    /** Like {@link #visible}, with the pattern anchored in view space, where the hand holds still as the camera turns. */
+    public static RenderType visibleHand(Identifier texture, int effect) {
+        return HAND_TYPES.computeIfAbsent(new Key(texture, effect), key -> create("hand", HAND[key.effect()], key));
     }
 
     public static RenderType occluded(Identifier texture, int effect) {
@@ -79,14 +86,15 @@ public final class EntityFills {
                 RenderSetup.builder(pipeline).withTexture(TEXTURE, key.texture()).createRenderSetup());
     }
 
-    private static RenderPipeline[] pipelines(String name, ColorTargetState color, DepthStencilState depth) {
+    private static RenderPipeline[] pipelines(String name, ColorTargetState color, DepthStencilState depth, boolean hand) {
         RenderPipeline[] pipelines = new RenderPipeline[EFFECTS + 1];
         for (int effect = 0; effect < pipelines.length; effect++) {
             pipelines[effect] = RenderPipeline.builder()
-                    .withLocation(Adin.id("pipeline/entity_fill_" + name + effect))
-                    .withVertexShader(Adin.id("world/entity_fill"))
-                    .withFragmentShader(Adin.id("world/entity_fill"))
+                    .withLocation(Adin.id("pipeline/entity/fill_" + name + effect))
+                    .withVertexShader(Adin.id("entity/fill"))
+                    .withFragmentShader(Adin.id("entity/fill"))
                     .withShaderDefine("EFFECT", effect)
+                    .withShaderDefine("HAND", hand ? 1 : 0)
                     .withBindGroupLayout(BindGroupLayouts.DYNAMIC_TRANSFORMS)
                     .withBindGroupLayout(BindGroupLayouts.PROJECTION)
                     .withBindGroupLayout(BindGroupLayouts.GLOBALS)

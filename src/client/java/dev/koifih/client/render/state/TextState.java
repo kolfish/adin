@@ -1,10 +1,9 @@
-package dev.koifih.client.render.gui;
+package dev.koifih.client.render.state;
 
 import com.mojang.blaze3d.pipeline.RenderPipeline;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.textures.FilterMode;
 import com.mojang.blaze3d.vertex.VertexConsumer;
-import dev.koifih.client.render.Pipelines;
 import dev.koifih.client.render.Scissor;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
@@ -16,7 +15,7 @@ import org.joml.Matrix3x2f;
 import org.joml.Matrix3x2fc;
 import java.util.List;
 
-public record TextRenderState(Matrix3x2fc pose, TextureSetup textureSetup, List<Quad> quads,
+public record TextState(Matrix3x2fc pose, TextureSetup textureSetup, List<Quad> quads,
                               ScreenRectangle bounds, ScreenRectangle scissorArea) implements GuiElementRenderState {
     public record Quad(float left, float top, float right, float bottom,
                        float u0, float v0, float u1, float v1, int leftColor, int rightColor) {
@@ -26,7 +25,7 @@ public record TextRenderState(Matrix3x2fc pose, TextureSetup textureSetup, List<
         }
     }
 
-    public static TextRenderState of(GuiGraphicsExtractor graphics, Identifier atlas, List<Quad> quads) {
+    public static TextState of(GuiGraphicsExtractor graphics, Identifier atlas, List<Quad> quads) {
         float left = Float.POSITIVE_INFINITY, top = Float.POSITIVE_INFINITY;
         float right = Float.NEGATIVE_INFINITY, bottom = Float.NEGATIVE_INFINITY;
         for (Quad quad : quads) {
@@ -42,7 +41,7 @@ public record TextRenderState(Matrix3x2fc pose, TextureSetup textureSetup, List<
         var texture = Minecraft.getInstance().getTextureManager().getTexture(atlas);
         var textureSetup = TextureSetup.singleTexture(texture.getTextureView(),
                 RenderSystem.getSamplerCache().getClampToEdge(FilterMode.LINEAR));
-        return new TextRenderState(pose, textureSetup, List.copyOf(quads), bounds, Scissor.current());
+        return new TextState(pose, textureSetup, List.copyOf(quads), bounds, Scissor.current());
     }
 
     @Override

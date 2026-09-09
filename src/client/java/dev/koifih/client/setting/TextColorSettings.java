@@ -1,8 +1,9 @@
 package dev.koifih.client.setting;
 
-import dev.koifih.client.gui.Theme;
-import dev.koifih.client.render.gui.Text;
+import dev.koifih.client.render.Text;
+import dev.koifih.client.ui.Theme;
 import dev.koifih.client.util.Colors;
+import dev.koifih.client.util.Time;
 import java.util.List;
 
 public final class TextColorSettings implements SettingGroup {
@@ -30,7 +31,7 @@ public final class TextColorSettings implements SettingGroup {
         int primary = Colors.opaque(color.get());
         if (mode.get() != GRADIENT) return x -> primary;
         int secondary = Colors.opaque(color.secondary());
-        float phase = (System.nanoTime() / 1_000_000_000f) / WAVE_SECONDS;
+        float phase = Time.seconds() / WAVE_SECONDS;
         float length = WAVE_LENGTH * scale;
         return x -> {
             float wave = (x / length - phase) % 1f;

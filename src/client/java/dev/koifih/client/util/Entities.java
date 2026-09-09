@@ -1,6 +1,5 @@
 package dev.koifih.client.util;
 
-import net.minecraft.client.Minecraft;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.world.entity.Entity;
@@ -14,7 +13,7 @@ public final class Entities {
     }
 
     public static boolean isLocal(Entity entity) {
-        return entity == Minecraft.getInstance().player;
+        return entity == Game.player();
     }
 
     public static boolean holdsWeapon(LivingEntity entity) {

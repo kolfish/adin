@@ -1,4 +1,4 @@
-package dev.koifih.client.gui.animation;
+package dev.koifih.client.ui.animation;
 
 public final class Transition {
     private final long durationNanos;

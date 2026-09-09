@@ -1,12 +1,12 @@
-package dev.koifih.client.gui.component;
+package dev.koifih.client.ui.component;
 
-import dev.koifih.client.gui.Theme;
-import dev.koifih.client.gui.animation.Easing;
-import dev.koifih.client.gui.animation.Transition;
+import dev.koifih.client.render.Draw;
 import dev.koifih.client.render.Opacity;
-import dev.koifih.client.render.gui.Rects;
-import dev.koifih.client.render.gui.Text;
-import dev.koifih.client.render.gui.Transform;
+import dev.koifih.client.render.Text;
+import dev.koifih.client.render.Transform;
+import dev.koifih.client.ui.Theme;
+import dev.koifih.client.ui.animation.Easing;
+import dev.koifih.client.ui.animation.Transition;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.narration.NarratedElementType;
 import net.minecraft.client.gui.narration.NarrationElementOutput;
@@ -43,7 +43,7 @@ public final class HelpDot extends Control {
         float x = Math.max(px(2), getX() + getWidth() / 2f - width / 2f);
         float y = getY() - px(TOOLTIP_GAP) - height;
         Transform.translated(graphics, 0f, px(3) * (1f - amount), () -> Opacity.with(amount, () -> {
-            Rects.bordered(graphics, x, y, width, height, px(4), Theme.POPUP, Theme.POPUP_BORDER);
+            Draw.bordered(graphics, x, y, width, height, px(4), Theme.POPUP, Theme.POPUP_BORDER);
             text(graphics, text, x + px(TOOLTIP_PADDING), y + height / 2, textSize, Theme.TEXT);
         }));
     }

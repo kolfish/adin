@@ -1,14 +1,15 @@
-package dev.koifih.client.render.preview;
+package dev.koifih.client.ui.preview;
 
 import dev.koifih.Adin;
 import dev.koifih.client.mixin.FallingBlockEntityAccessor;
-import dev.koifih.client.render.EntityFill;
-import dev.koifih.client.render.FilledRenderState;
+import dev.koifih.client.render.Point;
+import dev.koifih.client.render.entity.EntityFill;
+import dev.koifih.client.render.entity.Filled;
 import dev.koifih.client.render.screen.Projector;
-import dev.koifih.client.render.screen.ScreenPoint;
+import dev.koifih.client.util.Game;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
+import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.client.renderer.entity.EntityRenderer;
 import net.minecraft.client.renderer.entity.state.AvatarRenderState;
 import net.minecraft.client.renderer.entity.state.EntityRenderState;
@@ -40,7 +41,7 @@ public final class EntityPreview {
     }
 
     private static LocalPlayer player() {
-        return Minecraft.getInstance().player;
+        return Game.player();
     }
 
     private static Optional<Entity> entity(EntityType<?> type) {
@@ -48,7 +49,7 @@ public final class EntityPreview {
     }
 
     private static Optional<Entity> create(EntityType<?> type) {
-        var level = Minecraft.getInstance().level;
+        var level = Game.level();
         if (level == null) return Optional.empty();
         try {
             Entity entity = type.create(level, EntitySpawnReason.LOAD);
@@ -104,7 +105,7 @@ public final class EntityPreview {
         float centerY = (y0 + y1) * 0.5f;
         return (x, y, z) -> {
             Vector3f point = rotation.transform(new Vector3f((float) x, (float) y, (float) z)).add(lift).mul(scale);
-            return new ScreenPoint(centerX + point.x, centerY + point.y, point.z);
+            return new Point(centerX + point.x, centerY + point.y, point.z);
         };
     }
 
@@ -145,7 +146,7 @@ public final class EntityPreview {
         state.shadowPieces.clear();
         state.outlineColor = 0;
         if (skin != null && state instanceof AvatarRenderState avatar) avatar.skin = skin;
-        ((FilledRenderState) state).adin$setFill(fill);
+        ((Filled) state).adin$setFill(fill);
         float scale = fitScale(entity, x0, y0, x1, y1);
         Quaternionf camera = new Quaternionf().rotateX((float) Math.toRadians(15));
         graphics.entity(state, scale, new Vector3f(0f, entity.getBbHeight() / 2f, 0f), sceneRotation(sceneYawDegrees), camera, x0, y0, x1, y1);

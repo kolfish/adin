@@ -4,6 +4,7 @@ import dev.koifih.client.event.events.TickEvent;
 import dev.koifih.client.module.Category;
 import dev.koifih.client.module.Module;
 import dev.koifih.client.setting.BoolSetting;
+import dev.koifih.client.util.Players;
 import net.minecraft.client.player.LocalPlayer;
 
 public final class Sprint extends Module {
@@ -30,9 +31,7 @@ public final class Sprint extends Module {
     private void onTick(TickEvent event) {
         LocalPlayer player = event.client().player;
         if (player == null || player.isSprinting() || !canSprint(player)) return;
-        boolean moving = omni.get()
-                ? player.input.getMoveVector().lengthSquared() > 1.0E-10f
-                : player.input.hasForwardImpulse();
+        boolean moving = omni.get() ? Players.isMoving(player) : player.input.hasForwardImpulse();
         if (moving) player.setSprinting(true);
     }
 

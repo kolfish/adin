@@ -1,4 +1,4 @@
-package dev.koifih.client.gui.component;
+package dev.koifih.client.ui.component;
 
 public interface Windowed {
     void setWindow(int x, int y, int width, int height);

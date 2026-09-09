@@ -1,8 +1,8 @@
-package dev.koifih.client.gui.component;
+package dev.koifih.client.ui.component;
 
-import dev.koifih.client.gui.Theme;
-import dev.koifih.client.render.gui.Rects;
-import dev.koifih.client.render.gui.Text;
+import dev.koifih.client.render.Draw;
+import dev.koifih.client.render.Text;
+import dev.koifih.client.ui.Theme;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.narration.NarrationElementOutput;
@@ -33,7 +33,7 @@ public abstract class Control extends AbstractWidget {
     }
 
     void rect(GuiGraphicsExtractor graphics, float x, float y, float width, float height, float radius, int color) {
-        Rects.draw(graphics, x, y, width, Math.max(1, Math.round(height)), Math.max(0, Math.round(radius)), color);
+        Draw.rect(graphics, x, y, width, Math.max(1, Math.round(height)), Math.max(0, Math.round(radius)), color);
     }
 
     protected void text(GuiGraphicsExtractor graphics, String text, float x, float centerY, float size, int color) {

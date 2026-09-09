@@ -1,4 +1,4 @@
-package dev.koifih.client.gui;
+package dev.koifih.client.ui;
 
 import dev.koifih.client.util.Lang;
 

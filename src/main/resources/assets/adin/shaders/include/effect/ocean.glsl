@@ -8,8 +8,8 @@ float waves(vec2 p, float time) {
     return height;
 }
 
-vec3 ocean(vec3 base, float time) {
-    vec2 p = surfaceUv() * 2.5;
+vec3 ocean(vec2 uv, vec3 base, float time) {
+    vec2 p = uv * 2.5;
     float e = 0.02;
     float height = waves(p, time);
     vec3 normal = normalize(vec3(waves(p - vec2(e, 0.0), time) - waves(p + vec2(e, 0.0), time),

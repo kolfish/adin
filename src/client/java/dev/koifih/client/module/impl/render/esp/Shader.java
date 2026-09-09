@@ -1,8 +1,8 @@
 package dev.koifih.client.module.impl.render.esp;
 
-import dev.koifih.client.render.EntityFill;
+import dev.koifih.client.render.Rect;
+import dev.koifih.client.render.entity.EntityFill;
 import dev.koifih.client.render.screen.Projection;
-import dev.koifih.client.render.screen.ScreenRect;
 import dev.koifih.client.setting.BoolSetting;
 import dev.koifih.client.setting.ColorSetting;
 import dev.koifih.client.setting.EnumSetting;
@@ -65,7 +65,7 @@ final class Shader {
         if (!gradient()) return EntityFill.solid(visible, occluded);
         Projection projection = Projection.capture();
         double half = state.boundingBoxWidth / 2.0;
-        ScreenRect rect = projection.bounds(new AABB(position.x - half, position.y, position.z - half,
+        Rect rect = projection.bounds(new AABB(position.x - half, position.y, position.z - half,
                 position.x + half, position.y + state.boundingBoxHeight, position.z + half));
         int minY = rect == null ? 0 : projection.framebufferY(rect.maxY());
         int maxY = rect == null ? 0 : projection.framebufferY(rect.minY());

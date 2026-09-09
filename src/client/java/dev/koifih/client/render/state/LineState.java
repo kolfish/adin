@@ -1,18 +1,18 @@
-package dev.koifih.client.render.screen;
+package dev.koifih.client.render.state;
 
 import com.mojang.blaze3d.pipeline.RenderPipeline;
 import com.mojang.blaze3d.vertex.VertexConsumer;
-import dev.koifih.client.render.Pipelines;
+import dev.koifih.client.render.Rect;
 import net.minecraft.client.gui.navigation.ScreenRectangle;
 import net.minecraft.client.gui.render.TextureSetup;
 import net.minecraft.client.renderer.state.gui.GuiElementRenderState;
 import org.joml.Matrix3x2fc;
 
-public record ScreenLineRenderState(Matrix3x2fc pose, ScreenBuffer.Line line, int color,
-                                    ScreenRectangle scissorArea) implements GuiElementRenderState {
+public record LineState(Matrix3x2fc pose, float x0, float y0, float x1, float y1, float width, int color,
+                        ScreenRectangle scissorArea) implements GuiElementRenderState {
     @Override
     public void buildVertices(VertexConsumer vertices) {
-        ScreenGeometry.line(vertices, pose, line.x0(), line.y0(), line.x1(), line.y1(), line.width(), color);
+        Geometry.line(vertices, pose, x0, y0, x1, y1, width, color);
     }
 
     @Override
@@ -27,7 +27,6 @@ public record ScreenLineRenderState(Matrix3x2fc pose, ScreenBuffer.Line line, in
 
     @Override
     public ScreenRectangle bounds() {
-        ScreenRect rect = ScreenRect.of(line.x0(), line.y0(), line.x1(), line.y1());
-        return ScreenGeometry.bounds(rect.expand(line.width() * 0.5f), pose);
+        return Geometry.bounds(Rect.of(x0, y0, x1, y1).expand(width * 0.5f), pose);
     }
 }

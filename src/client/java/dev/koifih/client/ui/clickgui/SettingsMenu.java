@@ -1,21 +1,21 @@
-package dev.koifih.client.gui.clickgui;
+package dev.koifih.client.ui.clickgui;
 
-import dev.koifih.client.gui.Theme;
-import dev.koifih.client.gui.UiScale;
-import dev.koifih.client.gui.Units;
-import dev.koifih.client.gui.animation.Easing;
-import dev.koifih.client.gui.animation.Transition;
-import dev.koifih.client.gui.component.AccentPicker;
-import dev.koifih.client.gui.component.Control;
-import dev.koifih.client.gui.component.Dropdown;
-import dev.koifih.client.gui.component.IconButton;
-import dev.koifih.client.gui.component.Keybind;
-import dev.koifih.client.gui.component.Popup;
-import dev.koifih.client.gui.component.ThemeSwitch;
 import dev.koifih.client.input.Keybinds;
-import dev.koifih.client.render.gui.Rects;
-import dev.koifih.client.render.gui.Text;
-import dev.koifih.client.render.gui.Transform;
+import dev.koifih.client.render.Draw;
+import dev.koifih.client.render.Text;
+import dev.koifih.client.render.Transform;
+import dev.koifih.client.ui.Theme;
+import dev.koifih.client.ui.UiScale;
+import dev.koifih.client.ui.Units;
+import dev.koifih.client.ui.animation.Easing;
+import dev.koifih.client.ui.animation.Transition;
+import dev.koifih.client.ui.component.AccentPicker;
+import dev.koifih.client.ui.component.Control;
+import dev.koifih.client.ui.component.Dropdown;
+import dev.koifih.client.ui.component.IconButton;
+import dev.koifih.client.ui.component.Keybind;
+import dev.koifih.client.ui.component.Popup;
+import dev.koifih.client.ui.component.ThemeSwitch;
 import dev.koifih.client.util.Lang;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.input.MouseButtonEvent;
@@ -201,7 +201,7 @@ public final class SettingsMenu {
     private void drawBody(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float delta) {
         float scale = layout.scale();
         int radius = layout.atLeastOne(RADIUS);
-        Rects.bordered(graphics, x(), y(), width(), height(), radius, Theme.OVERLAY, Theme.POPUP_BORDER);
+        Draw.bordered(graphics, x(), y(), width(), height(), radius, Theme.OVERLAY, Theme.POPUP_BORDER);
         float textX = x() + PADDING * scale;
         Text.drawCentered(graphics, Lang.get("settings"), textX,
                 y() + (PADDING + TITLE_HEIGHT * 0.5f) * scale, 8 * scale, Theme.TEXT);

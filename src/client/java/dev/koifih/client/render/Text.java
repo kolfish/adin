@@ -1,9 +1,10 @@
-package dev.koifih.client.render.gui;
+package dev.koifih.client.render;
 
-import dev.koifih.client.render.GuiElements;
 import dev.koifih.client.render.Opacity;
 import dev.koifih.client.render.font.Font;
 import dev.koifih.client.render.font.Fonts;
+import dev.koifih.client.render.state.Submit;
+import dev.koifih.client.render.state.TextState;
 import dev.koifih.client.util.Colors;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import java.util.ArrayList;
@@ -106,7 +107,7 @@ public final class Text {
     private static void draw(GuiGraphicsExtractor graphics, List<Span> spans, float x, float baseline, float size,
                              ColorAt colorAt) {
         if (!Float.isFinite(size) || size <= 0) return;
-        List<TextRenderState.Quad> quads = new ArrayList<>();
+        List<TextState.Quad> quads = new ArrayList<>();
         float cursor = x;
         int previous = -1;
         for (Span span : spans) {
@@ -115,14 +116,14 @@ public final class Text {
                 Font.Glyph glyph = FONT.glyph(codepoint);
                 cursor += FONT.kerning(previous, glyph.unicode()) * size;
                 Font.Bounds plane = glyph.planeBounds();
-                if (plane != null && glyph.atlasBounds() != null && (color >>> 24) != 0) {
+                if (plane != null && glyph.atlasBounds() != null && !Colors.transparent(color)) {
                     Font.Bounds uv = FONT.uv(glyph);
                     float left = cursor + plane.left() * size;
                     float right = cursor + plane.right() * size;
                     int leftColor = colorAt == null ? color : Opacity.apply(colorAt.at(left));
                     int rightColor = colorAt == null ? color : Opacity.apply(colorAt.at(right));
-                    if ((leftColor >>> 24) != 0 || (rightColor >>> 24) != 0) {
-                        quads.add(new TextRenderState.Quad(
+                    if (!Colors.transparent(leftColor) || !Colors.transparent(rightColor)) {
+                        quads.add(new TextState.Quad(
                                 left, baseline + plane.top() * size, right, baseline + plane.bottom() * size,
                                 uv.left(), uv.top(), uv.right(), uv.bottom(), leftColor, rightColor));
                     }
@@ -132,6 +133,6 @@ public final class Text {
             }
         }
         if (quads.isEmpty()) return;
-        GuiElements.submit(graphics, TextRenderState.of(graphics, FONT.texture(), quads));
+        Submit.submit(graphics, TextState.of(graphics, FONT.texture(), quads));
     }
 }

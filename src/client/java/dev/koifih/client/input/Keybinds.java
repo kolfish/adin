@@ -2,8 +2,8 @@ package dev.koifih.client.input;
 
 import com.mojang.blaze3d.platform.InputConstants;
 import dev.koifih.Adin;
-import dev.koifih.client.gui.clickgui.ClickGui;
 import dev.koifih.client.mixin.KeyMappingAccessor;
+import dev.koifih.client.ui.clickgui.ClickGui;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.keymapping.v1.KeyMappingHelper;
 import net.minecraft.client.KeyMapping;

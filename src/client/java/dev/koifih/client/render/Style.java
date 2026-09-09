@@ -1,5 +1,7 @@
 package dev.koifih.client.render;
 
+import dev.koifih.client.util.Colors;
+
 public record Style(int fill, int stroke, float strokeWidth, int outline, float outlineWidth, Edges edges) {
     public static final Style EMPTY = new Style(0, 0, 0f, 0, 0f, Edges.FULL);
 
@@ -32,15 +34,15 @@ public record Style(int fill, int stroke, float strokeWidth, int outline, float 
     }
 
     public boolean hasFill() {
-        return (fill >>> 24) != 0;
+        return !Colors.transparent(fill);
     }
 
     public boolean hasStroke() {
-        return (stroke >>> 24) != 0 && strokeWidth > 0f;
+        return !Colors.transparent(stroke) && strokeWidth > 0f;
     }
 
     public boolean hasOutline() {
-        return hasStroke() && (outline >>> 24) != 0 && outlineWidth > strokeWidth;
+        return hasStroke() && !Colors.transparent(outline) && outlineWidth > strokeWidth;
     }
 
     public float widestStroke() {

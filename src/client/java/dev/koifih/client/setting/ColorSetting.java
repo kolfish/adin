@@ -16,8 +16,8 @@ public final class ColorSetting extends Setting<Integer> {
     }
 
     public ColorSetting(String id, int defaultRgb, int defaultSecondaryRgb) {
-        super(id, defaultRgb & 0xFFFFFF);
-        this.defaultSecondary = defaultSecondaryRgb & 0xFFFFFF;
+        super(id, Colors.rgb(defaultRgb));
+        this.defaultSecondary = Colors.rgb(defaultSecondaryRgb);
         this.secondary = defaultSecondary;
     }
 
@@ -34,7 +34,7 @@ public final class ColorSetting extends Setting<Integer> {
     }
 
     public void setSecondary(int rgb) {
-        secondary = rgb & 0xFFFFFF;
+        secondary = Colors.rgb(rgb);
     }
 
     @Override
@@ -67,7 +67,7 @@ public final class ColorSetting extends Setting<Integer> {
 
     private static int parse(JsonElement json, int fallback) {
         try {
-            return Integer.parseInt(json.getAsString().replace("#", ""), 16) & 0xFFFFFF;
+            return Colors.rgb(Integer.parseInt(json.getAsString().replace("#", ""), 16));
         } catch (NumberFormatException | IllegalStateException exception) {
             return fallback;
         }

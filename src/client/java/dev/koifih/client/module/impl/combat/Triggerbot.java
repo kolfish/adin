@@ -9,7 +9,8 @@ import dev.koifih.client.setting.RangeSetting;
 import dev.koifih.client.setting.TargetSettings;
 import dev.koifih.client.util.Entities;
 import dev.koifih.client.util.Game;
-import dev.koifih.client.util.MathUtil;
+import dev.koifih.client.util.Maths;
+import dev.koifih.client.util.Players;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.world.InteractionHand;
@@ -61,7 +62,7 @@ public final class Triggerbot extends Module {
         if (target == null) return;
         float charge = player.getAttackStrengthScale(0.5f);
         if (crits.get() && !player.onGround()) {
-            if (!falling(player)) return;
+            if (!Players.canCrit(player)) return;
             holdingSprint = held;
             if (player.isSprinting()) {
                 if (player.getAttackStrengthScale(NEXT_TICK) < threshold) return;
@@ -80,7 +81,7 @@ public final class Triggerbot extends Module {
     }
 
     private float roll() {
-        return MathUtil.random(cooldown.low() / 100f, cooldown.high() / 100f);
+        return Maths.random(cooldown.low() / 100f, cooldown.high() / 100f);
     }
 
     private static boolean launched(LocalPlayer player) {
@@ -88,11 +89,7 @@ public final class Triggerbot extends Module {
     }
 
     private static boolean waitingForSprint(LocalPlayer player) {
-        return !player.isSprinting() && player.input.getMoveVector().lengthSquared() > 1.0E-10f;
-    }
-
-    private static boolean falling(LocalPlayer player) {
-        return player.fallDistance > 0.0 && !player.onClimbable() && !player.isInWater() && !player.isMobilityRestricted() && !player.isPassenger();
+        return !player.isSprinting() && Players.isMoving(player);
     }
 
     private LivingEntity crosshairTarget(Minecraft client, LocalPlayer player) {

@@ -1,4 +1,4 @@
-package dev.koifih.client.render;
+package dev.koifih.client.render.state;
 
 import com.mojang.blaze3d.GpuFormat;
 import com.mojang.blaze3d.PrimitiveTopology;
@@ -14,6 +14,7 @@ import net.minecraft.client.renderer.RenderPipelines;
 import java.util.Optional;
 
 public final class Pipelines {
+    /** Shared by every shader under {@code shaders/gui} and {@code shaders/screen}. */
     public static final VertexFormat SHAPE_FORMAT = VertexFormat.builder(0)
             .addAttribute("Position", GpuFormat.RGB32_FLOAT)
             .addAttribute("Color", GpuFormat.RGBA8_UNORM)
@@ -22,12 +23,17 @@ public final class Pipelines {
             .addAttribute("UV2", GpuFormat.RG16_SINT)
             .build();
 
-    public static final RenderPipeline RECT = shape("gui/rect", "gui/rect");
-    public static final RenderPipeline HUE_BAR = shape("gui/rect", "gui/hue_bar");
-    public static final RenderPipeline SATURATION_VALUE = shape("gui/rect", "gui/saturation_value");
-    public static final RenderPipeline SHAPE = shape("screen/shape", "screen/shape");
+    /** Branches of {@code gui/rect.fsh}; must match the MODE_* defines there. */
+    private static final int MODE_SOLID = 0;
+    private static final int MODE_HUE_BAR = 1;
+    private static final int MODE_SATURATION_VALUE = 2;
 
-    public static final RenderPipeline TEXT = builder("gui/text", "gui/text")
+    public static final RenderPipeline RECT = rect("rect", MODE_SOLID);
+    public static final RenderPipeline HUE_BAR = rect("hue_bar", MODE_HUE_BAR);
+    public static final RenderPipeline SATURATION_VALUE = rect("saturation_value", MODE_SATURATION_VALUE);
+    public static final RenderPipeline SHAPE = shape("screen/shape", "screen/shape", "screen/shape").build();
+
+    public static final RenderPipeline TEXT = builder("gui/text", "gui/text", "gui/text")
             .withShaderDefine("MSDF_RANGE", Fonts.DISTANCE_RANGE)
             .withBindGroupLayout(BindGroupLayouts.DYNAMIC_TRANSFORMS)
             .withBindGroupLayout(BindGroupLayouts.PROJECTION)
@@ -42,17 +48,21 @@ public final class Pipelines {
 
     private Pipelines() {}
 
-    private static RenderPipeline shape(String vertexShader, String fragmentShader) {
-        return builder(vertexShader, fragmentShader)
-                .withBindGroupLayout(BindGroupLayouts.DYNAMIC_TRANSFORMS)
-                .withBindGroupLayout(BindGroupLayouts.PROJECTION)
-                .withVertexBinding(0, SHAPE_FORMAT)
-                .build();
+    /** One {@code gui/rect.fsh} branch. Each needs its own location even though they share a shader. */
+    private static RenderPipeline rect(String name, int mode) {
+        return shape("gui/" + name, "gui/rect", "gui/rect").withShaderDefine("RECT_MODE", mode).build();
     }
 
-    private static RenderPipeline.Builder builder(String vertexShader, String fragmentShader) {
+    private static RenderPipeline.Builder shape(String name, String vertexShader, String fragmentShader) {
+        return builder(name, vertexShader, fragmentShader)
+                .withBindGroupLayout(BindGroupLayouts.DYNAMIC_TRANSFORMS)
+                .withBindGroupLayout(BindGroupLayouts.PROJECTION)
+                .withVertexBinding(0, SHAPE_FORMAT);
+    }
+
+    private static RenderPipeline.Builder builder(String name, String vertexShader, String fragmentShader) {
         return RenderPipeline.builder()
-                .withLocation(Adin.id("pipeline/" + fragmentShader))
+                .withLocation(Adin.id("pipeline/" + name))
                 .withVertexShader(Adin.id(vertexShader))
                 .withFragmentShader(Adin.id(fragmentShader))
                 .withPrimitiveTopology(PrimitiveTopology.QUADS)

@@ -1,6 +1,5 @@
 package dev.koifih.client.module.impl.render.esp;
 
-import dev.koifih.client.gui.Theme;
 import dev.koifih.client.render.Edges;
 import dev.koifih.client.render.Style;
 import dev.koifih.client.setting.ColorSetting;
@@ -8,6 +7,7 @@ import dev.koifih.client.setting.EnumSetting;
 import dev.koifih.client.setting.Measure;
 import dev.koifih.client.setting.MultiSetting;
 import dev.koifih.client.setting.SliderSetting;
+import dev.koifih.client.ui.Theme;
 import dev.koifih.client.util.Colors;
 import net.minecraft.world.phys.AABB;
 

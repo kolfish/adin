@@ -1,9 +1,9 @@
-package dev.koifih.client.gui.component;
+package dev.koifih.client.ui.component;
 
-import dev.koifih.client.gui.Theme;
-import dev.koifih.client.gui.animation.Easing;
-import dev.koifih.client.gui.animation.Transition;
-import dev.koifih.client.render.gui.Rects;
+import dev.koifih.client.render.Draw;
+import dev.koifih.client.ui.Theme;
+import dev.koifih.client.ui.animation.Easing;
+import dev.koifih.client.ui.animation.Transition;
 import dev.koifih.client.util.Colors;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.narration.NarrationElementOutput;
@@ -29,14 +29,14 @@ public final class Bool extends Clickable {
         thumb.set(get.getAsBoolean() ? 1f : 0f);
         float on = thumb.value();
         int radius = getHeight() / 2;
-        Rects.draw(graphics, getX(), getY(), getWidth(), getHeight(), radius,
+        Draw.rect(graphics, getX(), getY(), getWidth(), getHeight(), radius,
                 Colors.lerp(Theme.TOGGLE_OFF_BORDER, Theme.ACCENT, on));
-        Rects.draw(graphics, getX() + 1, getY() + 1, getWidth() - 2, getHeight() - 2,
+        Draw.rect(graphics, getX() + 1, getY() + 1, getWidth() - 2, getHeight() - 2,
                 Math.max(0, radius - 1), Colors.lerp(Theme.TOGGLE_OFF, Theme.ACCENT, on));
         int inset = Math.max(1, Math.round(getHeight() / 6f));
         int size = Math.max(1, getHeight() - 2 * inset);
         float thumbX = getX() + inset + (getWidth() - 2 * inset - size) * on;
-        Rects.draw(graphics, thumbX, getY() + inset, size, size, size / 2,
+        Draw.rect(graphics, thumbX, getY() + inset, size, size, size / 2,
                 Colors.lerp(Theme.THUMB_OFF, Theme.ON_ACCENT, on));
     }
 

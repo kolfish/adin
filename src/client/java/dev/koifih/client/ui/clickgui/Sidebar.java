@@ -1,11 +1,11 @@
-package dev.koifih.client.gui.clickgui;
+package dev.koifih.client.ui.clickgui;
 
-import dev.koifih.client.gui.Theme;
-import dev.koifih.client.gui.component.IconButton;
-import dev.koifih.client.gui.component.TabButton;
 import dev.koifih.client.module.Category;
-import dev.koifih.client.render.gui.Rects;
-import dev.koifih.client.render.gui.Text;
+import dev.koifih.client.render.Draw;
+import dev.koifih.client.render.Text;
+import dev.koifih.client.ui.Theme;
+import dev.koifih.client.ui.component.IconButton;
+import dev.koifih.client.ui.component.TabButton;
 import dev.koifih.client.util.Lang;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.network.chat.Component;
@@ -97,7 +97,7 @@ public final class Sidebar {
         }
         if (target == null) return;
         SelectionPill.Position position = pill.update(target.getY(), target.getWidth());
-        Rects.draw(graphics, target.getX(), position.y(), position.width(),
+        Draw.rect(graphics, target.getX(), position.y(), position.width(),
                 target.getHeight(), Math.max(1, Math.round(PILL_RADIUS * layout.scale())), Theme.ACCENT);
         for (TabButton button : buttons) {
             float center = button.getY() + button.getHeight() * 0.5f;

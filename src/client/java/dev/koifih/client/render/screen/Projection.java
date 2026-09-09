@@ -1,7 +1,9 @@
 package dev.koifih.client.render.screen;
 
 import com.mojang.math.Axis;
-import dev.koifih.client.render.BoxCorners;
+import dev.koifih.client.render.Corners;
+import dev.koifih.client.render.Point;
+import dev.koifih.client.render.Rect;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.state.GameRenderState;
 import net.minecraft.client.renderer.state.OptionsRenderState;
@@ -43,23 +45,23 @@ public final class Projection implements Projector {
     }
 
     @Override
-    public ScreenPoint project(double x, double y, double z) {
+    public Point project(double x, double y, double z) {
         Vector4f clip = clip(x, y, z, new Vector4f());
         return inFront(clip) ? toScreen(clip) : null;
     }
 
-    public ScreenRect bounds(AABB box) {
-        Vector4f[] corners = new Vector4f[BoxCorners.COUNT];
+    public Rect bounds(AABB box) {
+        Vector4f[] corners = new Vector4f[Corners.COUNT];
         for (int i = 0; i < corners.length; i++) {
-            corners[i] = clip(BoxCorners.x(box, i), BoxCorners.y(box, i), BoxCorners.z(box, i), new Vector4f());
+            corners[i] = clip(Corners.x(box, i), Corners.y(box, i), Corners.z(box, i), new Vector4f());
         }
-        ScreenExtent extent = new ScreenExtent();
+        Extent extent = new Extent();
         for (Vector4f corner : corners) {
             if (inFront(corner)) extent.add(toScreen(corner));
         }
-        for (int i = 0; i < BoxCorners.EDGES.length; i += 2) {
-            Vector4f a = corners[BoxCorners.EDGES[i]];
-            Vector4f b = corners[BoxCorners.EDGES[i + 1]];
+        for (int i = 0; i < Corners.EDGES.length; i += 2) {
+            Vector4f a = corners[Corners.EDGES[i]];
+            Vector4f b = corners[Corners.EDGES[i + 1]];
             if (inFront(a) != inFront(b)) extent.add(toScreen(nearIntersection(a, b)));
         }
         return extent.toRect();
@@ -77,9 +79,9 @@ public final class Projection implements Projector {
         return viewProjection.transform((float) (x - origin.x), (float) (y - origin.y), (float) (z - origin.z), 1f, dest);
     }
 
-    private ScreenPoint toScreen(Vector4fc clip) {
+    private Point toScreen(Vector4fc clip) {
         float inverse = 1f / clip.w();
-        return new ScreenPoint((clip.x() * inverse + 1f) * 0.5f * width, (1f - clip.y() * inverse) * 0.5f * height, clip.w());
+        return new Point((clip.x() * inverse + 1f) * 0.5f * width, (1f - clip.y() * inverse) * 0.5f * height, clip.w());
     }
 
     private static boolean inFront(Vector4fc clip) {

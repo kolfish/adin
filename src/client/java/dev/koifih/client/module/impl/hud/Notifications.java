@@ -2,16 +2,15 @@ package dev.koifih.client.module.impl.hud;
 
 import dev.koifih.client.event.events.HudRenderEvent;
 import dev.koifih.client.event.events.ModuleToggleEvent;
-import dev.koifih.client.gui.Theme;
-import dev.koifih.client.gui.UiScale;
-import dev.koifih.client.gui.animation.Easing;
-import dev.koifih.client.gui.animation.Transition;
 import dev.koifih.client.module.Category;
 import dev.koifih.client.module.Module;
+import dev.koifih.client.render.Draw;
 import dev.koifih.client.render.Opacity;
-import dev.koifih.client.render.gui.Icons;
-import dev.koifih.client.render.gui.Rects;
-import dev.koifih.client.render.gui.Text;
+import dev.koifih.client.render.Text;
+import dev.koifih.client.ui.Theme;
+import dev.koifih.client.ui.UiScale;
+import dev.koifih.client.ui.animation.Easing;
+import dev.koifih.client.ui.animation.Transition;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import java.util.ArrayList;
@@ -93,11 +92,11 @@ public final class Notifications extends Module {
         float dividerX = badgeX + badge + padding;
         int dividerHeight = Math.max(1, Math.round(DIVIDER_HEIGHT * scale));
         Opacity.with(shown, () -> {
-            Rects.bordered(graphics, x, y, width, height, RADIUS * scale, Theme.POPUP, Theme.POPUP_BORDER);
-            Rects.draw(graphics, badgeX, centerY - badge * 0.5f, badge, badge, badge / 2, Theme.CONTROL);
-            Icons.draw(graphics, toast.enabled() ? CHECK_ICON : CROSS_ICON, badgeX + (badge - icon) * 0.5f, centerY - icon * 0.5f, icon,
+            Draw.bordered(graphics, x, y, width, height, RADIUS * scale, Theme.POPUP, Theme.POPUP_BORDER);
+            Draw.rect(graphics, badgeX, centerY - badge * 0.5f, badge, badge, badge / 2, Theme.CONTROL);
+            Draw.icon(graphics, toast.enabled() ? CHECK_ICON : CROSS_ICON, badgeX + (badge - icon) * 0.5f, centerY - icon * 0.5f, icon,
                     toast.enabled() ? Theme.ACCENT : Theme.MUTED);
-            Rects.draw(graphics, dividerX, centerY - dividerHeight * 0.5f, divider, dividerHeight, 0, Theme.UNCHECKED);
+            Draw.rect(graphics, dividerX, centerY - dividerHeight * 0.5f, divider, dividerHeight, 0, Theme.UNCHECKED);
             Text.drawCentered(graphics, toast.text(), dividerX + divider + padding, centerY, textSize, Theme.TEXT);
         });
     }

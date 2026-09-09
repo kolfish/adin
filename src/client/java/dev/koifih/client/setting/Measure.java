@@ -1,6 +1,6 @@
 package dev.koifih.client.setting;
 
-import dev.koifih.client.gui.Units;
+import dev.koifih.client.ui.Units;
 import java.util.Locale;
 
 public enum Measure {

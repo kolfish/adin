@@ -8,6 +8,7 @@ import dev.koifih.client.setting.SliderSetting;
 import dev.koifih.client.util.Game;
 import dev.koifih.client.util.Hotbar;
 import dev.koifih.client.util.Reach;
+import dev.koifih.client.util.Time;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.tags.ItemTags;
@@ -36,7 +37,7 @@ public final class ShieldBreaker extends Module {
     private Stage stage = Stage.IDLE;
     private Player engaged;
     private int shieldedTicks;
-    private long stageAt;
+    private final Time.Stopwatch sinceStage = new Time.Stopwatch();
     private int originalSlot = Hotbar.NONE;
 
     public ShieldBreaker() {
@@ -50,7 +51,7 @@ public final class ShieldBreaker extends Module {
 
     @Override
     protected void onDisable() {
-        reset(Minecraft.getInstance().player);
+        reset(Game.player());
     }
 
     private void onTick(PreTickEvent event) {
@@ -120,11 +121,11 @@ public final class ShieldBreaker extends Module {
 
     private void advance(Stage next) {
         stage = next;
-        stageAt = System.currentTimeMillis();
+        sinceStage.reset();
     }
 
     private boolean elapsed(long millis) {
-        return System.currentTimeMillis() - stageAt >= millis;
+        return sinceStage.elapsed(millis);
     }
 
     private boolean shielded(LocalPlayer player, Player target) {
