@@ -43,13 +43,13 @@ final class Box {
         fillOpacity = esp.setting(new SliderSetting("fillOpacity", 25, 0, 100, Measure.PERCENT));
         type.visibleWhen(esp::flat);
         color.visibleWhen(() -> !esp.shaded());
-        show.visibleWhen(() -> !esp.shaded());
+        show.visibleWhen(() -> !esp.shaded() && !esp.outlined());
         show.optionVisibleWhen(option -> switch (option) {
             case SHOW_FILL -> esp.boxed() || show.get().contains(SHOW_BOX);
             case SHOW_OUTLINE -> show.get().contains(SHOW_BOX);
             default -> true;
         });
-        fillOpacity.visibleWhen(() -> !esp.shaded() && shows(SHOW_FILL));
+        fillOpacity.visibleWhen(() -> !esp.shaded() && (esp.outlined() ? esp.outlineFilled() : shows(SHOW_FILL)));
     }
 
     boolean shows(int element) {
@@ -57,7 +57,15 @@ final class Box {
     }
 
     boolean shown() {
-        return shows(SHOW_BOX);
+        return !esp.outlined() && shows(SHOW_BOX);
+    }
+
+    int rgb() {
+        return color.get();
+    }
+
+    float fillOpacity() {
+        return fillOpacity.get() / 100f;
     }
 
     Style worldStyle() {
@@ -71,7 +79,7 @@ final class Box {
 
     private Style styled(float lineWidth, float outlineWidth) {
         int rgb = Colors.opaque(color.get());
-        if (esp.shaded()) return Style.EMPTY;
+        if (esp.shaded() || esp.outlined()) return Style.EMPTY;
         Style style = shown() ? Style.stroke(rgb, lineWidth) : Style.EMPTY;
         if (shows(SHOW_FILL)) style = style.withFill(Colors.withAlpha(rgb, fillOpacity.get() / 100f));
         if (shows(SHOW_OUTLINE)) style = style.withOutline(OUTLINE_COLOR, outlineWidth);

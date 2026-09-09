@@ -242,10 +242,10 @@ public final class PreviewWindow {
         if (projector == null || bounds == null) return;
         PreviewSetting.Shade shade = preview.shade(highlighted);
         if (shade != null) {
-            EntityPreview.drawPlayer(graphics, x0, y0, x1, y1, angle, currentSkin(), fill(shade, projector, bounds, y1));
+            EntityPreview.drawPlayer(graphics, x0, y0, x1, y1, angle, currentSkin(), fill(shade, projector, bounds, y1), preview.outline());
             return;
         }
-        if (!EntityPreview.drawPlayer(graphics, x0, y0, x1, y1, angle, currentSkin(), null)) return;
+        if (!EntityPreview.drawPlayer(graphics, x0, y0, x1, y1, angle, currentSkin(), null, preview.outline())) return;
         bounds = preview.fit(bounds);
         float pixel = 1f / Math.max(1, Minecraft.getInstance().getWindow().getGuiScale());
         Point[] corners = Boxes.project(projector, bounds);

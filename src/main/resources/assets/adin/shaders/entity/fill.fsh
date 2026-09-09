@@ -16,11 +16,9 @@ flat in ivec2 packedB;
 out vec4 fragColor;
 
 const float SECONDS_PER_DAY = 1200.0;
-// Must match EntityFill.java, which packs the origin as short * ORIGIN_UNITS and so wraps every ORIGIN_WRAP blocks.
 const float ORIGIN_UNITS = 512.0;
 const float ORIGIN_WRAP = 65536.0 / ORIGIN_UNITS;
 const float SCALE_UNITS = 256.0;
-// Triplanar weights: higher sharpness keeps flat faces on a single projection; the cutoff skips negligible ones.
 const float TRIPLANAR_SHARPNESS = 8.0;
 const float TRIPLANAR_CUTOFF = 0.01;
 
@@ -32,15 +30,11 @@ vec3 gradientColor(vec3 base) {
     return mix(base, end, t);
 }
 
-// Position relative to the entity origin, in entity-scale units. The origin arrives wrapped modulo ORIGIN_WRAP, so
-// re-centre the difference: every vertex of an entity sits well inside half a wrap of its own origin.
 vec3 localPosition() {
     vec3 origin = vec3(float(packedA.x), float(packedA.y), float(packedB.x)) / ORIGIN_UNITS;
     float scale = max(float(packedB.y & 0xFFFF) / SCALE_UNITS, 0.001);
     vec3 offset = mod(relativePosition - origin + ORIGIN_WRAP * 0.5, ORIGIN_WRAP) - ORIGIN_WRAP * 0.5;
 #if HAND
-    // The hand shares the entities' frame, which the camera rotates through. Move into view space, where the hand
-    // holds still as the camera turns, so the pattern stays on it instead of scrolling across it.
     offset = mat3(ModelViewMat) * offset;
 #endif
     return offset / scale;
@@ -54,7 +48,6 @@ vec3 localPosition() {
 #moj_import <adin:effect/lava.glsl>
 #moj_import <adin:effect/sky.glsl>
 
-// The surface-patterned effects, as a function of a 2D projection of the local position.
 vec3 pattern(vec2 uv, vec3 base, float time) {
 #if EFFECT == 1
     return starNest(uv, base, time);
@@ -69,8 +62,6 @@ vec3 pattern(vec2 uv, vec3 base, float time) {
 #endif
 }
 
-// Projects the pattern along whichever axes the surface faces, so no face ever sees it edge-on and smeared.
-// Flat faces resolve to one projection; only faces near 45 degrees blend two.
 vec3 triplanar(vec3 base, float time) {
     vec3 local = localPosition();
 #if HAND

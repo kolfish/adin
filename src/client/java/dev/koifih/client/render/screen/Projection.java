@@ -71,6 +71,10 @@ public final class Projection implements Projector {
         return pixel;
     }
 
+    public int framebufferX(float x) {
+        return Math.round(x / pixel);
+    }
+
     public int framebufferY(float y) {
         return Math.round((height - y) / pixel);
     }

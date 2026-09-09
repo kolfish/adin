@@ -2,8 +2,11 @@ package dev.koifih.client.mixin;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.QuadInstance;
+import com.mojang.blaze3d.vertex.VertexConsumer;
 import dev.koifih.client.render.entity.EntityFill;
 import dev.koifih.client.render.entity.EntityFills;
+import dev.koifih.client.render.entity.EntityOutline;
+import dev.koifih.client.render.entity.EntityOutlines;
 import dev.koifih.client.render.entity.Filled;
 import net.minecraft.client.model.Model;
 import net.minecraft.client.renderer.SubmitNodeCollection;
@@ -22,6 +25,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import java.util.List;
+import java.util.function.Consumer;
 
 @Mixin(SubmitNodeCollection.class)
 public abstract class SubmitNodeCollectionMixin {
@@ -29,12 +33,14 @@ public abstract class SubmitNodeCollectionMixin {
     @SuppressWarnings({"unchecked", "rawtypes"})
     private void adin$fillModel(Model model, Object state, PoseStack pose, RenderType type, int light, int overlay, int color,
                                 TextureAtlasSprite sprite, int outline, ModelFeatureRenderer.CrumblingOverlay crumbling, CallbackInfo info) {
+        if (EntityFills.isFill(type)) return;
         boolean hand = !(state instanceof Filled);
-        EntityFill fill = hand ? adin$hand(pose) : ((Filled) state).adin$fill();
-        if (fill == null || EntityFills.isFill(type)) return;
-        Identifier texture = EntityFills.texture(type);
-        if (texture == null) return;
         SubmitNodeCollection collection = (SubmitNodeCollection) (Object) this;
+        Identifier texture = EntityFills.texture(type);
+        if (hand && texture != null) adin$outlineHand(fill -> collection.submitModel(model, state, pose,
+                EntityFills.silhouette(texture), fill.light(), fill.visibleOverlay(), fill.visible(), sprite, 0, crumbling));
+        EntityFill fill = hand ? adin$hand(pose) : ((Filled) state).adin$fill();
+        if (fill == null || texture == null) return;
         if (fill.occluded() != 0) {
             collection.submitModel(model, state, pose, EntityFills.occluded(texture, fill.effect()), fill.light(), fill.occludedOverlay(),
                     fill.occluded(), sprite, 0, crumbling);
@@ -47,25 +53,35 @@ public abstract class SubmitNodeCollectionMixin {
     @Inject(method = "submitItem", at = @At("HEAD"), cancellable = true)
     private void adin$fillItem(PoseStack pose, ItemDisplayContext context, int light, int overlay, int outline, int[] tints,
                                List<BakedQuad> quads, ItemStackRenderState.FoilType foil, CallbackInfo info) {
-        EntityFill fill = adin$hand(pose);
-        if (fill == null || quads.isEmpty()) return;
+        if (quads.isEmpty()) return;
         Identifier texture = EntityFills.texture(quads.getFirst().materialInfo().itemRenderType());
         if (texture == null) return;
+        SubmitNodeCollection collection = (SubmitNodeCollection) (Object) this;
+        adin$outlineHand(silhouette -> collection.submitCustomGeometry(pose, EntityFills.silhouette(texture),
+                (entry, consumer) -> adin$putQuads(entry, consumer, quads, silhouette)));
+        EntityFill fill = adin$hand(pose);
+        if (fill == null) return;
+        collection.submitCustomGeometry(pose, EntityFills.visibleHand(texture, fill.effect()),
+                (entry, consumer) -> adin$putQuads(entry, consumer, quads, fill));
+        info.cancel();
+    }
+
+    @Unique
+    private static void adin$putQuads(PoseStack.Pose entry, VertexConsumer consumer, List<BakedQuad> quads, EntityFill fill) {
         QuadInstance instance = new QuadInstance();
         instance.setColor(fill.visible());
         instance.setLightCoords(fill.light());
         instance.setOverlayCoords(fill.visibleOverlay());
-        SubmitNodeCollection collection = (SubmitNodeCollection) (Object) this;
-        collection.submitCustomGeometry(pose, EntityFills.visibleHand(texture, fill.effect()), (entry, consumer) -> {
-            for (BakedQuad quad : quads) consumer.putBakedQuad(entry, quad, instance);
-        });
-        info.cancel();
+        for (BakedQuad quad : quads) consumer.putBakedQuad(entry, quad, instance);
     }
 
-    /**
-     * The hand has no entity position, so anchor its pattern at the pose that placed it. That is the same matrix the
-     * vertices went through, so the origin is in their frame by construction and the pattern follows swings and bob.
-     */
+    @Unique
+    private static void adin$outlineHand(Consumer<EntityFill> submit) {
+        EntityOutline outline = EntityOutlines.hand();
+        if (outline == null || !EntityFills.inHandPass()) return;
+        submit.accept(EntityFill.solid(outline.color(), 0));
+    }
+
     @Unique
     private static EntityFill adin$hand(PoseStack pose) {
         EntityFill fill = EntityFills.hand();

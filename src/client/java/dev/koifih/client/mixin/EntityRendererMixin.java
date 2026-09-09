@@ -17,6 +17,7 @@ public abstract class EntityRendererMixin {
     private void adin$extracted(Entity entity, float partialTicks, CallbackInfoReturnable<EntityRenderState> info) {
         EntityRenderState state = info.getReturnValue();
         ((Filled) state).adin$setFill(null);
+        ((Filled) state).adin$setOutline(null);
         AdinClient.EVENTS.post(new EntityRenderStateEvent(entity, state, partialTicks));
     }
 }

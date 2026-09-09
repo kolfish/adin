@@ -1,6 +1,5 @@
 package dev.koifih.client.util;
 
-/** Packed ARGB colour maths. Channels are 0-255, alpha in the high byte. */
 public final class Colors {
     private Colors() {}
 
@@ -20,12 +19,10 @@ public final class Colors {
         return argb & 255;
     }
 
-    /** Strips the alpha channel, leaving a bare RGB triple. */
     public static int rgb(int argb) {
         return argb & 0xFFFFFF;
     }
 
-    /** True when the colour is fully transparent and drawing it would be a no-op. */
     public static boolean transparent(int argb) {
         return alpha(argb) == 0;
     }

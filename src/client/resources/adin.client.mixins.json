@@ -22,7 +22,10 @@
 		"ClientPacketListenerMixin",
 		"MouseHandlerMixin",
 		"MinecraftMixin",
-		"ChatScreenMixin"
+		"ChatScreenMixin",
+		"LevelRendererAccessor",
+		"LevelRendererMixin",
+		"PictureInPictureRendererMixin"
 	],
 	"injectors": {
 		"defaultRequire": 1

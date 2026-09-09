@@ -4,6 +4,7 @@ import dev.koifih.Adin;
 import dev.koifih.client.mixin.FallingBlockEntityAccessor;
 import dev.koifih.client.render.Point;
 import dev.koifih.client.render.entity.EntityFill;
+import dev.koifih.client.render.entity.EntityOutline;
 import dev.koifih.client.render.entity.Filled;
 import dev.koifih.client.render.screen.Projector;
 import dev.koifih.client.util.Game;
@@ -77,7 +78,7 @@ public final class EntityPreview {
             living.yHeadRot = yawDegrees;
             living.yHeadRotO = yawDegrees;
         }
-        if (!render(graphics, entity, x0, y0, x1, y1, 0f, null, null)) ENTITIES.put(type, Optional.empty());
+        if (!render(graphics, entity, x0, y0, x1, y1, 0f, null, null, null)) ENTITIES.put(type, Optional.empty());
     }
 
     public static void drawBlock(GuiGraphicsExtractor graphics, Block block, int x0, int y0, int x1, int y1, float yawDegrees) {
@@ -87,12 +88,13 @@ public final class EntityPreview {
             fallingBlock = falling;
         }
         ((FallingBlockEntityAccessor) fallingBlock).adin$setBlockState(block.defaultBlockState());
-        render(graphics, fallingBlock, x0, y0, x1, y1, yawDegrees, null, null);
+        render(graphics, fallingBlock, x0, y0, x1, y1, yawDegrees, null, null, null);
     }
 
-    public static boolean drawPlayer(GuiGraphicsExtractor graphics, int x0, int y0, int x1, int y1, float sceneYawDegrees, PlayerSkin skin, EntityFill fill) {
+    public static boolean drawPlayer(GuiGraphicsExtractor graphics, int x0, int y0, int x1, int y1, float sceneYawDegrees,
+                                     PlayerSkin skin, EntityFill fill, EntityOutline outline) {
         var player = player();
-        return player != null && render(graphics, player, x0, y0, x1, y1, sceneYawDegrees, skin, fill);
+        return player != null && render(graphics, player, x0, y0, x1, y1, sceneYawDegrees, skin, fill, outline);
     }
 
     public static Projector playerProjector(int x0, int y0, int x1, int y1, float sceneYawDegrees) {
@@ -132,7 +134,8 @@ public final class EntityPreview {
         return new Quaternionf().rotateZ((float) Math.PI).mul(camera).rotateY((float) Math.toRadians(sceneYawDegrees));
     }
 
-    private static boolean render(GuiGraphicsExtractor graphics, Entity entity, int x0, int y0, int x1, int y1, float sceneYawDegrees, PlayerSkin skin, EntityFill fill) {
+    private static boolean render(GuiGraphicsExtractor graphics, Entity entity, int x0, int y0, int x1, int y1, float sceneYawDegrees,
+                                  PlayerSkin skin, EntityFill fill, EntityOutline outline) {
         var player = player();
         if (player != null && entity != player) entity.setPos(player.getX(), player.getY(), player.getZ());
         EntityRenderState state;
@@ -147,6 +150,7 @@ public final class EntityPreview {
         state.outlineColor = 0;
         if (skin != null && state instanceof AvatarRenderState avatar) avatar.skin = skin;
         ((Filled) state).adin$setFill(fill);
+        ((Filled) state).adin$setOutline(outline);
         float scale = fitScale(entity, x0, y0, x1, y1);
         Quaternionf camera = new Quaternionf().rotateX((float) Math.toRadians(15));
         graphics.entity(state, scale, new Vector3f(0f, entity.getBbHeight() / 2f, 0f), sceneRotation(sceneYawDegrees), camera, x0, y0, x1, y1);

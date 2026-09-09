@@ -23,7 +23,7 @@ final class Health {
     }
 
     HealthBar.Side side() {
-        if (esp.shaded() || !box.shows(Box.SHOW_HEALTH)) return null;
+        if (esp.shaded() || esp.outlined() || !box.shows(Box.SHOW_HEALTH)) return null;
         return esp.flat() ? SIDES[position.get()] : HealthBar.Side.LEFT;
     }
 

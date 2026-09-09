@@ -14,10 +14,6 @@ import org.joml.Matrix3x2f;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * The 2D drawing surface: rounded rectangles, icons and the logo. Text lives in {@link Text},
- * which has a richer API of its own.
- */
 public final class Draw {
     public static final int TOP_LEFT = 1;
     public static final int TOP_RIGHT = 2;
@@ -44,7 +40,6 @@ public final class Draw {
         rect(graphics, x, y, width, height, radius, corners, color, Pipelines.RECT);
     }
 
-    /** Draws at sub-pixel width by scaling a whole-pixel rectangle horizontally. */
     public static void rect(GuiGraphicsExtractor graphics, float x, float y, float width, int height,
                             int radius, int color) {
         if (width <= 0 || height <= 0) return;
@@ -58,7 +53,6 @@ public final class Draw {
         }
     }
 
-    /** Rounds a single corner inwards, for tucking a rectangle against its neighbour. */
     public static void fillet(GuiGraphicsExtractor graphics, int x, int y, int width, int height, int radius,
                               int corner, int color) {
         rect(graphics, x, y, width, height, radius, FILLET | corner, color, Pipelines.RECT);

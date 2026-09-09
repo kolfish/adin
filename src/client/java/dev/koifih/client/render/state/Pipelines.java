@@ -14,7 +14,6 @@ import net.minecraft.client.renderer.RenderPipelines;
 import java.util.Optional;
 
 public final class Pipelines {
-    /** Shared by every shader under {@code shaders/gui} and {@code shaders/screen}. */
     public static final VertexFormat SHAPE_FORMAT = VertexFormat.builder(0)
             .addAttribute("Position", GpuFormat.RGB32_FLOAT)
             .addAttribute("Color", GpuFormat.RGBA8_UNORM)
@@ -23,7 +22,6 @@ public final class Pipelines {
             .addAttribute("UV2", GpuFormat.RG16_SINT)
             .build();
 
-    /** Branches of {@code gui/rect.fsh}; must match the MODE_* defines there. */
     private static final int MODE_SOLID = 0;
     private static final int MODE_HUE_BAR = 1;
     private static final int MODE_SATURATION_VALUE = 2;
@@ -48,7 +46,6 @@ public final class Pipelines {
 
     private Pipelines() {}
 
-    /** One {@code gui/rect.fsh} branch. Each needs its own location even though they share a shader. */
     private static RenderPipeline rect(String name, int mode) {
         return shape("gui/" + name, "gui/rect", "gui/rect").withShaderDefine("RECT_MODE", mode).build();
     }

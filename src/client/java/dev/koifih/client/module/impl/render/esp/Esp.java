@@ -9,6 +9,7 @@ import dev.koifih.client.module.Category;
 import dev.koifih.client.module.Module;
 import dev.koifih.client.render.Rect;
 import dev.koifih.client.render.Style;
+import dev.koifih.client.render.entity.EntityOutlines;
 import dev.koifih.client.render.entity.Filled;
 import dev.koifih.client.render.screen.HealthBar;
 import dev.koifih.client.setting.EntitySetting;
@@ -30,10 +31,11 @@ import java.util.ArrayList;
 import java.util.List;
 
 public final class Esp extends Module {
-    private static final String[] MODES = {"3D", "2D", "Shader"};
+    private static final String[] MODES = {"3D", "2D", "Shader", "Outline"};
     private static final int MODE_3D = 0;
     private static final int MODE_2D = 1;
     private static final int MODE_SHADER = 2;
+    private static final int MODE_OUTLINE = 3;
     private static final String[] TARGETS = {"Self", "Players", "Entities", "Hand"};
     private static final int SELF = 0;
     private static final int PLAYERS = 1;
@@ -48,14 +50,15 @@ public final class Esp extends Module {
     private final EntitySetting entities = add(new EntitySetting("entities"));
     private final Box box = new Box(this);
     private final Health health = new Health(this, box);
+    private final Outline outline = new Outline(this, box);
     private final Shader shader = new Shader(this);
     private final PreviewSetting preview = add(new PreviewSetting("preview", this::flat, box::shown, box::screenStyle,
-            box::worldStyle, Box::fitPlayer, health::side, shader::shade));
+            box::worldStyle, Box::fitPlayer, health::side, shader::shade, outline::spec));
 
     public Esp() {
         super("esp", Category.RENDER);
         entities.visibleWhen(() -> targets.get().contains(ENTITIES));
-        targets.optionVisibleWhen(option -> option != HAND || shaded());
+        targets.optionVisibleWhen(option -> option != HAND || shaded() || outlined());
     }
 
     @Override
@@ -79,8 +82,16 @@ public final class Esp extends Module {
         return mode.get() == MODE_SHADER;
     }
 
+    boolean outlined() {
+        return mode.get() == MODE_OUTLINE;
+    }
+
     boolean handTargeted() {
         return targets.has(HAND);
+    }
+
+    boolean outlineFilled() {
+        return outline.filled();
     }
 
     @Override
@@ -91,7 +102,16 @@ public final class Esp extends Module {
         listen(HandRenderEvent.class, this::onHandRender);
     }
 
+    @Override
+    protected void onDisable() {
+        EntityOutlines.configure(null);
+        EntityOutlines.configureHand(null);
+    }
+
     private void onWorldRender(WorldRenderEvent event) {
+        outline.endFrame();
+        EntityOutlines.configure(outlined() ? outline.spec() : null);
+        EntityOutlines.configureHand(outlined() && handTargeted() ? outline.spec() : null);
         if (!boxed()) return;
         Style style = box.worldStyle();
         if (!style.hasFill() && !style.hasStroke()) return;
@@ -117,11 +137,16 @@ public final class Esp extends Module {
     }
 
     private void onEntityRenderState(EntityRenderStateEvent event) {
-        if (!shaded()) return;
+        if (!shaded() && !outlined()) return;
         Camera camera = Minecraft.getInstance().gameRenderer.mainCamera();
         Entity entity = event.entity();
-        if (!targeted(entity, camera) || entity.distanceToSqr(camera.position()) > range()) return;
-        ((Filled) event.state()).adin$setFill(shader.entityFill(event.renderPosition(), camera, event.state()));
+        boolean targeted = targeted(entity, camera) && entity.distanceToSqr(camera.position()) <= range();
+        if (outlined()) {
+            if (targeted) event.state().outlineColor = outline.color();
+            if (targeted || entity.isCurrentlyGlowing()) outline.include(event);
+            return;
+        }
+        if (targeted) ((Filled) event.state()).adin$setFill(shader.entityFill(event.renderPosition(), camera, event.state()));
     }
 
     private void onHandRender(HandRenderEvent event) {

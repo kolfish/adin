@@ -3,6 +3,7 @@ package dev.koifih.client.setting;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonNull;
 import dev.koifih.client.render.Style;
+import dev.koifih.client.render.entity.EntityOutline;
 import dev.koifih.client.render.screen.HealthBar;
 import net.minecraft.world.phys.AABB;
 import java.util.function.BooleanSupplier;
@@ -20,10 +21,11 @@ public final class PreviewSetting extends Setting<Void> {
     private final UnaryOperator<AABB> flatFit;
     private final Supplier<HealthBar.Side> healthSide;
     private final Function<Setting<?>, Shade> shade;
+    private final Supplier<EntityOutline> outline;
 
     public PreviewSetting(String id, BooleanSupplier flat, BooleanSupplier boxShown, Supplier<Style> screenStyle,
                           Supplier<Style> worldStyle, UnaryOperator<AABB> flatFit, Supplier<HealthBar.Side> healthSide,
-                          Function<Setting<?>, Shade> shade) {
+                          Function<Setting<?>, Shade> shade, Supplier<EntityOutline> outline) {
         super(id, null);
         this.flat = flat;
         this.boxShown = boxShown;
@@ -32,6 +34,7 @@ public final class PreviewSetting extends Setting<Void> {
         this.flatFit = flatFit;
         this.healthSide = healthSide;
         this.shade = shade;
+        this.outline = outline;
     }
 
     public boolean isFlat() {
@@ -60,6 +63,10 @@ public final class PreviewSetting extends Setting<Void> {
 
     public Shade shade(Setting<?> highlighted) {
         return highlighted == null ? null : shade.apply(highlighted);
+    }
+
+    public EntityOutline outline() {
+        return outline.get();
     }
 
     @Override
