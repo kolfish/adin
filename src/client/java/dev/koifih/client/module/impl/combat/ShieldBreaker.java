@@ -18,7 +18,7 @@ import net.minecraft.world.phys.EntityHitResult;
 import net.minecraft.world.phys.Vec3;
 
 public final class ShieldBreaker extends Module {
-    private final SliderSetting delay = add(new SliderSetting("delay", 100, 0, 500));
+    private final SliderSetting delay = add(new SliderSetting("delay", 100, 1, 500));
     private final BoolSetting facing = add(new BoolSetting("facing", true));
     private final BoolSetting switchBack = add(new BoolSetting("switchBack", true));
     private final Time.Stopwatch sinceSwitch = new Time.Stopwatch();
