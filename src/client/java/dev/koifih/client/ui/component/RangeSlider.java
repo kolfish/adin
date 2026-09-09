@@ -87,17 +87,27 @@ public final class RangeSlider extends Control {
         return Math.clamp(Math.round(min + fraction * (max - min)), min, max);
     }
 
-    private void setLow(int value) {
-        lowSet.accept(Math.clamp(value, min, highGet.getAsInt()));
-    }
-
-    private void setHigh(int value) {
-        highSet.accept(Math.clamp(value, lowGet.getAsInt(), max));
+    private void move(int value) {
+        value = Math.clamp(value, min, max);
+        int low = lowGet.getAsInt();
+        int high = highGet.getAsInt();
+        if (draggingHigh && value < low) {
+            lowSet.accept(value);
+            highSet.accept(low);
+            draggingHigh = false;
+        } else if (!draggingHigh && value > high) {
+            highSet.accept(value);
+            lowSet.accept(high);
+            draggingHigh = true;
+        } else if (draggingHigh) {
+            highSet.accept(value);
+        } else {
+            lowSet.accept(value);
+        }
     }
 
     private void drag(double mouseX) {
-        if (draggingHigh) setHigh(valueAt(mouseX));
-        else setLow(valueAt(mouseX));
+        move(valueAt(mouseX));
     }
 
     @Override
@@ -129,8 +139,7 @@ public final class RangeSlider extends Control {
         }
         if (event.isLeft() || event.isRight()) {
             int step = (event.isRight() ? 1 : -1) * (event.hasShiftDown() ? 10 : 1);
-            if (draggingHigh) setHigh(highGet.getAsInt() + step);
-            else setLow(lowGet.getAsInt() + step);
+            move((draggingHigh ? highGet.getAsInt() : lowGet.getAsInt()) + step);
             return true;
         }
         return super.keyPressed(event);
