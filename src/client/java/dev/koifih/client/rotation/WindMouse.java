@@ -30,7 +30,9 @@ final class WindMouse implements Rotator {
         float deltaYaw = from.yawTo(target);
         float deltaPitch = from.pitchTo(target);
         float distance = Maths.length(deltaYaw, deltaPitch);
-        if (distance < DONE) {
+        if (distance < DONE || config.smoothness() <= 0f) {
+            windYaw = 0f;
+            windPitch = 0f;
             velocityYaw = 0f;
             velocityPitch = 0f;
             travelling = false;
