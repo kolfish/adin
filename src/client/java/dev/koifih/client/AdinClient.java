@@ -14,6 +14,7 @@ import dev.koifih.client.module.impl.hud.KeybindList;
 import dev.koifih.client.module.impl.hud.ModuleList;
 import dev.koifih.client.module.impl.hud.Notifications;
 import dev.koifih.client.module.impl.hud.Watermark;
+import dev.koifih.client.module.impl.movement.JumpReset;
 import dev.koifih.client.module.impl.movement.MoveFix;
 import dev.koifih.client.module.impl.movement.Sprint;
 import dev.koifih.client.module.impl.player.AutoTotem;
@@ -44,6 +45,7 @@ public final class AdinClient implements ClientModInitializer {
         MODULES.register(new KeyPearl());
         MODULES.register(new AutoTotem());
         MODULES.register(new MoveFix());
+        MODULES.register(new JumpReset());
         MODULES.register(new Esp());
         MODULES.register(new Notifications());
         MODULES.register(new ModuleList());
