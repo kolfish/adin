@@ -1,12 +1,15 @@
 package dev.koifih.client.mixin;
 
 import dev.koifih.client.AdinClient;
+import dev.koifih.client.event.events.TotemPopEvent;
 import dev.koifih.client.rotation.Rotation;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientPacketListener;
 import net.minecraft.client.player.LocalPlayer;
+import net.minecraft.network.protocol.game.ClientboundEntityEventPacket;
 import net.minecraft.network.protocol.game.ClientboundPlayerPositionPacket;
 import net.minecraft.network.protocol.game.ClientboundPlayerRotationPacket;
+import net.minecraft.world.entity.EntityEvent;
 import net.minecraft.world.entity.Relative;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Unique;
@@ -24,6 +27,13 @@ public abstract class ClientPacketListenerMixin {
     @Inject(method = "handleRotatePlayer", at = @At("TAIL"))
     private void adin$syncRotate(ClientboundPlayerRotationPacket packet, CallbackInfo info) {
         adin$sync();
+    }
+
+    @Inject(method = "handleEntityEvent", at = @At("HEAD"))
+    private void adin$totemPop(ClientboundEntityEventPacket packet, CallbackInfo info) {
+        Minecraft client = Minecraft.getInstance();
+        if (packet.getEventId() != EntityEvent.PROTECTED_FROM_DEATH || client.level == null || !client.isSameThread()) return;
+        if (packet.getEntity(client.level) == client.player) AdinClient.EVENTS.post(new TotemPopEvent(client));
     }
 
     @Unique
