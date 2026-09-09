@@ -30,6 +30,7 @@ final class Shader {
     private final BoolSetting invisible;
     private final ColorSetting visibleColor;
     private final ColorSetting invisibleColor;
+    private final ColorSetting handColor;
 
     Shader(Esp esp) {
         mode = esp.setting(new EnumSetting("shaderMode", 0, MODES));
@@ -37,13 +38,16 @@ final class Shader {
         invisible = esp.setting(new BoolSetting("invisible", true));
         visibleColor = esp.setting(new ColorSetting("visibleColor", VISIBLE_COLOR, VISIBLE_COLOR_END));
         invisibleColor = esp.setting(new ColorSetting("invisibleColor", INVISIBLE_COLOR, INVISIBLE_COLOR_END));
+        handColor = esp.setting(new ColorSetting("handColor", VISIBLE_COLOR, VISIBLE_COLOR_END));
         mode.visibleWhen(esp::shaded);
         effect.visibleWhen(() -> esp.shaded() && effect());
         invisible.visibleWhen(esp::shaded);
         visibleColor.visibleWhen(esp::shaded);
         invisibleColor.visibleWhen(() -> esp.shaded() && invisible.get());
+        handColor.visibleWhen(() -> esp.shaded() && esp.handTargeted());
         visibleColor.gradientWhen(() -> esp.shaded() && gradient());
         invisibleColor.gradientWhen(() -> esp.shaded() && gradient());
+        handColor.gradientWhen(() -> esp.shaded() && gradient());
     }
 
     private boolean gradient() {
@@ -73,14 +77,14 @@ final class Shader {
     }
 
     EntityFill handFill() {
-        int visible = Colors.opaque(visibleColor.get());
-        if (effect()) return EntityFill.effect(visible, 0, effectIndex(), Vec3.ZERO, 1f);
-        if (!gradient()) return EntityFill.solid(visible, 0);
-        return EntityFill.gradient(visible, visibleColor.secondary(), 0, 0, 0, Minecraft.getInstance().getWindow().getHeight());
+        int color = Colors.opaque(handColor.get());
+        if (effect()) return EntityFill.effect(color, 0, effectIndex(), Vec3.ZERO, 1f);
+        if (!gradient()) return EntityFill.solid(color, 0);
+        return EntityFill.gradient(color, handColor.secondary(), 0, 0, 0, Minecraft.getInstance().getWindow().getHeight());
     }
 
     PreviewSetting.Shade shade(Setting<?> highlighted) {
-        if (highlighted != visibleColor && highlighted != invisibleColor) return null;
+        if (highlighted != visibleColor && highlighted != invisibleColor && highlighted != handColor) return null;
         ColorSetting color = (ColorSetting) highlighted;
         return new PreviewSetting.Shade(color.get(), color.secondary(), gradient(), effectIndex());
     }

@@ -106,6 +106,7 @@
   "setting.esp.invisible": "Invisible",
   "setting.esp.visibleColor": "Visible color",
   "setting.esp.invisibleColor": "Invisible color",
+  "setting.esp.handColor": "Hand color",
   "setting.esp.distance": "Distance",
   "setting.esp.color": "Color",
   "setting.esp.show": "Show",

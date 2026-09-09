@@ -79,6 +79,10 @@ public final class Esp extends Module {
         return mode.get() == MODE_SHADER;
     }
 
+    boolean handTargeted() {
+        return targets.has(HAND);
+    }
+
     @Override
     protected void onEnable() {
         listen(WorldRenderEvent.class, this::onWorldRender);
@@ -121,7 +125,7 @@ public final class Esp extends Module {
     }
 
     private void onHandRender(HandRenderEvent event) {
-        if (shaded() && targets.has(HAND)) event.setFill(shader.handFill());
+        if (shaded() && handTargeted()) event.setFill(shader.handFill());
     }
 
     private double range() {
