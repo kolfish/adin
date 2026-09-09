@@ -58,6 +58,10 @@ public final class RotationManager {
         lastSent = rotation;
     }
 
+    public Rotation lastSent() {
+        return lastSent;
+    }
+
     public Vec3 viewVector(Entity entity) {
         return current != null && Entities.isLocal(entity) ? current.direction() : null;
     }
