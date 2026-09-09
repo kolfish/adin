@@ -60,6 +60,13 @@ public final class ModuleManager {
         for (Module module : modules) module.tickKeybind(client);
     }
 
+    public boolean activates(InputConstants.Key key) {
+        for (Module module : modules) {
+            if (module.activatable() && module.isEnabled() && module.key().equals(key)) return true;
+        }
+        return false;
+    }
+
     public Map<String, Config.ModuleState> snapshot() {
         Map<String, Config.ModuleState> states = new LinkedHashMap<>();
         for (Module module : modules) {

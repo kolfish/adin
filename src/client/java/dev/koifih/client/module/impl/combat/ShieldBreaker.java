@@ -57,13 +57,14 @@ public final class ShieldBreaker extends Module {
         if (!(target instanceof Player other) || !shielded(player, other)) return;
         int axe = Hotbar.find(player, stack -> stack.is(ItemTags.AXES));
         if (axe == Hotbar.NONE) return;
-        originalSlot = Hotbar.selected(player);
-        Hotbar.select(player, axe);
+        int selected = Hotbar.selected(player);
+        if (!Hotbar.swap(player, axe, false)) return;
+        originalSlot = selected;
         sinceSwitch.reset();
     }
 
     private void restore(LocalPlayer player) {
-        if (player != null && switchBack.get() && originalSlot != Hotbar.NONE) Hotbar.select(player, originalSlot);
+        if (player != null && switchBack.get() && originalSlot != Hotbar.NONE && !Hotbar.swap(player, originalSlot, false)) return;
         originalSlot = Hotbar.NONE;
     }
 

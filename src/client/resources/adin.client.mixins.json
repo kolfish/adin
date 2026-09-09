@@ -22,6 +22,7 @@
 		"MouseHandlerMixin",
 		"MinecraftMixin",
 		"ChatScreenMixin",
+		"ClientCommonPacketListenerImplMixin",
 		"LevelRendererAccessor",
 		"MinecraftAccessor",
 		"MultiPlayerGameModeAccessor",

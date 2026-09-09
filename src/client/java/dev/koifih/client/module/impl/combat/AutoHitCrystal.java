@@ -1,4 +1,4 @@
-package dev.koifih.client.module.impl.player;
+package dev.koifih.client.module.impl.combat;
 
 import dev.koifih.client.event.events.PreTickEvent;
 import dev.koifih.client.mixin.MultiPlayerGameModeAccessor;
@@ -10,21 +10,27 @@ import dev.koifih.client.util.Game;
 import dev.koifih.client.util.Hotbar;
 import dev.koifih.client.util.Time;
 import net.minecraft.client.player.LocalPlayer;
-import net.minecraft.network.protocol.game.ServerboundUseItemPacket;
+import net.minecraft.core.BlockPos;
+import net.minecraft.network.protocol.game.ServerboundUseItemOnPacket;
+import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.item.Items;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.SoundType;
+import net.minecraft.world.phys.BlockHitResult;
+import net.minecraft.world.phys.HitResult;
 
-public final class KeyPearl extends Module {
+public final class AutoHitCrystal extends Module {
     private final SliderSetting delay = add(new SliderSetting("delay", 100, 1, 500));
     private final BoolSetting silentSwap = add(new BoolSetting("silentSwap", false));
     private final BoolSetting swapBack = add(new BoolSetting("swapBack", true));
     private final Time.Stopwatch sinceSwap = new Time.Stopwatch();
     private int originalSlot = Hotbar.NONE;
     private boolean silent;
-    private boolean threw;
+    private boolean placed;
 
-    public KeyPearl() {
-        super("keyPearl", Category.PLAYER);
+    public AutoHitCrystal() {
+        super("autoHitCrystal", Category.COMBAT);
         swapBack.visibleWhen(() -> !silentSwap.get());
     }
 
@@ -46,10 +52,10 @@ public final class KeyPearl extends Module {
     @Override
     protected void onActivate() {
         LocalPlayer player = mc.player;
-        if (!Game.playing(mc)) return;
+        if (!Game.playing(mc) || !(mc.hitResult instanceof BlockHitResult hit) || hit.getType() != HitResult.Type.BLOCK) return;
         int selected = Hotbar.selected(player);
-        int slot = player.getMainHandItem().is(Items.ENDER_PEARL) ? selected : Hotbar.find(player, stack -> stack.is(Items.ENDER_PEARL));
-        if (slot == Hotbar.NONE || player.getCooldowns().isOnCooldown(player.getInventory().getItem(slot))) return;
+        int slot = player.getMainHandItem().is(Items.OBSIDIAN) ? selected : Hotbar.find(player, stack -> stack.is(Items.OBSIDIAN));
+        if (slot == Hotbar.NONE) return;
         if (slot != selected) {
             if (originalSlot == Hotbar.NONE) originalSlot = selected;
             silent = silentSwap.get();
@@ -61,18 +67,21 @@ public final class KeyPearl extends Module {
         }
         if (silent && slot != selected) {
             ((MultiPlayerGameModeAccessor) mc.gameMode).adin$startPrediction(mc.level,
-                    sequence -> new ServerboundUseItemPacket(InteractionHand.MAIN_HAND, sequence, player.getYRot(), player.getXRot()));
-        } else if (!mc.gameMode.useItem(player, InteractionHand.MAIN_HAND).consumesAction()) {
+                    sequence -> new ServerboundUseItemOnPacket(InteractionHand.MAIN_HAND, hit, sequence));
+            BlockPos pos = mc.level.getBlockState(hit.getBlockPos()).canBeReplaced() ? hit.getBlockPos() : hit.getBlockPos().relative(hit.getDirection());
+            SoundType sound = Blocks.OBSIDIAN.defaultBlockState().getSoundType();
+            mc.level.playSound(player, pos, sound.getPlaceSound(), SoundSource.BLOCKS, (sound.getVolume() + 1f) / 2f, sound.getPitch() * 0.8f);
+        } else if (!mc.gameMode.useItemOn(player, InteractionHand.MAIN_HAND, hit).consumesAction()) {
             return;
         }
         player.swing(InteractionHand.MAIN_HAND);
-        threw = true;
+        placed = true;
     }
 
     private void onTick(PreTickEvent event) {
-        boolean thrown = threw;
-        threw = false;
-        if (originalSlot == Hotbar.NONE || thrown) return;
+        boolean justPlaced = placed;
+        placed = false;
+        if (originalSlot == Hotbar.NONE || justPlaced) return;
         LocalPlayer player = event.client().player;
         if (player == null || (!silent && !swapBack.get())) {
             originalSlot = Hotbar.NONE;
