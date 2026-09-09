@@ -75,7 +75,7 @@ public final class Triggerbot extends Module {
     private boolean critReady(Minecraft client, LocalPlayer player) {
         if (player.onGround()) {
             holdingSprint = false;
-            return !client.options.keyJump.isDown() && player.getDeltaMovement().y <= 0.0 && !resumingSprint(player);
+            return !client.options.keyJump.isDown() && player.getDeltaMovement().y <= 0.0;
         }
         if (!Players.canCrit(player)) {
             if (player.fallDistance <= 0.0 && peaking(player) && charged(player, NEXT_TICK)) dropSprint(player);
@@ -110,9 +110,6 @@ public final class Triggerbot extends Module {
         return rise > 0.0 && (rise - GRAVITY) * DRAG <= 0.0;
     }
 
-    private static boolean resumingSprint(LocalPlayer player) {
-        return !player.isSprinting() && Players.isMoving(player);
-    }
 
     private LivingEntity crosshairTarget(Minecraft client, LocalPlayer player) {
         if (!(client.hitResult instanceof EntityHitResult hit) || !(hit.getEntity() instanceof LivingEntity entity)) return null;
