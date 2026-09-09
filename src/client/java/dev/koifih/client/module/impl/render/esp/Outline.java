@@ -22,6 +22,7 @@ final class Outline {
     private static final int SHOW_LAYERS = 1;
     private static final int SHOW_GLOW = 2;
     private static final String[] LAYERS = {"1", "2", "3"};
+    private static final double RENDER_REACH = 1.0;
 
     private final Esp esp;
     private final Box box;
@@ -58,7 +59,7 @@ final class Outline {
     void include(EntityRenderStateEvent event) {
         if (projection == null) projection = Projection.capture();
         Entity entity = event.entity();
-        Rect rect = projection.bounds(entity.getBoundingBox().move(event.renderPosition().subtract(entity.position())));
+        Rect rect = projection.bounds(entity.getBoundingBox().inflate(RENDER_REACH).move(event.renderPosition().subtract(entity.position())));
         if (rect == null) return;
         EntityOutlines.include(projection.framebufferX(rect.minX()), projection.framebufferY(rect.maxY()),
                 projection.framebufferX(rect.maxX()), projection.framebufferY(rect.minY()));

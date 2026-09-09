@@ -1,43 +1,27 @@
 package dev.koifih.client.module.impl.combat;
 
 import dev.koifih.client.event.events.PreTickEvent;
+import dev.koifih.client.mixin.MinecraftAccessor;
 import dev.koifih.client.module.Category;
 import dev.koifih.client.module.Module;
 import dev.koifih.client.setting.BoolSetting;
 import dev.koifih.client.setting.SliderSetting;
 import dev.koifih.client.util.Game;
 import dev.koifih.client.util.Hotbar;
-import dev.koifih.client.util.Reach;
 import dev.koifih.client.util.Time;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.tags.ItemTags;
-import net.minecraft.world.InteractionHand;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.phys.EntityHitResult;
 import net.minecraft.world.phys.Vec3;
 
 public final class ShieldBreaker extends Module {
-    private enum Stage {
-        IDLE,
-        SWITCHED,
-        STRUCK,
-        BROKEN,
-        STUNNED
-    }
-
-    private static final long RESPONSE_MILLIS = 200L;
-    private static final long STUN_MILLIS = 150L;
-    private static final int CONFIRM_TICKS = 3;
-
     private final SliderSetting delay = add(new SliderSetting("delay", 100, 0, 500));
     private final BoolSetting facing = add(new BoolSetting("facing", true));
-    private final BoolSetting stun = add(new BoolSetting("stun", true));
     private final BoolSetting switchBack = add(new BoolSetting("switchBack", true));
-    private Stage stage = Stage.IDLE;
-    private Player engaged;
-    private int shieldedTicks;
-    private final Time.Stopwatch sinceStage = new Time.Stopwatch();
+    private final Time.Stopwatch sinceSwitch = new Time.Stopwatch();
     private int originalSlot = Hotbar.NONE;
 
     public ShieldBreaker() {
@@ -51,81 +35,36 @@ public final class ShieldBreaker extends Module {
 
     @Override
     protected void onDisable() {
-        reset(Game.player());
+        restore(Game.player());
     }
 
     private void onTick(PreTickEvent event) {
         Minecraft client = event.client();
         LocalPlayer player = client.player;
-        if (!Game.playing(client) || player.isBlocking() || (stage != Stage.IDLE && !engaged.isAlive())) {
-            reset(player);
+        if (originalSlot != Hotbar.NONE) {
+            if (player == null || !switchBack.get() || sinceSwitch.elapsed(delay.get())) restore(player);
             return;
         }
+        if (!Game.playing(client) || player.isBlocking() || player.getAttackStrengthScale(0.5f) < 1f) return;
         Player target = crosshairPlayer(client, player);
-        shieldedTicks = target != null && shielded(player, target) ? shieldedTicks + 1 : 0;
-        switch (stage) {
-            case IDLE -> {
-                if (shieldedTicks >= CONFIRM_TICKS) begin(player, target);
-            }
-            case SWITCHED -> strike(client, player, target);
-            case STRUCK -> struck();
-            case BROKEN -> stun(client, player);
-            case STUNNED -> {
-                if (elapsed(delay.get())) reset(player);
-            }
-        }
+        if (target == null) return;
+        prepare(player, target);
+        if (player.getMainHandItem().is(ItemTags.AXES)) ((MinecraftAccessor) client).adin$startAttack();
     }
 
-    private void begin(LocalPlayer player, Player target) {
-        int selected = Hotbar.selected(player);
-        int axe = player.getMainHandItem().is(ItemTags.AXES) ? selected : Hotbar.find(player, stack -> stack.is(ItemTags.AXES));
+    public void prepare(LocalPlayer player, Entity target) {
+        if (!isEnabled() || player.getMainHandItem().is(ItemTags.AXES)) return;
+        if (!(target instanceof Player other) || !shielded(player, other)) return;
+        int axe = Hotbar.find(player, stack -> stack.is(ItemTags.AXES));
         if (axe == Hotbar.NONE) return;
-        engaged = target;
-        originalSlot = axe == selected ? Hotbar.NONE : selected;
+        originalSlot = Hotbar.selected(player);
         Hotbar.select(player, axe);
-        advance(Stage.SWITCHED);
+        sinceSwitch.reset();
     }
 
-    private void strike(Minecraft client, LocalPlayer player, Player target) {
-        if (!elapsed(delay.get())) return;
-        if (target == engaged && shielded(player, target) && Reach.canHit(player, target)) {
-            hit(client, player);
-            advance(Stage.STRUCK);
-        } else {
-            reset(player);
-        }
-    }
-
-    private void struck() {
-        if (!engaged.isBlocking()) advance(stun.get() ? Stage.BROKEN : Stage.STUNNED);
-        else if (elapsed(RESPONSE_MILLIS)) advance(Stage.STUNNED);
-    }
-
-    private void stun(Minecraft client, LocalPlayer player) {
-        if (Reach.canHit(player, engaged)) hit(client, player);
-        else if (!elapsed(STUN_MILLIS)) return;
-        advance(Stage.STUNNED);
-    }
-
-    private void hit(Minecraft client, LocalPlayer player) {
-        client.gameMode.attack(player, engaged);
-        player.swing(InteractionHand.MAIN_HAND);
-    }
-
-    private void reset(LocalPlayer player) {
+    private void restore(LocalPlayer player) {
         if (player != null && switchBack.get() && originalSlot != Hotbar.NONE) Hotbar.select(player, originalSlot);
         originalSlot = Hotbar.NONE;
-        engaged = null;
-        stage = Stage.IDLE;
-    }
-
-    private void advance(Stage next) {
-        stage = next;
-        sinceStage.reset();
-    }
-
-    private boolean elapsed(long millis) {
-        return sinceStage.elapsed(millis);
     }
 
     private boolean shielded(LocalPlayer player, Player target) {

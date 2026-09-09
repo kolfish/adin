@@ -1,5 +1,6 @@
 package dev.koifih.client.module.impl.combat;
 
+import dev.koifih.client.AdinClient;
 import dev.koifih.client.event.events.PreTickEvent;
 import dev.koifih.client.module.Category;
 import dev.koifih.client.module.Module;
@@ -74,6 +75,7 @@ public final class Triggerbot extends Module {
             return;
         }
         if (charge < threshold) return;
+        AdinClient.MODULES.get(ShieldBreaker.class).prepare(player, target);
         client.gameMode.attack(player, target);
         player.swing(InteractionHand.MAIN_HAND);
         threshold = roll();

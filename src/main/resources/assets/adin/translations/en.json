@@ -79,7 +79,6 @@
   "module.shieldBreaker.description": "Swaps to an axe to break a blocking player's shield",
   "setting.shieldBreaker.delay": "Delay",
   "setting.shieldBreaker.facing": "Is facing",
-  "setting.shieldBreaker.stun": "Stun",
   "setting.shieldBreaker.switchBack": "Switch back",
   "module.sprint": "Sprint",
   "module.sprint.description": "Sprints for you",

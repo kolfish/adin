@@ -10,6 +10,7 @@ import com.mojang.blaze3d.pipeline.ColorTargetState;
 import com.mojang.blaze3d.pipeline.RenderPipeline;
 import com.mojang.blaze3d.pipeline.RenderTarget;
 import com.mojang.blaze3d.pipeline.TextureTarget;
+import com.mojang.blaze3d.platform.BlendFactor;
 import com.mojang.blaze3d.shaders.UniformType;
 import com.mojang.blaze3d.systems.CommandEncoder;
 import com.mojang.blaze3d.systems.RenderPass;
@@ -35,8 +36,7 @@ public final class EntityOutlines {
 
     private static final int CONFIG_SIZE = 48;
     private static final int KAWASE_SIZE = 16;
-    private static final int BLUR_PASSES = 5;
-    private static final float BLUR_TEXELS_PER_PASS = 4f;
+    private static final int BLUR_PASSES = 8;
     private static final Vector4fc CLEAR = new Vector4f();
     private static final BindGroupLayout CONFIG = BindGroupLayout.builder()
             .withUniform("OutlineConfig", UniformType.UNIFORM_BUFFER)
@@ -51,7 +51,8 @@ public final class EntityOutlines {
     private static final RenderPipeline SCAN = pipeline("outline_scan", ColorTargetState.DEFAULT, BindGroupLayouts.IN_SAMPLER, CONFIG);
     private static final RenderPipeline INK = pipeline("outline", new ColorTargetState(BlendFunction.TRANSLUCENT), BindGroupLayouts.IN_SAMPLER, CONFIG);
     private static final RenderPipeline KAWASE = pipeline("kawase", ColorTargetState.DEFAULT, BindGroupLayouts.IN_SAMPLER, KAWASE_CONFIG);
-    private static final RenderPipeline GLOW = pipeline("glow", new ColorTargetState(BlendFunction.ADDITIVE), GLOW_SAMPLERS, CONFIG);
+    private static final BlendFunction SCREEN = new BlendFunction(BlendFactor.ONE, BlendFactor.ONE_MINUS_SRC_COLOR);
+    private static final RenderPipeline GLOW = pipeline("glow", new ColorTargetState(SCREEN), GLOW_SAMPLERS, CONFIG);
 
     private static EntityOutline level;
     private static EntityOutline hand;
@@ -201,11 +202,10 @@ public final class EntityOutlines {
     private void uploadKawase(CommandEncoder encoder, float radius) {
         if (radius == uploadedRadius) return;
         float half = radius * 0.5f;
-        blurPasses = Math.clamp(Math.round(half / BLUR_TEXELS_PER_PASS), 1, BLUR_PASSES);
-        float weights = blurPasses * (blurPasses + 1) * 0.5f;
+        blurPasses = Math.clamp((int) Math.ceil(Math.sqrt(2f * half)), 1, BLUR_PASSES);
         for (int i = 0; i <= blurPasses; i++) {
             if (kawase[i] == null) kawase[i] = buffer("kawase " + i, KAWASE_SIZE);
-            float offset = i == 0 ? 1f : Math.max(0.5f, half * i / weights);
+            float offset = i == 0 ? 1f : i - 0.5f;
             try (MemoryStack stack = MemoryStack.stackPush()) {
                 encoder.writeToBuffer(kawase[i].slice(), Std140Builder.onStack(stack, KAWASE_SIZE)
                         .putVec2(offset, offset).putVec2(0f, 0f).get());
