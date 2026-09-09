@@ -28,6 +28,7 @@ public final class RotationManager {
     private Smoothing smoothing;
     private Rotator rotator;
     private Rotation lastSent = new Rotation(0f, 0f);
+    private Rotation previousSent = new Rotation(0f, 0f);
 
     public void init() {
         AdinClient.EVENTS.subscribe(TickEvent.class, Priority.LOWEST, this::onTick);
@@ -66,7 +67,12 @@ public final class RotationManager {
     }
 
     public void sent(Rotation rotation) {
+        previousSent = lastSent;
         lastSent = rotation;
+    }
+
+    public float sentYawDelta() {
+        return Math.abs(Mth.wrapDegrees(lastSent.yaw() - previousSent.yaw()));
     }
 
     public Rotation lastSent() {

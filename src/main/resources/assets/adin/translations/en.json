@@ -86,6 +86,8 @@
   "module.keyPearl.description": "Press its bind to throw an ender pearl and swap back",
   "module.autoHitCrystal": "Auto Hit Crystal",
   "module.autoHitCrystal.description": "Press a bind to place obsidian",
+  "module.autoCrystal": "Auto Crystal",
+  "module.autoCrystal.description": "Hold a bind to place and hit crystals",
   "setting.delay": "Delay",
   "setting.silentSwap": "Silent swap",
   "setting.swapBack": "Swap back",

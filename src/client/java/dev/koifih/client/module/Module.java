@@ -110,6 +110,12 @@ public abstract class Module {
     protected void onActivate() {
     }
 
+    protected void onHold() {
+    }
+
+    protected void onRelease() {
+    }
+
     protected void onEnable() {
     }
 
@@ -127,7 +133,11 @@ public abstract class Module {
     void tickKeybind(Minecraft client) {
         boolean down = key != InputConstants.UNKNOWN && client.gui.screen() == null && isKeyDown(client.getWindow().handle());
         if (activatable()) {
-            if (down && !keyWasDown && enabled) onActivate();
+            if (enabled) {
+                if (down && !keyWasDown) onActivate();
+                if (down) onHold();
+                if (!down && keyWasDown) onRelease();
+            }
         } else if (hold) {
             if (down != keyWasDown) setEnabled(down);
         } else if (down && !keyWasDown) {

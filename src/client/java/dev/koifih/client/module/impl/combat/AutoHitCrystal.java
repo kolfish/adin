@@ -1,5 +1,6 @@
 package dev.koifih.client.module.impl.combat;
 
+import dev.koifih.client.AdinClient;
 import dev.koifih.client.event.events.PreTickEvent;
 import dev.koifih.client.mixin.MultiPlayerGameModeAccessor;
 import dev.koifih.client.module.Category;
@@ -14,11 +15,15 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.network.protocol.game.ServerboundUseItemOnPacket;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.InteractionHand;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
+import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.SoundType;
+import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.HitResult;
+import net.minecraft.world.phys.shapes.CollisionContext;
 
 public final class AutoHitCrystal extends Module {
     private final SliderSetting delay = add(new SliderSetting("delay", 100, 1, 500));
@@ -53,9 +58,11 @@ public final class AutoHitCrystal extends Module {
     protected void onActivate() {
         LocalPlayer player = mc.player;
         if (!Game.playing(mc) || !(mc.hitResult instanceof BlockHitResult hit) || hit.getType() != HitResult.Type.BLOCK) return;
+        BlockState target = mc.level.getBlockState(hit.getBlockPos());
+        if (target.is(Blocks.OBSIDIAN) || target.is(Blocks.BEDROCK)) return;
         int selected = Hotbar.selected(player);
         int slot = player.getMainHandItem().is(Items.OBSIDIAN) ? selected : Hotbar.find(player, stack -> stack.is(Items.OBSIDIAN));
-        if (slot == Hotbar.NONE) return;
+        if (slot == Hotbar.NONE || !placeable(player, player.getInventory().getItem(slot), hit)) return;
         if (slot != selected) {
             if (originalSlot == Hotbar.NONE) originalSlot = selected;
             silent = silentSwap.get();
@@ -78,10 +85,27 @@ public final class AutoHitCrystal extends Module {
         placed = true;
     }
 
+    public int holding() {
+        return originalSlot;
+    }
+
+    private static boolean placeable(LocalPlayer player, ItemStack stack, BlockHitResult hit) {
+        BlockPlaceContext context = new BlockPlaceContext(player, InteractionHand.MAIN_HAND, stack, hit);
+        if (!context.canPlace()) return false;
+        BlockState state = Blocks.OBSIDIAN.getStateForPlacement(context);
+        return state != null && state.canSurvive(mc.level, context.getClickedPos())
+                && mc.level.isUnobstructed(state, context.getClickedPos(), CollisionContext.of(player));
+    }
+
     private void onTick(PreTickEvent event) {
         boolean justPlaced = placed;
         placed = false;
         if (originalSlot == Hotbar.NONE || justPlaced) return;
+        if (AdinClient.MODULES.get(AutoCrystal.class).holding()) {
+            originalSlot = Hotbar.NONE;
+            silent = false;
+            return;
+        }
         LocalPlayer player = event.client().player;
         if (player == null || (!silent && !swapBack.get())) {
             originalSlot = Hotbar.NONE;

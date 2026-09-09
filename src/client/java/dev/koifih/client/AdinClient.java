@@ -6,6 +6,7 @@ import dev.koifih.client.event.events.TickEvent;
 import dev.koifih.client.input.Keybinds;
 import dev.koifih.client.module.ModuleManager;
 import dev.koifih.client.module.impl.combat.AimAssist;
+import dev.koifih.client.module.impl.combat.AutoCrystal;
 import dev.koifih.client.module.impl.combat.AutoHitCrystal;
 import dev.koifih.client.module.impl.combat.ShieldBreaker;
 import dev.koifih.client.module.impl.combat.Triggerbot;
@@ -37,6 +38,7 @@ public final class AdinClient implements ClientModInitializer {
         MODULES.register(new Triggerbot());
         MODULES.register(new ShieldBreaker());
         MODULES.register(new AutoHitCrystal());
+        MODULES.register(new AutoCrystal());
         MODULES.register(new Sprint());
         MODULES.register(new KeyPearl());
         MODULES.register(new MoveFix());
