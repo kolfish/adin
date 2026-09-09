@@ -3,40 +3,33 @@ package dev.koifih.client.module.impl.movement;
 import dev.koifih.client.event.events.TickEvent;
 import dev.koifih.client.module.Category;
 import dev.koifih.client.module.Module;
-import dev.koifih.client.setting.BoolSetting;
-import dev.koifih.client.util.Players;
-import net.minecraft.client.player.LocalPlayer;
-
 public final class Sprint extends Module {
-    private final BoolSetting omni = add(new BoolSetting("omni", false));
+
+    boolean wasSprinting;
 
     public Sprint() {
         super("sprint", Category.MOVEMENT);
     }
 
     @Override
-    public String info() {
-        return omni.get() ? "Omni" : "";
-    }
-
-    public boolean omniActive() {
-        return isEnabled() && omni.get();
-    }
-
-    @Override
     protected void onEnable() {
+        if (mc.options.toggleSprint().get()) {
+            wasSprinting = true;
+        }
         listen(TickEvent.class, this::onTick);
     }
 
-    private void onTick(TickEvent event) {
-        LocalPlayer player = event.client().player;
-        if (player == null || player.isSprinting() || !canSprint(player)) return;
-        boolean moving = omni.get() ? Players.isMoving(player) : player.input.hasForwardImpulse();
-        if (moving) player.setSprinting(true);
+    @Override
+    protected void onDisable() {
+        if (wasSprinting) {
+            mc.options.toggleSprint().set(true);
+        }
     }
 
-    private static boolean canSprint(LocalPlayer player) {
-        boolean fed = player.getFoodData().getFoodLevel() > 6 || player.getAbilities().mayfly;
-        return fed && !player.isShiftKeyDown() && !player.isUsingItem() && !player.isFallFlying() && !player.isPassenger();
+    private void onTick(TickEvent event) {
+        if (mc.options.toggleSprint().get().booleanValue()) {
+            mc.options.toggleSprint().set(false);
+        }
+        mc.options.keySprint.setDown(true);
     }
 }

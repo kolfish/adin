@@ -6,7 +6,6 @@
 		"GuiGraphicsExtractorAccessor",
 		"KeyMappingAccessor",
 		"FallingBlockEntityAccessor",
-		"ClientInputMixin",
 		"EntityRenderStateMixin",
 		"EntityRendererMixin",
 		"RenderTypeAccessor",

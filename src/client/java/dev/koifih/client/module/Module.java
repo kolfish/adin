@@ -16,6 +16,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public abstract class Module {
+    public static Minecraft mc = Minecraft.getInstance();
     private final String id;
     private final Category category;
     private final List<Setting<?>> settings = new ArrayList<>();
