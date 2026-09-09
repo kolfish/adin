@@ -14,6 +14,7 @@ import dev.koifih.client.module.impl.hud.Notifications;
 import dev.koifih.client.module.impl.hud.Watermark;
 import dev.koifih.client.module.impl.movement.MoveFix;
 import dev.koifih.client.module.impl.movement.Sprint;
+import dev.koifih.client.module.impl.player.KeyPearl;
 import dev.koifih.client.module.impl.render.esp.Esp;
 import dev.koifih.client.render.screen.ScreenRenderer;
 import dev.koifih.client.render.world.WorldRenderer;
@@ -35,6 +36,7 @@ public final class AdinClient implements ClientModInitializer {
         MODULES.register(new Triggerbot());
         MODULES.register(new ShieldBreaker());
         MODULES.register(new Sprint());
+        MODULES.register(new KeyPearl());
         MODULES.register(new MoveFix());
         MODULES.register(new Esp());
         MODULES.register(new Notifications());
@@ -46,7 +48,7 @@ public final class AdinClient implements ClientModInitializer {
         HudEditor.init();
         WorldRenderer.init();
         ScreenRenderer.init();
-        EVENTS.subscribe(TickEvent.class, event -> MODULES.tickKeybinds(event.client()));
+        EVENTS.subscribe(PreTickEvent.class, event -> MODULES.tickKeybinds(event.client()));
         ClientTickEvents.START_CLIENT_TICK.register(client -> EVENTS.post(new PreTickEvent(client)));
         ClientTickEvents.END_CLIENT_TICK.register(client -> EVENTS.post(new TickEvent(client)));
         ClientPlayConnectionEvents.DISCONNECT.register((handler, client) -> EntityPreview.clear());

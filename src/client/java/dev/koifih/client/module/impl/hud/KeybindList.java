@@ -91,7 +91,9 @@ public final class KeybindList extends HudModule {
             String key = keyName(module);
             float keyX = right - padding - Text.width(key, textSize);
             Text.drawCentered(graphics, module.name(), x + padding, centerY, textSize, module.isEnabled() ? Theme.TEXT : Theme.DIM);
-            Draw.icon(graphics, module.hold() ? HOLD_ICON : TOGGLE_ICON, keyX - gap - icon, centerY - icon * 0.5f, icon, Theme.MUTED);
+            if (!module.activatable()) {
+                Draw.icon(graphics, module.hold() ? HOLD_ICON : TOGGLE_ICON, keyX - gap - icon, centerY - icon * 0.5f, icon, Theme.MUTED);
+            }
             Text.drawCentered(graphics, key, keyX, centerY, textSize, Theme.MUTED);
             rowY += row;
         }

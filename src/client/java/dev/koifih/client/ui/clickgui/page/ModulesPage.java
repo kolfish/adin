@@ -160,15 +160,18 @@ public final class ModulesPage implements Page {
         int previewSize = layout.atLeastOne(PREVIEW_BUTTON_SIZE);
 
         int modeX = right - modeWidth;
-        bindControl = host.add(new Keybind(modeX - layout.scaled(PanelLayout.GAP) - bindWidth, settingY(0, bindHeight),
+        int bindX = module.activatable() ? right - bindWidth : modeX - layout.scaled(PanelLayout.GAP) - bindWidth;
+        bindControl = host.add(new Keybind(bindX, settingY(0, bindHeight),
                 bindWidth, bindHeight, scale, Component.literal(Lang.get("keybind")), module::key, module::setKey));
         settingControls.add(bindControl);
-        settingControls.add(host.add(new BindMode(modeX, settingY(0, bindHeight), modeWidth, bindHeight, scale,
-                module::hold, module::setHold)));
-        int helpSize = layout.atLeastOne(HELP_SIZE);
-        settingControls.add(host.add(new HelpDot(bindControl.getX() - layout.scaled(PanelLayout.GAP) - helpSize,
-                settingY(0, helpSize), helpSize, scale,
-                () -> Lang.get(module.hold() ? "bind.help.hold" : "bind.help.toggle"))));
+        if (!module.activatable()) {
+            settingControls.add(host.add(new BindMode(modeX, settingY(0, bindHeight), modeWidth, bindHeight, scale,
+                    module::hold, module::setHold)));
+            int helpSize = layout.atLeastOne(HELP_SIZE);
+            settingControls.add(host.add(new HelpDot(bindControl.getX() - layout.scaled(PanelLayout.GAP) - helpSize,
+                    settingY(0, helpSize), helpSize, scale,
+                    () -> Lang.get(module.hold() ? "bind.help.hold" : "bind.help.toggle"))));
+        }
 
         for (Setting<?> setting : module.settings()) {
             Component label = Component.literal(setting.name());
