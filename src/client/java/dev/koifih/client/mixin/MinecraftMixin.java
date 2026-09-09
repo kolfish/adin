@@ -3,8 +3,10 @@ package dev.koifih.client.mixin;
 import com.mojang.blaze3d.platform.InputConstants;
 import dev.koifih.client.AdinClient;
 import dev.koifih.client.module.impl.combat.AimAssist;
+import dev.koifih.client.util.Players;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.MultiPlayerGameMode;
+import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.world.phys.HitResult;
 import org.lwjgl.glfw.GLFW;
 import org.spongepowered.asm.mixin.Mixin;
@@ -19,6 +21,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 public abstract class MinecraftMixin {
     @Shadow public HitResult hitResult;
     @Shadow public MultiPlayerGameMode gameMode;
+    @Shadow public LocalPlayer player;
 
     @Inject(method = "startAttack", at = @At("HEAD"), cancellable = true)
     private void adin$startAttack(CallbackInfoReturnable<Boolean> info) {
@@ -27,7 +30,7 @@ public abstract class MinecraftMixin {
 
     @Inject(method = "startUseItem", at = @At("HEAD"), cancellable = true)
     private void adin$startUseItem(CallbackInfo info) {
-        if (adin$activates(GLFW.GLFW_MOUSE_BUTTON_RIGHT)) info.cancel();
+        if (adin$activates(GLFW.GLFW_MOUSE_BUTTON_RIGHT) && !Players.consuming(player)) info.cancel();
     }
 
     @Unique

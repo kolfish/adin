@@ -9,6 +9,7 @@ import dev.koifih.client.setting.BoolSetting;
 import dev.koifih.client.setting.SliderSetting;
 import dev.koifih.client.util.Game;
 import dev.koifih.client.util.Hotbar;
+import dev.koifih.client.util.Players;
 import dev.koifih.client.util.Time;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.core.BlockPos;
@@ -62,7 +63,7 @@ public final class AutoCrystal extends Module {
     @Override
     protected void onHold() {
         LocalPlayer player = mc.player;
-        if (!Game.playing(mc) || !sinceAction.elapsed(delay.get())) return;
+        if (!Game.playing(mc) || Players.consuming(player) || !sinceAction.elapsed(delay.get())) return;
         releasing = false;
         if (mc.hitResult instanceof EntityHitResult hit && hit.getEntity() instanceof EndCrystal crystal) {
             mc.gameMode.attack(player, crystal);

@@ -9,6 +9,7 @@ import dev.koifih.client.setting.BoolSetting;
 import dev.koifih.client.setting.SliderSetting;
 import dev.koifih.client.util.Game;
 import dev.koifih.client.util.Hotbar;
+import dev.koifih.client.util.Players;
 import dev.koifih.client.util.Time;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.core.BlockPos;
@@ -57,7 +58,7 @@ public final class AutoHitCrystal extends Module {
     @Override
     protected void onActivate() {
         LocalPlayer player = mc.player;
-        if (!Game.playing(mc) || !(mc.hitResult instanceof BlockHitResult hit) || hit.getType() != HitResult.Type.BLOCK) return;
+        if (!Game.playing(mc) || Players.consuming(player) || !(mc.hitResult instanceof BlockHitResult hit) || hit.getType() != HitResult.Type.BLOCK) return;
         BlockState target = mc.level.getBlockState(hit.getBlockPos());
         if (target.is(Blocks.OBSIDIAN) || target.is(Blocks.BEDROCK)) return;
         int selected = Hotbar.selected(player);
