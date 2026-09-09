@@ -19,11 +19,14 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.phys.EntityHitResult;
 
 public final class Triggerbot extends Module {
+    private static final float NEXT_TICK = 1.5f;
+    private static final double GRAVITY = 0.08;
+    private static final double DRAG = 0.98;
+
     private final RangeSetting cooldown = add(new RangeSetting("cooldown", 60, 100, 0, 100, Measure.FRACTION));
     private final BoolSetting weaponsOnly = add(new BoolSetting("weaponsOnly", true));
     private final TargetSettings targets = add(new TargetSettings());
     private final BoolSetting crits = add(new BoolSetting("crits", true));
-    private static final float NEXT_TICK = 1.5f;
 
     private float threshold;
     private boolean holdingSprint;
@@ -53,44 +56,61 @@ public final class Triggerbot extends Module {
     }
 
     private void onTick(PreTickEvent event) {
-        boolean held = holdingSprint;
-        holdingSprint = false;
         Minecraft client = event.client();
         LocalPlayer player = client.player;
-        if (!Game.playing(client) || player.isUsingItem()) return;
-        if (weaponsOnly.get() && !Entities.holdsWeapon(player)) return;
-        LivingEntity target = crosshairTarget(client, player);
-        if (target == null) return;
-        float charge = player.getAttackStrengthScale(0.5f);
-        if (crits.get() && !player.onGround()) {
-            if (!Players.canCrit(player)) return;
-            holdingSprint = held;
-            if (player.isSprinting()) {
-                if (player.getAttackStrengthScale(NEXT_TICK) < threshold) return;
-                holdingSprint = true;
-                player.setSprinting(false);
-                return;
-            }
-        } else if (held || (crits.get() && (client.options.keyJump.isDown() || launched(player) || waitingForSprint(player)))) {
+        LivingEntity target = armed(client, player) ? crosshairTarget(client, player) : null;
+        if (target == null) {
+            holdingSprint = false;
             return;
         }
-        if (charge < threshold) return;
+        if (crits.get() && !critReady(client, player)) return;
+        if (!charged(player, 0.5f)) return;
         AdinClient.MODULES.get(ShieldBreaker.class).prepare(player, target);
         client.gameMode.attack(player, target);
         player.swing(InteractionHand.MAIN_HAND);
-        threshold = roll();
         holdingSprint = false;
+        threshold = roll();
+    }
+
+    private boolean critReady(Minecraft client, LocalPlayer player) {
+        if (player.onGround()) {
+            holdingSprint = false;
+            return !client.options.keyJump.isDown() && player.getDeltaMovement().y <= 0.0 && !resumingSprint(player);
+        }
+        if (!Players.canCrit(player)) {
+            if (player.fallDistance <= 0.0 && peaking(player) && charged(player, NEXT_TICK)) dropSprint(player);
+            return false;
+        }
+        if (player.isSprinting()) {
+            dropSprint(player);
+            return false;
+        }
+        return true;
+    }
+
+    private void dropSprint(LocalPlayer player) {
+        holdingSprint = true;
+        player.setSprinting(false);
+    }
+
+    private boolean charged(LocalPlayer player, float ticksAhead) {
+        return player.getAttackStrengthScale(ticksAhead) >= threshold;
     }
 
     private float roll() {
         return Maths.random(cooldown.low() / 100f, cooldown.high() / 100f);
     }
 
-    private static boolean launched(LocalPlayer player) {
-        return player.getDeltaMovement().y > 0.0;
+    private boolean armed(Minecraft client, LocalPlayer player) {
+        return Game.playing(client) && !player.isUsingItem() && (!weaponsOnly.get() || Entities.holdsWeapon(player));
     }
 
-    private static boolean waitingForSprint(LocalPlayer player) {
+    private static boolean peaking(LocalPlayer player) {
+        double rise = player.getDeltaMovement().y;
+        return rise > 0.0 && (rise - GRAVITY) * DRAG <= 0.0;
+    }
+
+    private static boolean resumingSprint(LocalPlayer player) {
         return !player.isSprinting() && Players.isMoving(player);
     }
 
