@@ -24,6 +24,8 @@ import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.world.entity.LivingEntity;
 
 public final class AimAssist extends Module {
+    private static final String[] MODES = {"Regular", "Silent"};
+    private static final int SILENT = 1;
     private static final String[] PRIORITIES = {"Closest to FOV", "Lowest health"};
     private static final int LOWEST_HEALTH = 1;
     private static final double RANGE = 6.0;
@@ -36,7 +38,8 @@ public final class AimAssist extends Module {
     }
 
     private final SliderSetting fov = add(new SliderSetting("fov", 80, 10, 180, Measure.DEGREES));
-    private final EnumSetting mode = add(new EnumSetting("mode", 0, Smoothing.NAMES));
+    private final EnumSetting mode = add(new EnumSetting("mode", 0, MODES));
+    private final EnumSetting rotation = add(new EnumSetting("rotation", 0, Smoothing.NAMES));
     private final SliderSetting smoothness = add(new SliderSetting("smoothness", 50, 0, 100, Measure.PERCENT));
     private final BoolSetting onHold = add(new BoolSetting("onHold", false));
     private final BoolSetting weaponsOnly = add(new BoolSetting("weaponsOnly", false));
@@ -51,11 +54,11 @@ public final class AimAssist extends Module {
 
     @Override
     public String info() {
-        return Smoothing.NAMES[mode.get()];
+        return mode.selected();
     }
 
     public boolean blocksBreaking() {
-        return isEnabled() && onHold.get();
+        return isEnabled() && (onHold.get() || AdinClient.ROTATIONS.active());
     }
 
     @Override
@@ -67,7 +70,10 @@ public final class AimAssist extends Module {
         if (onHold.get() && !event.client().options.keyAttack.isDown()) return;
         Aim aim = aim(event.client());
         if (aim == null) return;
-        RotationConfig config = RotationConfig.visible(smoothness.get() / 100f, Smoothing.values()[mode.get()]);
+        Smoothing smoothing = Smoothing.values()[rotation.get()];
+        RotationConfig config = mode.get() == SILENT
+                ? RotationConfig.silent(smoothness.get() / 100f, smoothing)
+                : RotationConfig.visible(smoothness.get() / 100f, smoothing);
         AdinClient.ROTATIONS.aim(aim, Priority.NORMAL, config);
     }
 
