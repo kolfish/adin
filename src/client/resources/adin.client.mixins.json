@@ -24,6 +24,7 @@
 		"ChatScreenMixin",
 		"LevelRendererAccessor",
 		"MinecraftAccessor",
+		"MultiPlayerGameModeAccessor",
 		"PlayerMixin",
 		"LevelRendererMixin",
 		"PictureInPictureRendererMixin"

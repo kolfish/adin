@@ -1,6 +1,7 @@
 package dev.koifih.client.module.impl.player;
 
 import dev.koifih.client.event.events.PreTickEvent;
+import dev.koifih.client.mixin.MultiPlayerGameModeAccessor;
 import dev.koifih.client.module.Category;
 import dev.koifih.client.module.Module;
 import dev.koifih.client.setting.BoolSetting;
@@ -9,18 +10,23 @@ import dev.koifih.client.util.Game;
 import dev.koifih.client.util.Hotbar;
 import dev.koifih.client.util.Time;
 import net.minecraft.client.player.LocalPlayer;
+import net.minecraft.network.protocol.game.ServerboundSetCarriedItemPacket;
+import net.minecraft.network.protocol.game.ServerboundUseItemPacket;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.item.Items;
 
 public final class KeyPearl extends Module {
     private final SliderSetting delay = add(new SliderSetting("delay", 100, 1, 500));
+    private final BoolSetting silentSwap = add(new BoolSetting("silentSwap", false));
     private final BoolSetting swapBack = add(new BoolSetting("swapBack", true));
     private final Time.Stopwatch sinceSwap = new Time.Stopwatch();
     private int originalSlot = Hotbar.NONE;
+    private boolean silent;
     private boolean threw;
 
     public KeyPearl() {
         super("keyPearl", Category.PLAYER);
+        swapBack.visibleWhen(() -> !silentSwap.get());
     }
 
     @Override
@@ -47,10 +53,17 @@ public final class KeyPearl extends Module {
         if (slot == Hotbar.NONE || player.getCooldowns().isOnCooldown(player.getInventory().getItem(slot))) return;
         if (slot != selected) {
             if (originalSlot == Hotbar.NONE) originalSlot = selected;
-            Hotbar.select(player, slot);
+            silent = silentSwap.get();
+            if (silent) player.connection.send(new ServerboundSetCarriedItemPacket(slot));
+            else Hotbar.select(player, slot);
             sinceSwap.reset();
         }
-        if (mc.gameMode.useItem(player, InteractionHand.MAIN_HAND).consumesAction()) {
+        if (silent && slot != selected) {
+            ((MultiPlayerGameModeAccessor) mc.gameMode).adin$startPrediction(mc.level,
+                    sequence -> new ServerboundUseItemPacket(InteractionHand.MAIN_HAND, sequence, player.getYRot(), player.getXRot()));
+            player.swing(InteractionHand.MAIN_HAND);
+            threw = true;
+        } else if (mc.gameMode.useItem(player, InteractionHand.MAIN_HAND).consumesAction()) {
             player.swing(InteractionHand.MAIN_HAND);
             threw = true;
         }
@@ -61,7 +74,7 @@ public final class KeyPearl extends Module {
         threw = false;
         if (originalSlot == Hotbar.NONE || thrown) return;
         LocalPlayer player = event.client().player;
-        if (player == null || !swapBack.get()) {
+        if (player == null || (!silent && !swapBack.get())) {
             originalSlot = Hotbar.NONE;
         } else if (sinceSwap.elapsed(delay.get())) {
             restore(player);
@@ -69,7 +82,14 @@ public final class KeyPearl extends Module {
     }
 
     private void restore(LocalPlayer player) {
-        if (player != null && swapBack.get() && originalSlot != Hotbar.NONE) Hotbar.select(player, originalSlot);
+        if (player != null && originalSlot != Hotbar.NONE) {
+            if (silent) {
+                if (Hotbar.selected(player) == originalSlot) player.connection.send(new ServerboundSetCarriedItemPacket(originalSlot));
+            } else if (swapBack.get()) {
+                Hotbar.select(player, originalSlot);
+            }
+        }
         originalSlot = Hotbar.NONE;
+        silent = false;
     }
 }
