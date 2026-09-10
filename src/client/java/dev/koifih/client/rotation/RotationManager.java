@@ -7,6 +7,7 @@ import dev.koifih.client.event.events.TickEvent;
 import dev.koifih.client.event.events.TurnEvent;
 import dev.koifih.client.module.impl.movement.MoveFix;
 import dev.koifih.client.util.Entities;
+import dev.koifih.client.util.Placement;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.client.renderer.entity.state.LivingEntityRenderState;
@@ -28,7 +29,6 @@ public final class RotationManager {
     private Smoothing smoothing;
     private Rotator rotator;
     private Rotation lastSent = new Rotation(0f, 0f);
-    private Rotation previousSent = new Rotation(0f, 0f);
 
     public void init() {
         AdinClient.EVENTS.subscribe(TickEvent.class, Priority.LOWEST, this::onTick);
@@ -67,12 +67,8 @@ public final class RotationManager {
     }
 
     public void sent(Rotation rotation) {
-        previousSent = lastSent;
+        if (!rotation.equals(lastSent)) Placement.rotated(Math.abs(rotation.yaw() - lastSent.yaw()));
         lastSent = rotation;
-    }
-
-    public float sentYawDelta() {
-        return Math.abs(Mth.wrapDegrees(lastSent.yaw() - previousSent.yaw()));
     }
 
     public Rotation lastSent() {
@@ -119,6 +115,10 @@ public final class RotationManager {
         return AdinClient.MODULES.get(MoveFix.class);
     }
 
+    private Rotation distinct(Rotation rotation) {
+        return Placement.duplicates(Math.abs(rotation.yaw() - lastSent.yaw())) ? rotation.moved(gcd(), 0f) : rotation;
+    }
+
     private Rotation quantized(Rotation rotation) {
         return new Rotation(quantized(rotation.yaw(), lastSent.yaw()),
                 Mth.clamp(quantized(rotation.pitch(), lastSent.pitch()), -90f, 90f));
@@ -150,7 +150,7 @@ public final class RotationManager {
         if (request != null) {
             config = request.config();
             if (config.silent()) {
-                current = quantized(step(from, request.target().at(1f), 1f));
+                current = distinct(quantized(step(from, request.target().at(1f), 1f)));
             } else {
                 current = null;
                 visible = request;

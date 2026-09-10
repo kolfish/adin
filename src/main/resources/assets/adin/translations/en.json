@@ -91,6 +91,7 @@
   "module.autoHitCrystal.description": "Press a bind to place obsidian",
   "module.autoCrystal": "Auto Crystal",
   "module.autoCrystal.description": "Hold a bind to place and hit crystals",
+  "setting.autoCrystal.headBob": "Head bob",
   "module.autoTotem": "Auto Totem",
   "module.autoTotem.description": "Moves a totem into your offhand after one pops",
   "setting.autoTotem.mode": "Mode",

@@ -9,6 +9,7 @@ import dev.koifih.client.setting.BoolSetting;
 import dev.koifih.client.setting.SliderSetting;
 import dev.koifih.client.util.Game;
 import dev.koifih.client.util.Hotbar;
+import dev.koifih.client.util.Placement;
 import dev.koifih.client.util.Players;
 import dev.koifih.client.util.Time;
 import net.minecraft.client.player.LocalPlayer;
@@ -63,7 +64,7 @@ public final class AutoHitCrystal extends Module {
         if (target.is(Blocks.OBSIDIAN) || target.is(Blocks.BEDROCK)) return;
         int selected = Hotbar.selected(player);
         int slot = player.getMainHandItem().is(Items.OBSIDIAN) ? selected : Hotbar.find(player, stack -> stack.is(Items.OBSIDIAN));
-        if (slot == Hotbar.NONE || !placeable(player, player.getInventory().getItem(slot), hit)) return;
+        if (slot == Hotbar.NONE || !placeable(player, player.getInventory().getItem(slot), hit) || !Placement.ready()) return;
         if (slot != selected) {
             if (originalSlot == Hotbar.NONE) originalSlot = selected;
             silent = silentSwap.get();
