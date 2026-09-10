@@ -20,6 +20,7 @@ import dev.koifih.client.module.impl.movement.MoveFix;
 import dev.koifih.client.module.impl.movement.Sprint;
 import dev.koifih.client.module.impl.player.AutoTotem;
 import dev.koifih.client.module.impl.player.KeyPearl;
+import dev.koifih.client.module.impl.render.Nametags;
 import dev.koifih.client.module.impl.render.esp.Esp;
 import dev.koifih.client.render.screen.ScreenRenderer;
 import dev.koifih.client.render.world.WorldRenderer;
@@ -49,6 +50,7 @@ public final class AdinClient implements ClientModInitializer {
         MODULES.register(new MoveFix());
         MODULES.register(new JumpReset());
         MODULES.register(new Esp());
+        MODULES.register(new Nametags());
         MODULES.register(new Notifications());
         MODULES.register(new ModuleList());
         MODULES.register(new Watermark());
