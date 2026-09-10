@@ -65,19 +65,25 @@ public final class AutoHitCrystal extends Module {
         int selected = Hotbar.selected(player);
         int slot = player.getMainHandItem().is(Items.OBSIDIAN) ? selected : Hotbar.find(player, stack -> stack.is(Items.OBSIDIAN));
         if (slot == Hotbar.NONE || !placeable(player, player.getInventory().getItem(slot), hit) || !Placement.ready()) return;
-        if (slot != selected) {
-            if (originalSlot == Hotbar.NONE) originalSlot = selected;
-            silent = silentSwap.get();
-            if (!Hotbar.swap(player, slot, silent)) {
+        boolean quiet = originalSlot != Hotbar.NONE ? silent : silentSwap.get();
+        if (slot != (quiet ? Hotbar.serverSlot() : selected)) {
+            if (originalSlot == Hotbar.NONE) {
+                originalSlot = selected;
+                silent = quiet;
+            }
+            if (!Hotbar.swap(player, slot, quiet)) {
                 originalSlot = Hotbar.NONE;
                 return;
             }
             sinceSwap.reset();
         }
-        if (silent && slot != selected) {
-            ((MultiPlayerGameModeAccessor) mc.gameMode).adin$startPrediction(mc.level,
-                    sequence -> new ServerboundUseItemOnPacket(InteractionHand.MAIN_HAND, hit, sequence));
+        if (quiet && slot != selected) {
+            ItemStack stack = player.getInventory().getItem(slot);
             BlockPos pos = mc.level.getBlockState(hit.getBlockPos()).canBeReplaced() ? hit.getBlockPos() : hit.getBlockPos().relative(hit.getDirection());
+            ((MultiPlayerGameModeAccessor) mc.gameMode).adin$startPrediction(mc.level, sequence -> {
+                Placement.predict(player, stack, hit);
+                return new ServerboundUseItemOnPacket(InteractionHand.MAIN_HAND, hit, sequence);
+            });
             SoundType sound = Blocks.OBSIDIAN.defaultBlockState().getSoundType();
             mc.level.playSound(player, pos, sound.getPlaceSound(), SoundSource.BLOCKS, (sound.getVolume() + 1f) / 2f, sound.getPitch() * 0.8f);
         } else if (!mc.gameMode.useItemOn(player, InteractionHand.MAIN_HAND, hit).consumesAction()) {

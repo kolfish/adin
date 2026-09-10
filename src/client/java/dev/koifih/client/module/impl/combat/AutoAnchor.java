@@ -1,0 +1,240 @@
+package dev.koifih.client.module.impl.combat;
+
+import dev.koifih.client.AdinClient;
+import dev.koifih.client.event.Priority;
+import dev.koifih.client.event.events.PreTickEvent;
+import dev.koifih.client.mixin.MultiPlayerGameModeAccessor;
+import dev.koifih.client.module.Category;
+import dev.koifih.client.module.Module;
+import dev.koifih.client.rotation.Rotation;
+import dev.koifih.client.rotation.RotationConfig;
+import dev.koifih.client.rotation.Smoothing;
+import dev.koifih.client.setting.BoolSetting;
+import dev.koifih.client.setting.SliderSetting;
+import dev.koifih.client.util.Game;
+import dev.koifih.client.util.Hotbar;
+import dev.koifih.client.util.Placement;
+import dev.koifih.client.util.Players;
+import dev.koifih.client.util.Time;
+import net.minecraft.client.player.LocalPlayer;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
+import net.minecraft.core.Vec3i;
+import net.minecraft.core.component.DataComponents;
+import net.minecraft.network.protocol.game.ServerboundUseItemOnPacket;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.attribute.EnvironmentAttributes;
+import net.minecraft.world.entity.player.Inventory;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
+import net.minecraft.world.item.context.BlockPlaceContext;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.RespawnAnchorBlock;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.phys.AABB;
+import net.minecraft.world.phys.BlockHitResult;
+import net.minecraft.world.phys.HitResult;
+import net.minecraft.world.phys.Vec3;
+import net.minecraft.world.phys.shapes.CollisionContext;
+import java.util.function.Predicate;
+
+public final class AutoAnchor extends Module {
+    private static final long PLACE_WAIT = 500;
+    private static final double DIAGONAL = 0.4;
+    private static final RotationConfig SNAP = RotationConfig.silent(0f, Smoothing.EASE_OUT_CUBIC);
+
+    private final SliderSetting delay = add(new SliderSetting("delay", 100, 1, 500));
+    private final BoolSetting safe = add(new BoolSetting("safe", false));
+    private final BoolSetting silentSwap = add(new BoolSetting("silentSwap", false));
+    private final BoolSetting swapBack = add(new BoolSetting("swapBack", true));
+    private final Time.Stopwatch sinceAction = new Time.Stopwatch();
+    private final Time.Stopwatch sincePlace = new Time.Stopwatch();
+    private int originalSlot = Hotbar.NONE;
+    private boolean silent;
+    private BlockPos anchor;
+    private BlockPos charged;
+    private BlockPos shield;
+    private boolean spent;
+
+    public AutoAnchor() {
+        super("autoAnchor", Category.COMBAT);
+        swapBack.visibleWhen(() -> !silentSwap.get());
+    }
+
+    @Override
+    protected void onEnable() {
+        spent = false;
+        listen(PreTickEvent.class, this::onTick);
+    }
+
+    @Override
+    protected void onDisable() {
+        idle(Game.player());
+    }
+
+    private void onTick(PreTickEvent event) {
+        LocalPlayer player = event.client().player;
+        if (player == null) return;
+        if (!Game.playing(mc) || Players.consuming(player)) {
+            if (shield == null && anchor == null) idle(player);
+            return;
+        }
+        if (shield != null) shield(player);
+        else if (anchor != null) work(player);
+        else look(player);
+    }
+
+    private void look(LocalPlayer player) {
+        if (!sinceAction.elapsed(delay.get())) return;
+        BlockHitResult hit = mc.hitResult instanceof BlockHitResult block && block.getType() == HitResult.Type.BLOCK ? block : null;
+        if (hit == null) {
+            idle(player);
+            return;
+        }
+        BlockPos pos = hit.getBlockPos();
+        BlockState state = mc.level.getBlockState(pos);
+        if (state.getBlock() instanceof RespawnAnchorBlock) {
+            anchor = pos;
+            return;
+        }
+        BlockPos target = state.canBeReplaced() ? pos : pos.relative(hit.getDirection());
+        int slot = nearest(player, stack -> stack.is(Items.RESPAWN_ANCHOR));
+        if (spent || slot == Hotbar.NONE || !placeable(player, player.getInventory().getItem(slot), hit, Blocks.RESPAWN_ANCHOR)) {
+            idle(player);
+        } else if (use(player, hit, stack -> stack.is(Items.RESPAWN_ANCHOR), true)) {
+            anchor = target;
+            spent = true;
+            sincePlace.reset();
+            if (safe.get()) shield = target.offset(towardPlayer(player, target));
+        }
+    }
+
+    private static Vec3i towardPlayer(LocalPlayer player, BlockPos anchor) {
+        Vec3 offset = player.getEyePosition().subtract(Vec3.atCenterOf(anchor));
+        double x = Math.abs(offset.x);
+        double z = Math.abs(offset.z);
+        boolean diagonal = Math.min(x, z) > DIAGONAL * Math.max(x, z);
+        int stepX = diagonal || x >= z ? (int) Math.signum(offset.x) : 0;
+        int stepZ = diagonal || z > x ? (int) Math.signum(offset.z) : 0;
+        return new Vec3i(stepX, 0, stepZ);
+    }
+
+    private void shield(LocalPlayer player) {
+        BlockPos ground = shield.below();
+        if (!mc.level.getBlockState(shield).canBeReplaced() || mc.level.getBlockState(ground).canBeReplaced()) {
+            shield = null;
+            return;
+        }
+        Vec3 point = Vec3.atBottomCenterOf(shield);
+        if (!aimed(player, point, ground)) return;
+        BlockHitResult hit = new BlockHitResult(point, Direction.UP, ground, false);
+        int slot = nearest(player, stack -> stack.is(Items.GLOWSTONE));
+        if (slot == Hotbar.NONE || !placeable(player, player.getInventory().getItem(slot), hit, Blocks.GLOWSTONE) || use(player, hit, stack -> stack.is(Items.GLOWSTONE), true)) shield = null;
+    }
+
+    private void work(LocalPlayer player) {
+        BlockState state = mc.level.getBlockState(anchor);
+        if (!(state.getBlock() instanceof RespawnAnchorBlock)) {
+            if (sincePlace.elapsed(PLACE_WAIT)) idle(player);
+            return;
+        }
+        Direction face = facing(player, anchor);
+        Vec3 point = Vec3.atCenterOf(anchor).add(face.getStepX() * 0.5, face.getStepY() * 0.5, face.getStepZ() * 0.5);
+        if (!aimed(player, point, anchor)) return;
+        BlockHitResult hit = new BlockHitResult(point, face, anchor, false);
+        if (state.getValue(RespawnAnchorBlock.CHARGE) == 0 && !anchor.equals(charged)) {
+            if (use(player, hit, stack -> stack.is(Items.GLOWSTONE), false)) charged = anchor;
+        } else if (mc.level.environmentAttributes().getValue(EnvironmentAttributes.RESPAWN_ANCHOR_WORKS, anchor)) {
+            idle(player);
+        } else {
+            use(player, hit, detonator(player), false);
+        }
+    }
+
+    private static Direction facing(LocalPlayer player, BlockPos pos) {
+        Vec3 eye = player.getEyePosition();
+        if (eye.y > pos.getY() + 1.0) return Direction.UP;
+        if (eye.y < pos.getY()) return Direction.DOWN;
+        return Direction.getApproximateNearest(eye.subtract(Vec3.atCenterOf(pos)).multiply(1.0, 0.0, 1.0));
+    }
+
+    private boolean aimed(LocalPlayer player, Vec3 point, BlockPos block) {
+        AdinClient.ROTATIONS.aim(partialTick -> Rotation.toward(player.getEyePosition(partialTick), point), Priority.HIGH, SNAP);
+        if (!sinceAction.elapsed(delay.get())) return false;
+        Vec3 eye = player.getEyePosition();
+        Vec3 look = AdinClient.ROTATIONS.rotation(player).direction();
+        return new AABB(block).clip(eye, eye.add(look.scale(player.blockInteractionRange()))).isPresent();
+    }
+
+    private void idle(LocalPlayer player) {
+        anchor = null;
+        charged = null;
+        shield = null;
+        restore(player);
+    }
+
+    private static boolean placeable(LocalPlayer player, ItemStack stack, BlockHitResult hit, Block block) {
+        BlockPlaceContext context = new BlockPlaceContext(player, InteractionHand.MAIN_HAND, stack, hit);
+        if (!context.canPlace()) return false;
+        BlockState state = block.getStateForPlacement(context);
+        return state != null && state.canSurvive(mc.level, context.getClickedPos())
+                && mc.level.isUnobstructed(state, context.getClickedPos(), CollisionContext.of(player));
+    }
+
+    private static Predicate<ItemStack> detonator(LocalPlayer player) {
+        if (has(player, stack -> stack.is(Items.TOTEM_OF_UNDYING))) return stack -> stack.is(Items.TOTEM_OF_UNDYING);
+        if (has(player, stack -> stack.has(DataComponents.WEAPON))) return stack -> stack.has(DataComponents.WEAPON);
+        return stack -> !stack.isEmpty() && !stack.is(Items.GLOWSTONE);
+    }
+
+    private static boolean has(LocalPlayer player, Predicate<ItemStack> matcher) {
+        return nearest(player, matcher) != Hotbar.NONE;
+    }
+
+    private static int nearest(LocalPlayer player, Predicate<ItemStack> matcher) {
+        Inventory inventory = player.getInventory();
+        int selected = Hotbar.selected(player);
+        for (int distance = 0; distance < Inventory.SELECTION_SIZE; distance++) {
+            for (int slot : new int[] {selected - distance, selected + distance}) {
+                if (Inventory.isHotbarSlot(slot) && matcher.test(inventory.getItem(slot))) return slot;
+            }
+        }
+        return Hotbar.NONE;
+    }
+
+    private boolean use(LocalPlayer player, BlockHitResult hit, Predicate<ItemStack> matcher, boolean placing) {
+        int slot = nearest(player, matcher);
+        if (slot == Hotbar.NONE || !Placement.ready()) return false;
+        int selected = Hotbar.selected(player);
+        boolean quiet = originalSlot != Hotbar.NONE ? silent : silentSwap.get();
+        if (slot != (quiet ? Hotbar.serverSlot() : selected)) {
+            if (originalSlot == Hotbar.NONE) {
+                originalSlot = selected;
+                silent = quiet;
+            }
+            if (!Hotbar.swap(player, slot, quiet)) return false;
+        }
+        if (quiet && slot != selected) {
+            ItemStack stack = player.getInventory().getItem(slot);
+            ((MultiPlayerGameModeAccessor) mc.gameMode).adin$startPrediction(mc.level, sequence -> {
+                if (placing) Placement.predict(player, stack, hit);
+                return new ServerboundUseItemOnPacket(InteractionHand.MAIN_HAND, hit, sequence);
+            });
+        } else {
+            mc.gameMode.useItemOn(player, InteractionHand.MAIN_HAND, hit);
+        }
+        player.swing(InteractionHand.MAIN_HAND);
+        sinceAction.reset();
+        return true;
+    }
+
+    private void restore(LocalPlayer player) {
+        if (player != null && originalSlot != Hotbar.NONE) {
+            boolean done = silent ? Hotbar.resync(player) : !swapBack.get() || Hotbar.swap(player, originalSlot, false);
+            if (!done) return;
+        }
+        originalSlot = Hotbar.NONE;
+        silent = false;
+    }
+}

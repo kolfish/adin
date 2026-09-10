@@ -192,7 +192,7 @@ public final class AutoCrystal extends Module {
             originalSlot = handedOff != Hotbar.NONE ? handedOff : selected;
             silent = silentSwap.get();
         }
-        if (slot != selected && !Hotbar.swap(player, slot, silent)) return false;
+        if (slot != (silent ? Hotbar.serverSlot() : selected) && !Hotbar.swap(player, slot, silent)) return false;
         if (silent && slot != selected) {
             ((MultiPlayerGameModeAccessor) mc.gameMode).adin$startPrediction(mc.level,
                     sequence -> new ServerboundUseItemOnPacket(InteractionHand.MAIN_HAND, hit, sequence));

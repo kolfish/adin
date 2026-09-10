@@ -1,8 +1,16 @@
 package dev.koifih.client.util;
 
+import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ServerboundClientTickEndPacket;
 import net.minecraft.network.protocol.game.ServerboundUseItemOnPacket;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.item.BlockItem;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.context.BlockPlaceContext;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.phys.BlockHitResult;
 
 public final class Placement {
     private static final float DUPLICATE_ROTATION = 2f;
@@ -26,6 +34,13 @@ public final class Placement {
     public static void rotated(float yawDelta) {
         lastRotationDelta = yawDelta;
         rotated = true;
+    }
+
+    public static void predict(LocalPlayer player, ItemStack stack, BlockHitResult hit) {
+        if (!(stack.getItem() instanceof BlockItem item)) return;
+        BlockPlaceContext context = new BlockPlaceContext(player, InteractionHand.MAIN_HAND, stack, hit);
+        BlockState state = item.getBlock().getStateForPlacement(context);
+        if (state != null) Game.level().setBlock(context.getClickedPos(), state, Block.UPDATE_ALL_IMMEDIATE);
     }
 
     public static void sent(Packet<?> packet) {
