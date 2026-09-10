@@ -27,6 +27,7 @@
 		"MinecraftAccessor",
 		"MultiPlayerGameModeAccessor",
 		"AbstractContainerScreenAccessor",
+		"LevelChunkMixin",
 		"PlayerMixin",
 		"LevelRendererMixin",
 		"PictureInPictureRendererMixin"
