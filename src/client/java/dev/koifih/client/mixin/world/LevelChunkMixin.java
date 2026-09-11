@@ -1,4 +1,4 @@
-package dev.koifih.client.mixin;
+package dev.koifih.client.mixin.world;
 
 import dev.koifih.client.render.blocks.BlockIndex;
 import net.minecraft.core.BlockPos;

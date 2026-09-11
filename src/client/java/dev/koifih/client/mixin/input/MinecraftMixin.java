@@ -1,4 +1,4 @@
-package dev.koifih.client.mixin;
+package dev.koifih.client.mixin.input;
 
 import com.mojang.blaze3d.platform.InputConstants;
 import dev.koifih.client.AdinClient;

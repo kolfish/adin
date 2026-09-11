@@ -1,4 +1,4 @@
-package dev.koifih.client.mixin;
+package dev.koifih.client.mixin.input;
 
 import dev.koifih.client.ui.hud.HudEditor;
 import net.minecraft.client.gui.screens.ChatScreen;

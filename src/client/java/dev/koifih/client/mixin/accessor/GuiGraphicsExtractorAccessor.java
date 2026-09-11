@@ -1,4 +1,4 @@
-package dev.koifih.client.mixin;
+package dev.koifih.client.mixin.accessor;
 
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.renderer.state.gui.GuiRenderState;

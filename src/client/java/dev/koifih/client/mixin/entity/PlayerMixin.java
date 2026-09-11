@@ -1,4 +1,4 @@
-package dev.koifih.client.mixin;
+package dev.koifih.client.mixin.entity;
 
 import com.llamalad7.mixinextras.injector.ModifyExpressionValue;
 import dev.koifih.client.AdinClient;

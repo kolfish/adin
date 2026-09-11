@@ -1,4 +1,4 @@
-package dev.koifih.client.mixin;
+package dev.koifih.client.mixin.network;
 
 import dev.koifih.client.util.Hotbar;
 import dev.koifih.client.util.Placement;

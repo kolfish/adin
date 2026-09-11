@@ -1,4 +1,4 @@
-package dev.koifih.client.mixin;
+package dev.koifih.client.mixin.render;
 
 import dev.koifih.client.AdinClient;
 import dev.koifih.client.event.events.HandRenderEvent;

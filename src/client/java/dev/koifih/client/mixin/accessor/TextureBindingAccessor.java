@@ -1,4 +1,4 @@
-package dev.koifih.client.mixin;
+package dev.koifih.client.mixin.accessor;
 
 import net.minecraft.resources.Identifier;
 import org.spongepowered.asm.mixin.Mixin;

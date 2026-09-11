@@ -1,7 +1,7 @@
 package dev.koifih.client.module.impl.player;
 
 import dev.koifih.client.event.events.PreTickEvent;
-import dev.koifih.client.mixin.MultiPlayerGameModeAccessor;
+import dev.koifih.client.mixin.accessor.MultiPlayerGameModeAccessor;
 import dev.koifih.client.module.Category;
 import dev.koifih.client.module.Module;
 import dev.koifih.client.setting.BoolSetting;

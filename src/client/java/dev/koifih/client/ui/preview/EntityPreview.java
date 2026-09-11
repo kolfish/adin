@@ -1,7 +1,7 @@
 package dev.koifih.client.ui.preview;
 
 import dev.koifih.Adin;
-import dev.koifih.client.mixin.FallingBlockEntityAccessor;
+import dev.koifih.client.mixin.accessor.FallingBlockEntityAccessor;
 import dev.koifih.client.render.Point;
 import dev.koifih.client.render.entity.EntityFill;
 import dev.koifih.client.render.entity.EntityOutline;

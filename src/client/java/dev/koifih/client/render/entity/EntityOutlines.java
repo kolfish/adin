@@ -19,7 +19,7 @@ import com.mojang.blaze3d.textures.FilterMode;
 import com.mojang.blaze3d.textures.GpuSampler;
 import com.mojang.blaze3d.textures.GpuTextureView;
 import dev.koifih.Adin;
-import dev.koifih.client.mixin.LevelRendererAccessor;
+import dev.koifih.client.mixin.accessor.LevelRendererAccessor;
 import dev.koifih.client.util.Colors;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.BindGroupLayouts;

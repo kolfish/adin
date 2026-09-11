@@ -1,6 +1,6 @@
 package dev.koifih.client.render.state;
 
-import dev.koifih.client.mixin.GuiGraphicsExtractorAccessor;
+import dev.koifih.client.mixin.accessor.GuiGraphicsExtractorAccessor;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.renderer.state.gui.GuiElementRenderState;
 

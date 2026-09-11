@@ -1,4 +1,4 @@
-package dev.koifih.client.mixin;
+package dev.koifih.client.mixin.input;
 
 import dev.koifih.client.AdinClient;
 import net.minecraft.client.Minecraft;

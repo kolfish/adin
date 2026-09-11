@@ -2,7 +2,7 @@ package dev.koifih.client.module.impl.player;
 
 import dev.koifih.client.event.events.PreTickEvent;
 import dev.koifih.client.event.events.TotemPopEvent;
-import dev.koifih.client.mixin.AbstractContainerScreenAccessor;
+import dev.koifih.client.mixin.accessor.AbstractContainerScreenAccessor;
 import dev.koifih.client.module.Category;
 import dev.koifih.client.module.Module;
 import dev.koifih.client.setting.BoolSetting;
