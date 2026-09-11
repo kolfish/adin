@@ -1,4 +1,4 @@
-package dev.koifih.client.ui.clickgui.page;
+package dev.koifih.client.ui.clickgui;
 
 import dev.koifih.client.AdinClient;
 import dev.koifih.client.module.Category;
@@ -17,27 +17,20 @@ import dev.koifih.client.setting.PreviewSetting;
 import dev.koifih.client.setting.RangeSetting;
 import dev.koifih.client.setting.Setting;
 import dev.koifih.client.setting.SliderSetting;
+import dev.koifih.client.ui.Catalog;
 import dev.koifih.client.ui.Theme;
-import dev.koifih.client.ui.animation.Easing;
-import dev.koifih.client.ui.animation.Transition;
-import dev.koifih.client.ui.catalog.BlockCatalog;
-import dev.koifih.client.ui.catalog.EntityCatalog;
-import dev.koifih.client.ui.clickgui.PanelLayout;
-import dev.koifih.client.ui.clickgui.WidgetHost;
-import dev.koifih.client.ui.component.BindMode;
+import dev.koifih.client.ui.Transition;
 import dev.koifih.client.ui.component.Bool;
+import dev.koifih.client.ui.component.Button;
 import dev.koifih.client.ui.component.CatalogPicker;
 import dev.koifih.client.ui.component.ColorPicker;
 import dev.koifih.client.ui.component.Control;
 import dev.koifih.client.ui.component.Dropdown;
 import dev.koifih.client.ui.component.HelpDot;
-import dev.koifih.client.ui.component.IconButton;
 import dev.koifih.client.ui.component.Keybind;
-import dev.koifih.client.ui.component.MultiSelect;
 import dev.koifih.client.ui.component.Popup;
-import dev.koifih.client.ui.component.RangeSlider;
+import dev.koifih.client.ui.component.Segmented;
 import dev.koifih.client.ui.component.Slider;
-import dev.koifih.client.ui.component.Windowed;
 import dev.koifih.client.util.Lang;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.AbstractWidget;
@@ -59,6 +52,9 @@ public final class ModulesPage implements Page {
     private static final int GEAR_SIZE = 16;
     private static final int GEAR_ICON_SIZE = 11;
     private static final int SETTINGS_ICON = 0xe8b8;
+    private static final int TOGGLE_ICON = 0xea18;
+    private static final int HOLD_ICON = 0xe913;
+    private static final int PREVIEW_ICON = 0xe89e;
     private static final int OVERLAY_INSET = 14;
     private static final int OVERLAY_PADDING = 6;
     private static final int OVERLAY_RADIUS = 6;
@@ -74,16 +70,15 @@ public final class ModulesPage implements Page {
     private static final int HELP_SIZE = 12;
     private static final int PICKER_INSET = 4;
     private static final int PREVIEW_BUTTON_SIZE = 16;
-    private static final int PREVIEW_ICON = 0xe89e;
 
-    private final WidgetHost host;
+    private final ClickGui gui;
     private final Supplier<Category> category;
-    private final Transition overlayReveal = new Transition(0f, OVERLAY_REVEAL_MILLIS, Easing.EASE_OUT_CUBIC);
+    private final Transition overlayReveal = new Transition(0f, OVERLAY_REVEAL_MILLIS);
     private final List<Module> modules = new ArrayList<>();
     private final List<RowControl> rowControls = new ArrayList<>();
     private final List<Control> settingControls = new ArrayList<>();
     private final List<SettingRow> settingRows = new ArrayList<>();
-    private final List<Windowed> windows = new ArrayList<>();
+    private final List<CatalogPicker> windows = new ArrayList<>();
     private PanelLayout layout;
     private Keybind bindControl;
     private Module openModule;
@@ -101,8 +96,8 @@ public final class ModulesPage implements Page {
         }
     }
 
-    public ModulesPage(WidgetHost host, Supplier<Category> category) {
-        this.host = host;
+    public ModulesPage(ClickGui gui, Supplier<Category> category) {
+        this.gui = gui;
         this.category = category;
     }
 
@@ -118,7 +113,7 @@ public final class ModulesPage implements Page {
     }
 
     public void reloadRows() {
-        for (RowControl control : rowControls) host.remove(control.widget());
+        for (RowControl control : rowControls) gui.remove(control.widget());
         rowControls.clear();
         rowScroll = 0f;
         buildRows();
@@ -139,11 +134,11 @@ public final class ModulesPage implements Page {
             Module module = modules.get(row);
             int rowY = rowY(row);
             int toggleInset = (rowHeight - toggleHeight) / 2;
-            rowControls.add(new RowControl(host.add(new Bool(toggleX, rowY + toggleInset, toggleWidth, toggleHeight, scale,
+            rowControls.add(new RowControl(gui.add(new Bool(toggleX, rowY + toggleInset, toggleWidth, toggleHeight, scale,
                     Component.literal(module.name()), module::isEnabled, module::setEnabled)), row, toggleInset));
             if (module.settings().isEmpty()) continue;
             int gearInset = (rowHeight - gearSize) / 2;
-            rowControls.add(new RowControl(host.add(new IconButton(gearX, rowY + gearInset, gearSize, scale, SETTINGS_ICON,
+            rowControls.add(new RowControl(gui.add(Button.icon(gearX, rowY + gearInset, gearSize, scale, SETTINGS_ICON,
                     Component.literal(module.name() + " settings"), () -> openOverlay(module))), row, gearInset));
         }
     }
@@ -192,8 +187,8 @@ public final class ModulesPage implements Page {
     }
 
     private void buildSettings(Module module) {
-        for (Control control : settingControls) host.remove(control);
-        for (SettingRow row : settingRows) host.remove(row.control());
+        for (Control control : settingControls) gui.remove(control);
+        for (SettingRow row : settingRows) gui.remove(row.control());
         settingControls.clear();
         settingRows.clear();
         windows.clear();
@@ -213,14 +208,16 @@ public final class ModulesPage implements Page {
 
         int modeX = right - modeWidth;
         int bindX = module.activatable() ? right - bindWidth : modeX - layout.scaled(PanelLayout.GAP) - bindWidth;
-        bindControl = host.add(new Keybind(bindX, settingY(0, bindHeight),
+        bindControl = gui.add(new Keybind(bindX, settingY(0, bindHeight),
                 bindWidth, bindHeight, scale, Component.literal(Lang.get("keybind")), module::key, module::setKey));
         settingControls.add(bindControl);
         if (!module.activatable()) {
-            settingControls.add(host.add(new BindMode(modeX, settingY(0, bindHeight), modeWidth, bindHeight, scale,
-                    module::hold, module::setHold)));
+            settingControls.add(gui.add(new Segmented(modeX, settingY(0, bindHeight), modeWidth, bindHeight, scale,
+                    Component.literal("Bind mode"),
+                    new Segmented.Segment[] {Segmented.Segment.of(TOGGLE_ICON), Segmented.Segment.of(HOLD_ICON)},
+                    () -> module.hold() ? 1 : 0, index -> module.setHold(index == 1))));
             int helpSize = layout.atLeastOne(HELP_SIZE);
-            settingControls.add(host.add(new HelpDot(bindControl.getX() - layout.scaled(PanelLayout.GAP) - helpSize,
+            settingControls.add(gui.add(new HelpDot(bindControl.getX() - layout.scaled(PanelLayout.GAP) - helpSize,
                     settingY(0, helpSize), helpSize, scale,
                     () -> Lang.get(module.hold() ? "bind.help.hold" : "bind.help.toggle"))));
         }
@@ -237,15 +234,15 @@ public final class ModulesPage implements Page {
                     yield slider;
                 }
                 case RangeSetting range -> {
-                    RangeSlider slider = new RangeSlider(halfX, 0, halfWidth, bindHeight, scale, label,
+                    Slider slider = Slider.range(halfX, 0, halfWidth, bindHeight, scale, label,
                             range.min(), range.max(), range::low, range::setLow, range::high, range::setHigh);
                     slider.setFormat(range::format);
                     yield slider;
                 }
                 case EnumSetting choice ->
-                        bounded(new Dropdown(x, 0, width, fieldHeight, scale, label, choice.options(), choice::get, choice::set));
+                        bounded(Dropdown.single(x, 0, width, fieldHeight, scale, label, choice.options(), choice::get, choice::set));
                 case MultiSetting multi -> {
-                    MultiSelect select = new MultiSelect(x, 0, width, fieldHeight, scale, label, multi.options(), multi::get);
+                    Dropdown select = Dropdown.multi(x, 0, width, fieldHeight, scale, label, multi.options(), multi::get);
                     select.setOptionVisible(multi::isOptionVisible);
                     yield bounded(select);
                 }
@@ -255,17 +252,17 @@ public final class ModulesPage implements Page {
                     yield bounded(picker);
                 }
                 case EntitySetting entities ->
-                        windowed(new CatalogPicker(x, 0, width, fieldHeight, scale, label, EntityCatalog.INSTANCE, entities::get));
+                        windowed(new CatalogPicker(x, 0, width, fieldHeight, scale, label, Catalog.ENTITIES, entities::get));
                 case BlockSetting blocks ->
-                        windowed(new CatalogPicker(x, 0, width, fieldHeight, scale, label, BlockCatalog.INSTANCE, blocks::get));
+                        windowed(new CatalogPicker(x, 0, width, fieldHeight, scale, label, Catalog.BLOCKS, blocks::get));
                 case PreviewSetting preview ->
-                        new IconButton(right - previewSize, 0, previewSize, scale, PREVIEW_ICON, label, () -> host.openPreview(preview));
+                        Button.icon(right - previewSize, 0, previewSize, scale, PREVIEW_ICON, label, () -> gui.openPreview(preview));
                 default -> null;
             };
             if (control == null) continue;
             String rowLabel = control instanceof Popup ? null : setting.name();
-            Transition reveal = new Transition(setting.isVisible() ? 1f : 0f, SETTING_REVEAL_MILLIS, Easing.EASE_OUT_CUBIC);
-            settingRows.add(new SettingRow(setting, host.add(control), rowLabel, reveal));
+            Transition reveal = new Transition(setting.isVisible() ? 1f : 0f, SETTING_REVEAL_MILLIS);
+            settingRows.add(new SettingRow(setting, gui.add(control), rowLabel, reveal));
         }
         layoutRows();
         relayout(layout);
@@ -300,16 +297,16 @@ public final class ModulesPage implements Page {
         return popup;
     }
 
-    private <T extends Popup & Windowed> T windowed(T popup) {
-        windows.add(popup);
-        return bounded(popup);
+    private CatalogPicker windowed(CatalogPicker picker) {
+        windows.add(picker);
+        return bounded(picker);
     }
 
     @Override
     public void relayout(PanelLayout layout) {
         this.layout = layout;
         int inset = layout.scaled(PICKER_INSET);
-        for (Windowed window : windows) {
+        for (CatalogPicker window : windows) {
             window.setWindow(layout.contentX() + inset, layout.contentY() + inset,
                     layout.contentWidth() - 2 * inset, layout.contentHeight() - 2 * inset);
         }
@@ -384,7 +381,7 @@ public final class ModulesPage implements Page {
         for (SettingRow row : settingRows) row.control().dismiss();
         overlayOpen = open;
         overlayReveal.set(open ? 1f : 0f);
-        host.dropFocus();
+        gui.dropFocus();
     }
 
     @Override

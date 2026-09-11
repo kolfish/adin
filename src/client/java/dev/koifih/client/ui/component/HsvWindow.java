@@ -3,8 +3,7 @@ package dev.koifih.client.ui.component;
 import dev.koifih.client.render.Draw;
 import dev.koifih.client.render.Transform;
 import dev.koifih.client.ui.Theme;
-import dev.koifih.client.ui.animation.Easing;
-import dev.koifih.client.ui.animation.Transition;
+import dev.koifih.client.ui.Transition;
 import dev.koifih.client.util.Colors;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
@@ -36,7 +35,7 @@ final class HsvWindow {
     private IntConsumer secondarySet = rgb -> {};
     private BooleanSupplier gradient = () -> false;
     private boolean editingSecondary;
-    private final Transition selection = new Transition(0f, SWATCH_MILLIS, Easing.EASE_OUT_CUBIC);
+    private final Transition selection = new Transition(0f, SWATCH_MILLIS);
     private float hue;
     private float saturation;
     private float value;

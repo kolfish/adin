@@ -7,12 +7,8 @@ import dev.koifih.client.render.Scissor;
 import dev.koifih.client.render.Transform;
 import dev.koifih.client.setting.PreviewSetting;
 import dev.koifih.client.ui.Theme;
+import dev.koifih.client.ui.Transition;
 import dev.koifih.client.ui.UiScale;
-import dev.koifih.client.ui.animation.Easing;
-import dev.koifih.client.ui.animation.Transition;
-import dev.koifih.client.ui.clickgui.page.ConfigsPage;
-import dev.koifih.client.ui.clickgui.page.ModulesPage;
-import dev.koifih.client.ui.clickgui.page.Page;
 import dev.koifih.client.ui.component.Control;
 import dev.koifih.client.ui.component.Popup;
 import dev.koifih.client.ui.component.TextInput;
@@ -27,14 +23,14 @@ import org.lwjgl.glfw.GLFW;
 import java.util.ArrayList;
 import java.util.List;
 
-public final class ClickGui extends Screen implements WidgetHost {
+public final class ClickGui extends Screen {
     private static final int PANEL_REVEAL_MILLIS = 200;
     private static final int PAGE_REVEAL_MILLIS = 150;
 
     private static Sidebar.Tab selectedTab = Sidebar.TABS.get(0);
 
-    private final Transition panelReveal = new Transition(0f, PANEL_REVEAL_MILLIS, Easing.EASE_OUT_CUBIC);
-    private final Transition pageReveal = new Transition(1f, PAGE_REVEAL_MILLIS, Easing.EASE_OUT_CUBIC);
+    private final Transition panelReveal = new Transition(0f, PANEL_REVEAL_MILLIS);
+    private final Transition pageReveal = new Transition(1f, PAGE_REVEAL_MILLIS);
     private final Sidebar sidebar = new Sidebar(this, this::selectTab, this::openMenu);
     private final SettingsMenu menu = new SettingsMenu(this);
     private final PreviewWindow preview = new PreviewWindow(this);
@@ -56,28 +52,23 @@ public final class ClickGui extends Screen implements WidgetHost {
         panelReveal.set(1f);
     }
 
-    @Override
-    public <T extends AbstractWidget> T add(T widget) {
+    <T extends AbstractWidget> T add(T widget) {
         return addRenderableWidget(widget);
     }
 
-    @Override
-    public void remove(AbstractWidget widget) {
+    void remove(AbstractWidget widget) {
         removeWidget(widget);
     }
 
-    @Override
-    public void requestRebuild() {
+    void requestRebuild() {
         rebuildPending = true;
     }
 
-    @Override
-    public void dropFocus() {
+    void dropFocus() {
         clearFocus();
     }
 
-    @Override
-    public void openPreview(PreviewSetting setting) {
+    void openPreview(PreviewSetting setting) {
         preview.open(setting);
         updateStates();
     }

@@ -1,4 +1,4 @@
-package dev.koifih.client.ui.preview;
+package dev.koifih.client.ui;
 
 import com.mojang.authlib.GameProfile;
 import net.minecraft.client.Minecraft;

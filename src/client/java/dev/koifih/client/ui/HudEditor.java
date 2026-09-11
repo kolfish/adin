@@ -1,4 +1,4 @@
-package dev.koifih.client.ui.hud;
+package dev.koifih.client.ui;
 
 import com.mojang.blaze3d.platform.Window;
 import dev.koifih.client.AdinClient;
@@ -7,7 +7,6 @@ import dev.koifih.client.event.events.HudRenderEvent;
 import dev.koifih.client.module.HudModule;
 import dev.koifih.client.module.Module;
 import dev.koifih.client.render.Draw;
-import dev.koifih.client.ui.Theme;
 import dev.koifih.client.util.Colors;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.ChatScreen;

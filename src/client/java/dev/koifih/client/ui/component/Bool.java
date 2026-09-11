@@ -2,8 +2,7 @@ package dev.koifih.client.ui.component;
 
 import dev.koifih.client.render.Draw;
 import dev.koifih.client.ui.Theme;
-import dev.koifih.client.ui.animation.Easing;
-import dev.koifih.client.ui.animation.Transition;
+import dev.koifih.client.ui.Transition;
 import dev.koifih.client.util.Colors;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.narration.NarrationElementOutput;
@@ -11,7 +10,7 @@ import net.minecraft.network.chat.Component;
 import java.util.function.BooleanSupplier;
 import java.util.function.Consumer;
 
-public final class Bool extends Clickable {
+public final class Bool extends Control {
     private final Component label;
     private final BooleanSupplier get;
     private final Transition thumb;
@@ -21,7 +20,7 @@ public final class Bool extends Clickable {
         super(x, y, width, height, scale, label, () -> set.accept(!get.getAsBoolean()));
         this.label = label;
         this.get = get;
-        this.thumb = new Transition(get.getAsBoolean() ? 1f : 0f, 150, Easing.SMOOTHSTEP);
+        this.thumb = new Transition(get.getAsBoolean() ? 1f : 0f, 150, Transition.Easing.SMOOTHSTEP);
     }
 
     @Override

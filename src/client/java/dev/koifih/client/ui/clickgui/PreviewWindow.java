@@ -17,12 +17,11 @@ import dev.koifih.client.render.screen.ScreenRenderer;
 import dev.koifih.client.setting.PreviewSetting;
 import dev.koifih.client.setting.Setting;
 import dev.koifih.client.ui.Theme;
-import dev.koifih.client.ui.animation.Easing;
-import dev.koifih.client.ui.animation.Transition;
-import dev.koifih.client.ui.component.IconButton;
+import dev.koifih.client.ui.Transition;
+import dev.koifih.client.ui.component.Button;
 import dev.koifih.client.ui.component.TextInput;
-import dev.koifih.client.ui.preview.EntityPreview;
-import dev.koifih.client.ui.preview.SkinCache;
+import dev.koifih.client.ui.EntityPreview;
+import dev.koifih.client.ui.SkinCache;
 import dev.koifih.client.util.Colors;
 import dev.koifih.client.util.Game;
 import dev.koifih.client.util.Lang;
@@ -54,11 +53,11 @@ public final class PreviewWindow {
     private static final int STATUS_HEIGHT = 10;
     private static final long FETCH_DELAY_MILLIS = 600L;
     private static String skinName = DEFAULT_SKIN;
-    private final WidgetHost host;
-    private final Transition reveal = new Transition(0f, REVEAL_MILLIS, Easing.EASE_OUT_CUBIC);
-    private final Transition yaw = new Transition(DEFAULT_YAW, 200, Easing.EASE_OUT_CUBIC);
+    private final ClickGui gui;
+    private final Transition reveal = new Transition(0f, REVEAL_MILLIS);
+    private final Transition yaw = new Transition(DEFAULT_YAW, 200);
     private PanelLayout layout;
-    private IconButton back;
+    private Button back;
     private TextInput nameInput;
     private PreviewSetting preview;
     private Setting<?> highlighted;
@@ -70,15 +69,15 @@ public final class PreviewWindow {
     private double pressX;
     private double lastX;
 
-    public PreviewWindow(WidgetHost host) {
-        this.host = host;
+    public PreviewWindow(ClickGui gui) {
+        this.gui = gui;
     }
 
     public void init(PanelLayout layout) {
         this.layout = layout;
-        back = host.add(new IconButton(backX(), backY(), layout.atLeastOne(BACK_SIZE), layout.scale(), BACK_ICON,
+        back = gui.add(Button.icon(backX(), backY(), layout.atLeastOne(BACK_SIZE), layout.scale(), BACK_ICON,
                 Component.literal("Back"), this::close));
-        nameInput = host.add(new TextInput(contentX(), inputY(), contentWidth(), layout.atLeastOne(INPUT_HEIGHT), layout.scale(),
+        nameInput = gui.add(new TextInput(contentX(), inputY(), contentWidth(), layout.atLeastOne(INPUT_HEIGHT), layout.scale(),
                 Component.literal(Lang.get("preview.skin")), NAME_MAX_LENGTH, () -> skinName, this::setSkinName));
         nameInput.setPlaceholder(Lang.get("preview.skin"));
         SkinCache.request(skinName);
@@ -123,14 +122,14 @@ public final class PreviewWindow {
         this.preview = preview;
         open = true;
         reveal.set(1f);
-        host.dropFocus();
+        gui.dropFocus();
     }
 
     public void close() {
         open = false;
         dragging = false;
         reveal.set(0f);
-        host.dropFocus();
+        gui.dropFocus();
     }
 
     public boolean isOpen() {
@@ -289,7 +288,7 @@ public final class PreviewWindow {
             dragged = false;
             pressX = event.x();
             lastX = event.x();
-            host.dropFocus();
+            gui.dropFocus();
         }
         return !back.isMouseOver(event.x(), event.y()) && !nameInput.isMouseOver(event.x(), event.y());
     }

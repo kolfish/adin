@@ -1,6 +1,5 @@
-package dev.koifih.client.ui.clickgui.page;
+package dev.koifih.client.ui.clickgui;
 
-import dev.koifih.client.ui.clickgui.PanelLayout;
 import dev.koifih.client.ui.component.Popup;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.input.KeyEvent;

@@ -2,8 +2,7 @@ package dev.koifih.client.ui.component;
 
 import dev.koifih.client.render.Draw;
 import dev.koifih.client.ui.Theme;
-import dev.koifih.client.ui.animation.Easing;
-import dev.koifih.client.ui.animation.Transition;
+import dev.koifih.client.ui.Transition;
 import dev.koifih.client.util.Colors;
 import dev.koifih.client.util.Lang;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
@@ -32,7 +31,7 @@ public final class AccentPicker extends Popup {
         this.get = get;
         this.set = set;
         this.window = new HsvWindow(this, get, set);
-        this.ring = new Transition(ringTarget(), 150, Easing.EASE_OUT_CUBIC);
+        this.ring = new Transition(ringTarget(), 150);
     }
 
     private float ringTarget() {

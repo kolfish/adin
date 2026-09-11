@@ -5,8 +5,7 @@ import dev.koifih.client.render.Opacity;
 import dev.koifih.client.render.Text;
 import dev.koifih.client.render.Transform;
 import dev.koifih.client.ui.Theme;
-import dev.koifih.client.ui.animation.Easing;
-import dev.koifih.client.ui.animation.Transition;
+import dev.koifih.client.ui.Transition;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.narration.NarratedElementType;
 import net.minecraft.client.gui.narration.NarrationElementOutput;
@@ -18,7 +17,7 @@ public final class HelpDot extends Control {
     private static final float TOOLTIP_GAP = 4f;
 
     private final Supplier<String> tooltip;
-    private final Transition shown = new Transition(0f, 120, Easing.EASE_OUT_CUBIC);
+    private final Transition shown = new Transition(0f, 120);
 
     public HelpDot(int x, int y, int size, float scale, Supplier<String> tooltip) {
         super(x, y, size, size, scale, Component.literal("Help"));

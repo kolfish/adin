@@ -1,7 +1,6 @@
 package dev.koifih.client.ui.component;
 
-import dev.koifih.client.ui.animation.Easing;
-import dev.koifih.client.ui.animation.Transition;
+import dev.koifih.client.ui.Transition;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.input.KeyEvent;
 import net.minecraft.client.input.MouseButtonEvent;
@@ -10,7 +9,7 @@ import org.lwjgl.glfw.GLFW;
 
 public abstract class Popup extends Control {
     private boolean open;
-    private final Transition reveal = new Transition(0f, 150, Easing.EASE_OUT_CUBIC);
+    private final Transition reveal = new Transition(0f, 150);
     private int bottomLimit = Integer.MAX_VALUE;
 
     protected Popup(int x, int y, int width, int height, float scale, Component label) {

@@ -1,6 +1,6 @@
 package dev.koifih.client.mixin.input;
 
-import dev.koifih.client.ui.hud.HudEditor;
+import dev.koifih.client.ui.HudEditor;
 import net.minecraft.client.gui.screens.ChatScreen;
 import net.minecraft.client.input.MouseButtonEvent;
 import org.spongepowered.asm.mixin.Mixin;

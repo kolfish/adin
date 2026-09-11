@@ -6,15 +6,23 @@ import dev.koifih.client.ui.Theme;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.narration.NarrationElementOutput;
+import net.minecraft.client.input.KeyEvent;
+import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.client.sounds.SoundManager;
 import net.minecraft.network.chat.Component;
 
 public abstract class Control extends AbstractWidget {
     protected final float scale;
+    private final Runnable action;
 
     protected Control(int x, int y, int width, int height, float scale, Component label) {
+        this(x, y, width, height, scale, label, null);
+    }
+
+    protected Control(int x, int y, int width, int height, float scale, Component label, Runnable action) {
         super(x, y, width, height, label);
         this.scale = scale;
+        this.action = action;
     }
 
     public boolean capturesInput() {
@@ -22,6 +30,24 @@ public abstract class Control extends AbstractWidget {
     }
 
     public void dismiss() {
+    }
+
+    protected void activate() {
+        if (action != null) action.run();
+    }
+
+    @Override
+    public void onClick(MouseButtonEvent event, boolean doubleClick) {
+        activate();
+    }
+
+    @Override
+    public boolean keyPressed(KeyEvent event) {
+        if (action != null && active && isFocused() && event.isSelection()) {
+            activate();
+            return true;
+        }
+        return super.keyPressed(event);
     }
 
     float px(float units) {

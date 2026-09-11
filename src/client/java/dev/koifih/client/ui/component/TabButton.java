@@ -3,8 +3,7 @@ package dev.koifih.client.ui.component;
 import dev.koifih.client.render.Draw;
 import dev.koifih.client.render.Text;
 import dev.koifih.client.ui.Theme;
-import dev.koifih.client.ui.animation.Easing;
-import dev.koifih.client.ui.animation.Transition;
+import dev.koifih.client.ui.Transition;
 import dev.koifih.client.ui.clickgui.Sidebar;
 import dev.koifih.client.util.Colors;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
@@ -13,7 +12,7 @@ import net.minecraft.client.gui.narration.NarrationElementOutput;
 import net.minecraft.network.chat.Component;
 import java.util.function.BooleanSupplier;
 
-public final class TabButton extends Clickable {
+public final class TabButton extends Control {
     private static final float ICON_INSET = 5f;
     private static final float ICON_SIZE = 11f;
     private static final float TEXT_INSET = 22f;
@@ -22,7 +21,7 @@ public final class TabButton extends Clickable {
 
     private final Sidebar.Tab tab;
     private final BooleanSupplier selected;
-    private final Transition onPill = new Transition(0f, 150, Easing.EASE_OUT_CUBIC);
+    private final Transition onPill = new Transition(0f, 150);
 
     public TabButton(int x, int y, int width, int height, float scale, Sidebar.Tab tab,
                      BooleanSupplier selected, Runnable onSelect) {

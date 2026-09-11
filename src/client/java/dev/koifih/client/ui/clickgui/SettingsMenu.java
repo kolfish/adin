@@ -5,17 +5,16 @@ import dev.koifih.client.render.Draw;
 import dev.koifih.client.render.Text;
 import dev.koifih.client.render.Transform;
 import dev.koifih.client.ui.Theme;
+import dev.koifih.client.ui.Transition;
 import dev.koifih.client.ui.UiScale;
 import dev.koifih.client.ui.Units;
-import dev.koifih.client.ui.animation.Easing;
-import dev.koifih.client.ui.animation.Transition;
 import dev.koifih.client.ui.component.AccentPicker;
+import dev.koifih.client.ui.component.Button;
 import dev.koifih.client.ui.component.Control;
 import dev.koifih.client.ui.component.Dropdown;
-import dev.koifih.client.ui.component.IconButton;
 import dev.koifih.client.ui.component.Keybind;
 import dev.koifih.client.ui.component.Popup;
-import dev.koifih.client.ui.component.ThemeSwitch;
+import dev.koifih.client.ui.component.Segmented;
 import dev.koifih.client.util.Lang;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.input.MouseButtonEvent;
@@ -34,14 +33,17 @@ public final class SettingsMenu {
     private static final int GEAR_SIZE = 16;
     private static final int RADIUS = 6;
     private static final int CLOSE_ICON = 0xe5cd;
+    private static final int LIGHT_ICON = 0xe518;
+    private static final int DARK_ICON = 0xe51c;
     private static final int LANGUAGE_ICON = 0xe894;
     private static final int SIZE_ICON = 0xe8ff;
     private static final int UNITS_ICON = 0xe41c;
     private static final int BIND_WIDTH = 42;
     private static final int BIND_HEIGHT = 16;
+    private static final Theme.Mode[] MODES = {Theme.Mode.LIGHT, Theme.Mode.DARK};
 
-    private final WidgetHost host;
-    private final Transition reveal = new Transition(0f, REVEAL_MILLIS, Easing.EASE_OUT_CUBIC);
+    private final ClickGui gui;
+    private final Transition reveal = new Transition(0f, REVEAL_MILLIS);
     private final List<Control> controls = new ArrayList<>();
     private PanelLayout layout;
     private boolean open;
@@ -51,8 +53,8 @@ public final class SettingsMenu {
     private AccentPicker accent;
     private Keybind bind;
 
-    public SettingsMenu(WidgetHost host) {
-        this.host = host;
+    public SettingsMenu(ClickGui gui) {
+        this.gui = gui;
     }
 
     public void init(PanelLayout layout) {
@@ -63,29 +65,33 @@ public final class SettingsMenu {
         int inner = layout.scaled(PADDING);
 
         int closeSize = layout.atLeastOne(12);
-        IconButton close = host.add(new IconButton(right() - inner - closeSize,
+        Button close = gui.add(Button.icon(right() - inner - closeSize,
                 y() + inner + (layout.scaled(TITLE_HEIGHT) - closeSize) / 2, closeSize, scale, CLOSE_ICON,
                 Component.literal("Close client settings"), this::close));
 
         int switchHeight = layout.atLeastOne(16);
-        ThemeSwitch theme = host.add(new ThemeSwitch(x() + inner, rowY(0) + (rowHeight - switchHeight) / 2,
-                width() - 2 * inner, switchHeight, scale));
+        Segmented theme = gui.add(new Segmented(x() + inner, rowY(0) + (rowHeight - switchHeight) / 2,
+                width() - 2 * inner, switchHeight, scale, Component.literal("Theme"),
+                new Segmented.Segment[] {
+                        Segmented.Segment.of(LIGHT_ICON, Lang.get("theme.light")),
+                        Segmented.Segment.of(DARK_ICON, Lang.get("theme.dark"))},
+                () -> Theme.mode() == Theme.Mode.LIGHT ? 0 : 1, index -> Theme.setMode(MODES[index])));
 
         String[] languages = new String[Lang.Language.ALL.length];
         for (int i = 0; i < languages.length; i++) languages[i] = Lang.Language.ALL[i].displayName();
         int dropdownHeight = layout.atLeastOne(18);
-        language = host.add(new Dropdown(x() + inner, rowY(1) + (rowHeight - dropdownHeight) / 2,
+        language = gui.add(Dropdown.single(x() + inner, rowY(1) + (rowHeight - dropdownHeight) / 2,
                 width() - 2 * inner, dropdownHeight, scale, Component.literal(Lang.get("language")), languages,
                 () -> Lang.current().ordinal(), index -> {
                     Lang.set(Lang.Language.ALL[index]);
-                    host.requestRebuild();
+                    gui.requestRebuild();
                 }));
         language.setIcon(LANGUAGE_ICON);
         language.setBottomLimit(layout.bottom());
 
         String[] sizes = new String[UiScale.ALL.length];
         for (int i = 0; i < sizes.length; i++) sizes[i] = UiScale.ALL[i].displayName();
-        size = host.add(new Dropdown(x() + inner, rowY(2) + (rowHeight - dropdownHeight) / 2,
+        size = gui.add(Dropdown.single(x() + inner, rowY(2) + (rowHeight - dropdownHeight) / 2,
                 width() - 2 * inner, dropdownHeight, scale, Component.literal(Lang.get("size")), sizes,
                 () -> UiScale.current().ordinal(), index -> UiScale.set(UiScale.ALL[index])));
         size.setIcon(SIZE_ICON);
@@ -93,7 +99,7 @@ public final class SettingsMenu {
 
         String[] unitNames = new String[Units.ALL.length];
         for (int i = 0; i < unitNames.length; i++) unitNames[i] = Units.ALL[i].displayName();
-        units = host.add(new Dropdown(x() + inner, rowY(3) + (rowHeight - dropdownHeight) / 2,
+        units = gui.add(Dropdown.single(x() + inner, rowY(3) + (rowHeight - dropdownHeight) / 2,
                 width() - 2 * inner, dropdownHeight, scale, Component.literal(Lang.get("units")), unitNames,
                 () -> Units.current().ordinal(), index -> Units.set(Units.ALL[index])));
         units.setIcon(UNITS_ICON);
@@ -103,12 +109,12 @@ public final class SettingsMenu {
         AccentPicker picker = new AccentPicker(0, rowY(4) + (rowHeight - accentHeight) / 2, accentHeight, scale,
                 Theme::accentRgb, Theme::setAccent);
         picker.setX(right() - inner - picker.getWidth());
-        accent = host.add(picker);
+        accent = gui.add(picker);
         accent.setBottomLimit(layout.bottom());
 
         int bindWidth = layout.atLeastOne(BIND_WIDTH);
         int bindHeight = layout.atLeastOne(BIND_HEIGHT);
-        bind = host.add(new Keybind(right() - inner - bindWidth, rowY(5) + (rowHeight - bindHeight) / 2,
+        bind = gui.add(new Keybind(right() - inner - bindWidth, rowY(5) + (rowHeight - bindHeight) / 2,
                 bindWidth, bindHeight, scale, Component.literal(Lang.get("clickgui_bind")),
                 Keybinds::clickGuiKey, Keybinds::setClickGuiKey));
         bind.setClearable(false);
@@ -169,14 +175,14 @@ public final class SettingsMenu {
     public void open() {
         open = true;
         reveal.set(1f);
-        host.dropFocus();
+        gui.dropFocus();
     }
 
     public void close() {
         for (Control control : controls) control.dismiss();
         open = false;
         reveal.set(0f);
-        host.dropFocus();
+        gui.dropFocus();
     }
 
     public void updateStates() {

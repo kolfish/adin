@@ -1,4 +1,4 @@
-package dev.koifih.client.ui.clickgui.page;
+package dev.koifih.client.ui.clickgui;
 
 import dev.koifih.client.config.Config;
 import dev.koifih.client.config.ConfigStore;
@@ -7,13 +7,9 @@ import dev.koifih.client.render.Opacity;
 import dev.koifih.client.render.Text;
 import dev.koifih.client.render.Transform;
 import dev.koifih.client.ui.Theme;
-import dev.koifih.client.ui.animation.Easing;
-import dev.koifih.client.ui.animation.Transition;
-import dev.koifih.client.ui.clickgui.PanelLayout;
-import dev.koifih.client.ui.clickgui.WidgetHost;
+import dev.koifih.client.ui.Transition;
 import dev.koifih.client.ui.component.Button;
 import dev.koifih.client.ui.component.Control;
-import dev.koifih.client.ui.component.IconButton;
 import dev.koifih.client.ui.component.Segmented;
 import dev.koifih.client.ui.component.TextInput;
 import dev.koifih.client.util.Lang;
@@ -52,9 +48,9 @@ public final class ConfigsPage implements Page {
     private static final int ADD_ICON = 0xe145;
     private static final int ADD_HEIGHT = 22;
 
-    private final WidgetHost host;
-    private final Transition dialogReveal = new Transition(0f, 150, Easing.EASE_OUT_CUBIC);
-    private final Transition listReveal = new Transition(0f, 200, Easing.EASE_OUT_CUBIC);
+    private final ClickGui gui;
+    private final Transition dialogReveal = new Transition(0f, 150);
+    private final Transition listReveal = new Transition(0f, 200);
     private final List<Control> cardControls = new ArrayList<>();
     private final List<Control> createControls = new ArrayList<>();
     private List<Config> configs = new ArrayList<>();
@@ -72,12 +68,12 @@ public final class ConfigsPage implements Page {
     private int scope = Config.Scope.BOTH.ordinal();
     private boolean dialogOpen;
 
-    public ConfigsPage(WidgetHost host) {
-        this.host = host;
+    public ConfigsPage(ClickGui gui) {
+        this.gui = gui;
     }
 
     private <T extends AbstractWidget> T add(T widget) {
-        return host.add(widget);
+        return gui.add(widget);
     }
 
     @Override
@@ -115,10 +111,10 @@ public final class ConfigsPage implements Page {
             int loadX = deleteX - area.scaled(GAP) - loadWidth;
             cardControls.add(add(new Button(loadX, cardY + (cardHeight - buttonHeight) / 2, loadWidth, buttonHeight, scale,
                     Component.literal(loadLabel), () -> load(config))));
-            cardControls.add(add(new IconButton(deleteX, cardY + (cardHeight - deleteSize) / 2, deleteSize, scale, DELETE_ICON,
+            cardControls.add(add(Button.icon(deleteX, cardY + (cardHeight - deleteSize) / 2, deleteSize, scale, DELETE_ICON,
                     Component.literal(Lang.get("configs.delete")), () -> delete(config))));
         }
-        addButton = add(new Button(area.rowX(), cardY(visibleCount()), area.rowWidth(), Math.max(1, area.scaled(ADD_HEIGHT)), scale,
+        addButton = add(Button.tile(area.rowX(), cardY(visibleCount()), area.rowWidth(), Math.max(1, area.scaled(ADD_HEIGHT)), scale,
                 Component.literal(makeLabel), ADD_ICON, this::openCreate));
 
         int rowHeight = Math.max(1, area.scaled(DIALOG_ROW));
@@ -134,7 +130,7 @@ public final class ConfigsPage implements Page {
         descriptionInput = add(new TextInput(controlX, dialogRowY(dialogY, 1) + (rowHeight - inputHeight) / 2, controlWidth, inputHeight, scale,
                 Component.literal(Lang.get("configs.description")), 48, () -> description, value -> description = value));
         descriptionInput.setPlaceholder(Lang.get("configs.description"));
-        String[] scopes = {Lang.get("configs.scope.colors"), Lang.get("configs.scope.settings"), Lang.get("configs.scope.both")};
+        Segmented.Segment[] scopes = {Segmented.Segment.of(Lang.get("configs.scope.colors")), Segmented.Segment.of(Lang.get("configs.scope.settings")), Segmented.Segment.of(Lang.get("configs.scope.both"))};
         int labelWidth = (int) Math.ceil(Text.width(Lang.get("configs.include"), 7 * scale));
         int scopeRight = dialogX + dialogWidth - area.scaled(DIALOG_PADDING);
         int scopeMax = scopeRight - (dialogX + area.scaled(DIALOG_PADDING) + labelWidth + area.scaled(GAP));
@@ -207,17 +203,17 @@ public final class ConfigsPage implements Page {
         if (name.isBlank()) return;
         ConfigStore.create(name, description, Config.Scope.values()[scope]);
         closeDialog();
-        host.requestRebuild();
+        gui.requestRebuild();
     }
 
     private void load(Config config) {
         ConfigStore.apply(config, true, true);
-        host.requestRebuild();
+        gui.requestRebuild();
     }
 
     private void delete(Config config) {
         ConfigStore.delete(config);
-        host.requestRebuild();
+        gui.requestRebuild();
     }
 
     @Override

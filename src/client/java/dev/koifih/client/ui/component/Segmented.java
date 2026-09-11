@@ -1,9 +1,9 @@
 package dev.koifih.client.ui.component;
 
+import dev.koifih.client.render.Draw;
 import dev.koifih.client.render.Text;
 import dev.koifih.client.ui.Theme;
-import dev.koifih.client.ui.animation.Easing;
-import dev.koifih.client.ui.animation.Transition;
+import dev.koifih.client.ui.Transition;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.narration.NarratedElementType;
 import net.minecraft.client.gui.narration.NarrationElementOutput;
@@ -14,61 +14,99 @@ import java.util.function.IntConsumer;
 import java.util.function.IntSupplier;
 
 public final class Segmented extends Control {
-    private final String[] labels;
+    public record Segment(int icon, String label) {
+        public static Segment of(String label) {
+            return new Segment(-1, label);
+        }
+
+        public static Segment of(int icon) {
+            return new Segment(icon, null);
+        }
+
+        public static Segment of(int icon, String label) {
+            return new Segment(icon, label);
+        }
+    }
+
+    private static final float TEXT_SIZE = 7f;
+    private static final float ICON_SIZE = 8f;
+    private static final float ICON_GAP = 3f;
+    private static final float SEGMENT_PADDING = 12f;
+
+    private final Segment[] segments;
     private final IntSupplier get;
     private final IntConsumer set;
     private final Transition highlight;
 
     public Segmented(int x, int y, int width, int height, float scale, Component label,
-                     String[] labels, IntSupplier get, IntConsumer set) {
+                     Segment[] segments, IntSupplier get, IntConsumer set) {
         super(x, y, width, height, scale, label);
-        this.labels = labels;
+        this.segments = segments;
         this.get = get;
         this.set = set;
-        this.highlight = new Transition(get.getAsInt(), 150, Easing.EASE_OUT_CUBIC);
+        this.highlight = new Transition(get.getAsInt(), 150);
     }
 
-    public static int preferredWidth(String[] labels, float scale) {
+    public static int preferredWidth(Segment[] segments, float scale) {
         float widest = 0;
-        for (String label : labels) widest = Math.max(widest, Text.width(label, 6.5f * scale));
-        return (int) Math.ceil(labels.length * (widest + 12 * scale));
+        for (Segment segment : segments) widest = Math.max(widest, contentWidth(segment, segment.label(), scale));
+        return (int) Math.ceil(segments.length * (widest + SEGMENT_PADDING * scale));
+    }
+
+    private static float contentWidth(Segment segment, String label, float scale) {
+        float width = 0;
+        if (segment.icon() >= 0) width += ICON_SIZE * scale;
+        if (segment.icon() >= 0 && label != null) width += ICON_GAP * scale;
+        if (label != null) width += Text.width(label, TEXT_SIZE * scale);
+        return width;
     }
 
     private float segmentWidth() {
-        return getWidth() / (float) labels.length;
+        return getWidth() / (float) segments.length;
     }
 
     @Override
     protected void extractWidgetRenderState(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float delta) {
-        highlight.set(get.getAsInt());
+        int selected = get.getAsInt();
+        highlight.set(selected);
         float segment = segmentWidth();
         rect(graphics, getX(), getY(), getWidth(), getHeight(), px(4), Theme.CONTROL);
         rect(graphics, getX() + segment * highlight.value(), getY(), segment, getHeight(), px(4), Theme.CONTROL_ACTIVE);
-        float size = px(6.5f);
-        for (int i = 0; i < labels.length; i++) {
-            String label = fit(labels[i], segment - px(6), size);
-            float x = getX() + segment * i + (segment - Text.width(label, size)) / 2;
-            text(graphics, label, x, centerY(), size, get.getAsInt() == i ? Theme.TEXT : Theme.DIM);
+        for (int i = 0; i < segments.length; i++) {
+            Segment item = segments[i];
+            int color = selected == i ? Theme.TEXT : Theme.DIM;
+            float iconSpan = item.icon() >= 0 ? px(ICON_SIZE + ICON_GAP) : 0f;
+            String label = item.label() == null ? null : fit(item.label(), segment - px(6) - iconSpan, px(TEXT_SIZE));
+            float x = getX() + segment * i + (segment - contentWidth(item, label, scale)) / 2;
+            if (item.icon() >= 0) {
+                Draw.icon(graphics, item.icon(), x, centerY() - px(ICON_SIZE) / 2, px(ICON_SIZE), color);
+                x += iconSpan;
+            }
+            if (label != null) text(graphics, label, x, centerY(), px(TEXT_SIZE), color);
         }
     }
 
     @Override
     public void onClick(MouseButtonEvent event, boolean doubleClick) {
-        set.accept(Math.clamp((int) ((event.x() - getX()) / segmentWidth()), 0, labels.length - 1));
+        set.accept(Math.clamp((int) ((event.x() - getX()) / segmentWidth()), 0, segments.length - 1));
     }
 
     @Override
     public boolean keyPressed(KeyEvent event) {
         if (!active || !isFocused()) return false;
-        if (event.isLeft()) set.accept(Math.max(0, get.getAsInt() - 1));
-        else if (event.isRight()) set.accept(Math.min(labels.length - 1, get.getAsInt() + 1));
+        int selected = get.getAsInt();
+        if (event.isLeft()) set.accept(Math.max(0, selected - 1));
+        else if (event.isRight()) set.accept(Math.min(segments.length - 1, selected + 1));
+        else if (event.isSelection()) set.accept((selected + 1) % segments.length);
         else return super.keyPressed(event);
         return true;
     }
 
     @Override
     protected void updateWidgetNarration(NarrationElementOutput output) {
-        output.add(NarratedElementType.TITLE, Component.literal(getMessage().getString() + ": " + labels[get.getAsInt()]));
+        int selected = get.getAsInt();
+        String name = segments[selected].label() != null ? segments[selected].label() : String.valueOf(selected + 1);
+        output.add(NarratedElementType.TITLE, Component.literal(getMessage().getString() + ": " + name));
         output.add(NarratedElementType.USAGE, Component.literal("Left and right arrows change the selection."));
     }
 }

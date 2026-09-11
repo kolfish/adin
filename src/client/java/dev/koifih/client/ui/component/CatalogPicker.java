@@ -5,10 +5,9 @@ import dev.koifih.client.render.Opacity;
 import dev.koifih.client.render.Scissor;
 import dev.koifih.client.render.Text;
 import dev.koifih.client.render.Transform;
+import dev.koifih.client.ui.Catalog;
 import dev.koifih.client.ui.Theme;
-import dev.koifih.client.ui.animation.Easing;
-import dev.koifih.client.ui.animation.Transition;
-import dev.koifih.client.ui.catalog.Catalog;
+import dev.koifih.client.ui.Transition;
 import dev.koifih.client.util.Colors;
 import dev.koifih.client.util.Lang;
 import dev.koifih.client.util.Time;
@@ -28,7 +27,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.function.Supplier;
 
-public final class CatalogPicker extends RowPopup implements Windowed {
+public final class CatalogPicker extends RowPopup {
     private static final int CHECK_ICON = 0xe5ca;
     private static final int SEARCH_ICON = 0xe8b6;
     private static final float MARGIN = 6f;
@@ -43,8 +42,8 @@ public final class CatalogPicker extends RowPopup implements Windowed {
 
     private final Catalog catalog;
     private final Supplier<Set<String>> selected;
-    private final Transition scrollShown = new Transition(0f, 120, Easing.EASE_OUT_CUBIC);
-    private final Transition groupHighlight = new Transition(0f, 150, Easing.EASE_OUT_CUBIC);
+    private final Transition scrollShown = new Transition(0f, 120);
+    private final Transition groupHighlight = new Transition(0f, 150);
     private final Map<String, Transition> checks = new HashMap<>();
     private int windowX;
     private int windowY;
@@ -69,7 +68,6 @@ public final class CatalogPicker extends RowPopup implements Windowed {
         this.selected = selected;
     }
 
-    @Override
     public void setWindow(int x, int y, int width, int height) {
         windowX = x;
         windowY = y;
@@ -181,7 +179,7 @@ public final class CatalogPicker extends RowPopup implements Windowed {
     }
 
     private Transition check(String id, boolean chosen) {
-        return checks.computeIfAbsent(id, key -> new Transition(chosen ? 1f : 0f, 120, Easing.EASE_OUT_CUBIC));
+        return checks.computeIfAbsent(id, key -> new Transition(chosen ? 1f : 0f, 120));
     }
 
     private void setQuery(String value) {

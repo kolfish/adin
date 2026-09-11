@@ -3,8 +3,7 @@ package dev.koifih.client.ui.component;
 import com.mojang.blaze3d.platform.InputConstants;
 import dev.koifih.client.render.Text;
 import dev.koifih.client.ui.Theme;
-import dev.koifih.client.ui.animation.Easing;
-import dev.koifih.client.ui.animation.Transition;
+import dev.koifih.client.ui.Transition;
 import dev.koifih.client.util.Colors;
 import dev.koifih.client.util.Lang;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
@@ -22,7 +21,7 @@ public final class Keybind extends Control {
     private final Consumer<InputConstants.Key> set;
     private boolean capturing;
     private boolean clearable = true;
-    private final Transition listening = new Transition(0f, 120, Easing.EASE_OUT_CUBIC);
+    private final Transition listening = new Transition(0f, 120);
 
     public Keybind(int x, int y, int width, int height, float scale, Component label,
                    Supplier<InputConstants.Key> get, Consumer<InputConstants.Key> set) {

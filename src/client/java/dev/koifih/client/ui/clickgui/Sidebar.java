@@ -4,7 +4,8 @@ import dev.koifih.client.module.Category;
 import dev.koifih.client.render.Draw;
 import dev.koifih.client.render.Text;
 import dev.koifih.client.ui.Theme;
-import dev.koifih.client.ui.component.IconButton;
+import dev.koifih.client.ui.Transition;
+import dev.koifih.client.ui.component.Button;
 import dev.koifih.client.ui.component.TabButton;
 import dev.koifih.client.util.Lang;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
@@ -21,20 +22,23 @@ public final class Sidebar {
     private static final int BUTTON_HEIGHT = 22;
     private static final int BUTTON_STRIDE = 26;
     private static final int PILL_RADIUS = 6;
+    private static final int PILL_MILLIS = 150;
     private static final int GEAR_SIZE = 16;
     private static final int SETTINGS_ICON = 0xe8b8;
     private static final int CONFIGS_ICON = 0xe2c7;
     private static final String BRAND_TEXT = "adin.lol";
 
-    private final WidgetHost host;
+    private final ClickGui gui;
     private final Consumer<Tab> onSelect;
     private final Runnable onSettings;
     private final List<TabButton> buttons = new ArrayList<>();
-    private final SelectionPill pill = new SelectionPill();
-    private IconButton settingsButton;
+    private final Transition pillY = new Transition(0f, PILL_MILLIS);
+    private final Transition pillWidth = new Transition(0f, PILL_MILLIS);
+    private boolean pillPlaced;
+    private Button settingsButton;
 
-    public Sidebar(WidgetHost host, Consumer<Tab> onSelect, Runnable onSettings) {
-        this.host = host;
+    public Sidebar(ClickGui gui, Consumer<Tab> onSelect, Runnable onSettings) {
+        this.gui = gui;
         this.onSelect = onSelect;
         this.onSettings = onSettings;
     }
@@ -48,7 +52,7 @@ public final class Sidebar {
 
     public void init(PanelLayout layout, Supplier<Tab> selected) {
         buttons.clear();
-        pill.reset();
+        pillPlaced = false;
         float scale = layout.scale();
         int margin = layout.sidebarInset() - TabButton.iconInset(scale);
         int x = layout.x() + margin;
@@ -57,11 +61,11 @@ public final class Sidebar {
         int index = 0;
         for (Tab tab : TABS) {
             int y = layout.contentY() + layout.scaled(PanelLayout.PADDING + index++ * BUTTON_STRIDE);
-            buttons.add(host.add(new TabButton(x, y, width, height, scale, tab,
+            buttons.add(gui.add(new TabButton(x, y, width, height, scale, tab,
                     () -> selected.get() == tab, () -> onSelect.accept(tab))));
         }
         int gearSize = layout.atLeastOne(GEAR_SIZE);
-        settingsButton = host.add(new IconButton(layout.x() + layout.sidebarInset(),
+        settingsButton = gui.add(Button.icon(layout.x() + layout.sidebarInset(),
                 layout.bottom() - layout.sidebarInset() - gearSize, gearSize, scale, SETTINGS_ICON,
                 Component.literal("Client settings"), onSettings));
     }
@@ -72,7 +76,7 @@ public final class Sidebar {
     }
 
     public void resetPill() {
-        pill.reset();
+        pillPlaced = false;
     }
 
     public void draw(GuiGraphicsExtractor graphics, PanelLayout layout, Tab selected, int mouseX, int mouseY, float delta) {
@@ -96,12 +100,19 @@ public final class Sidebar {
             if (button.tab() == selected) target = button;
         }
         if (target == null) return;
-        SelectionPill.Position position = pill.update(target.getY(), target.getWidth());
-        Draw.rect(graphics, target.getX(), position.y(), position.width(),
-                target.getHeight(), Math.max(1, Math.round(PILL_RADIUS * layout.scale())), Theme.ACCENT);
+        if (!pillPlaced) {
+            pillY.snap(target.getY());
+            pillWidth.snap(target.getWidth());
+            pillPlaced = true;
+        }
+        pillY.set(target.getY());
+        pillWidth.set(target.getWidth());
+        float y = pillY.value();
+        Draw.rect(graphics, target.getX(), y, pillWidth.value(), target.getHeight(),
+                Math.max(1, Math.round(PILL_RADIUS * layout.scale())), Theme.ACCENT);
         for (TabButton button : buttons) {
             float center = button.getY() + button.getHeight() * 0.5f;
-            button.setOnPill(center >= position.y() && center < position.y() + target.getHeight());
+            button.setOnPill(center >= y && center < y + target.getHeight());
         }
     }
 }

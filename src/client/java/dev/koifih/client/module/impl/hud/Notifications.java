@@ -9,8 +9,7 @@ import dev.koifih.client.render.Opacity;
 import dev.koifih.client.render.Text;
 import dev.koifih.client.ui.Theme;
 import dev.koifih.client.ui.UiScale;
-import dev.koifih.client.ui.animation.Easing;
-import dev.koifih.client.ui.animation.Transition;
+import dev.koifih.client.ui.Transition;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import java.util.ArrayList;
@@ -52,7 +51,7 @@ public final class Notifications extends Module {
     }
 
     private void push(String text, boolean enabled) {
-        Transition reveal = new Transition(0f, REVEAL_MILLIS, Easing.EASE_OUT_CUBIC);
+        Transition reveal = new Transition(0f, REVEAL_MILLIS);
         reveal.set(1f);
         toasts.add(new Toast(text, enabled, System.nanoTime(), reveal));
     }
