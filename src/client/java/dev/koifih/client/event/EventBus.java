@@ -2,21 +2,23 @@ package dev.koifih.client.event;
 
 import dev.koifih.Adin;
 import java.util.ArrayList;
-import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.CopyOnWriteArrayList;
 
 public final class EventBus {
     private record Handler<E extends Event>(Class<E> type, int priority, Listener<E> listener) {
+        @SuppressWarnings("unchecked")
         void accept(Event event) {
-            listener.on(type.cast(event));
+            listener.on((E) event);
         }
     }
 
-    private final Map<Class<? extends Event>, List<Handler<?>>> handlers = new ConcurrentHashMap<>();
-    private volatile Map<Class<? extends Event>, Handler<?>[]> dispatch = new ConcurrentHashMap<>();
+    private static final Handler<?>[] NONE = new Handler<?>[0];
+
+    private final Map<Class<? extends Event>, List<Handler<?>>> subscribers = new HashMap<>();
+    private final Map<Class<? extends Event>, Handler<?>[]> dispatch = new ConcurrentHashMap<>();
 
     public <E extends Event> Subscription subscribe(Class<E> type, Listener<E> listener) {
         return subscribe(type, Priority.NORMAL, listener);
@@ -24,16 +26,22 @@ public final class EventBus {
 
     public <E extends Event> Subscription subscribe(Class<E> type, int priority, Listener<E> listener) {
         Handler<E> handler = new Handler<>(type, priority, listener);
-        handlers.computeIfAbsent(type, key -> new CopyOnWriteArrayList<>()).add(handler);
-        invalidate();
+        synchronized (this) {
+            subscribers.computeIfAbsent(type, key -> new ArrayList<>()).add(handler);
+            dispatch.clear();
+        }
         return () -> {
-            handlers.getOrDefault(type, List.of()).remove(handler);
-            invalidate();
+            synchronized (this) {
+                List<Handler<?>> registered = subscribers.get(type);
+                if (registered != null && registered.remove(handler)) dispatch.clear();
+            }
         };
     }
 
     public <E extends Event> E post(E event) {
-        for (Handler<?> handler : handlersFor(event.getClass())) {
+        Handler<?>[] handlers = dispatch.get(event.getClass());
+        if (handlers == null) handlers = resolve(event.getClass());
+        for (Handler<?> handler : handlers) {
             if (event instanceof CancellableEvent cancellable && cancellable.isCancelled()) break;
             try {
                 handler.accept(event);
@@ -44,20 +52,14 @@ public final class EventBus {
         return event;
     }
 
-    private Handler<?>[] handlersFor(Class<? extends Event> type) {
-        return dispatch.computeIfAbsent(type, this::flatten);
-    }
-
-    private Handler<?>[] flatten(Class<? extends Event> type) {
+    private synchronized Handler<?>[] resolve(Class<? extends Event> type) {
         List<Handler<?>> found = new ArrayList<>();
-        handlers.forEach((registered, listeners) -> {
-            if (registered.isAssignableFrom(type)) found.addAll(listeners);
+        subscribers.forEach((registered, handlers) -> {
+            if (registered.isAssignableFrom(type)) found.addAll(handlers);
         });
-        found.sort(Comparator.comparingInt((Handler<?> handler) -> handler.priority()).reversed());
-        return found.toArray(new Handler<?>[0]);
-    }
-
-    private void invalidate() {
-        dispatch = new ConcurrentHashMap<>();
+        found.sort((a, b) -> Integer.compare(b.priority(), a.priority()));
+        Handler<?>[] resolved = found.toArray(NONE);
+        dispatch.put(type, resolved);
+        return resolved;
     }
 }
