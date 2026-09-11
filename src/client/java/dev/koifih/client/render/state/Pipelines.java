@@ -22,6 +22,8 @@ public final class Pipelines {
             .addAttribute("UV2", GpuFormat.RG16_SINT)
             .build();
 
+    public static final float AA_SOFTNESS = 3.0f;
+
     private static final int MODE_SOLID = 0;
     private static final int MODE_HUE_BAR = 1;
     private static final int MODE_SATURATION_VALUE = 2;
@@ -47,7 +49,10 @@ public final class Pipelines {
     private Pipelines() {}
 
     private static RenderPipeline rect(String name, int mode) {
-        return shape("gui/" + name, "gui/rect", "gui/rect").withShaderDefine("RECT_MODE", mode).build();
+        return shape("gui/" + name, "gui/rect", "gui/rect")
+                .withShaderDefine("RECT_MODE", mode)
+                .withShaderDefine("AA_SOFTNESS", AA_SOFTNESS)
+                .build();
     }
 
     private static RenderPipeline.Builder shape(String name, String vertexShader, String fragmentShader) {
