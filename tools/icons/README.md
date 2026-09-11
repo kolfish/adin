@@ -33,6 +33,7 @@ of the example mod's CC0 license.
 | ESP preview | open_in_new | E89E |
 | Preview window back | arrow_back | E5C4 |
 | Keybind list header | keyboard | E312 |
+| Friends tab | group | E7EF |
 
 `material-icons.codepoints` contains the relevant entries from Google's upstream
 codepoint list. `charset.txt` selects these twenty-five glyphs for the MSDF atlas. Icons share `text.vsh` / `text.fsh` with the Comfortaa renderer, including

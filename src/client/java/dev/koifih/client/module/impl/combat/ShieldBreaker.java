@@ -2,6 +2,7 @@ package dev.koifih.client.module.impl.combat;
 
 import dev.koifih.client.event.events.PreTickEvent;
 import dev.koifih.client.mixin.accessor.MinecraftAccessor;
+import dev.koifih.client.friends.FriendList;
 import dev.koifih.client.module.Module;
 import dev.koifih.client.setting.BoolSetting;
 import dev.koifih.client.setting.SliderSetting;
@@ -78,6 +79,6 @@ public final class ShieldBreaker extends Module {
 
     private static Player crosshairPlayer(Minecraft client, LocalPlayer player) {
         if (!(client.hitResult instanceof EntityHitResult hit) || !(hit.getEntity() instanceof Player target)) return null;
-        return target != player && target.isAlive() && !target.isSpectator() ? target : null;
+        return target != player && target.isAlive() && !target.isSpectator() && !FriendList.protects(target) ? target : null;
     }
 }

@@ -17,6 +17,12 @@
   "category.misc": "Razno",
   "category.player": "Igrač",
   "category.configs": "Konfiguracije",
+  "category.friends": "Prijatelji",
+  "friends.search": "Pretraži igrače",
+  "friends.offline": "Izvan mreže",
+  "friends.noMatch": "Nema igrača koji odgovaraju.",
+  "friends.empty.1": "Još nema igrača.",
+  "friends.empty.2": "Uđi na server i pojavit će se ovdje.",
   "configs.empty.1": "Gle gle, čini se da još nemaš konfiguraciju.",
   "configs.empty.2": "Kako bi bilo da napraviš jednu?",
   "configs.make": "Napravi konfiguraciju",
@@ -158,5 +164,7 @@
   "bind.help.hold": "Držanje: radi samo dok je tipka pritisnuta",
   "preview.skin": "Korisničko ime",
   "preview.loading": "Učitavanje skina…",
-  "preview.missing": "Skin nije pronađen"
+  "preview.missing": "Skin nije pronađen",
+  "module.friends": "Friends",
+  "module.friends.description": "Štiti tvoje prijatelje od borbenih modula"
 }

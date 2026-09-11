@@ -17,6 +17,12 @@
   "category.misc": "Divers",
   "category.player": "Joueur",
   "category.configs": "Configs",
+  "category.friends": "Amis",
+  "friends.search": "Rechercher des joueurs",
+  "friends.offline": "Hors ligne",
+  "friends.noMatch": "Aucun joueur ne correspond.",
+  "friends.empty.1": "Aucun joueur pour le moment.",
+  "friends.empty.2": "Rejoins un serveur et ils apparaîtront ici.",
   "configs.empty.1": "Tiens tiens, on dirait que tu n'as pas encore de config.",
   "configs.empty.2": "Et si tu en créais une ?",
   "configs.make": "Créer une config",
@@ -158,5 +164,7 @@
   "bind.help.hold": "Maintien : actif seulement tant que la touche est enfoncée",
   "preview.skin": "Nom d'utilisateur",
   "preview.loading": "Chargement du skin…",
-  "preview.missing": "Aucun skin trouvé"
+  "preview.missing": "Aucun skin trouvé",
+  "module.friends": "Friends",
+  "module.friends.description": "Protège tes amis des modules de combat"
 }

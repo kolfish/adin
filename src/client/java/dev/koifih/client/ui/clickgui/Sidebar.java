@@ -26,6 +26,7 @@ public final class Sidebar {
     private static final int GEAR_SIZE = 16;
     private static final int SETTINGS_ICON = 0xe8b8;
     private static final int CONFIGS_ICON = 0xe2c7;
+    private static final int FRIENDS_ICON = 0xe7ef;
     private static final String BRAND_TEXT = "adin.lol";
 
     private final ClickGui gui;
@@ -46,6 +47,7 @@ public final class Sidebar {
     private static List<Tab> tabs() {
         List<Tab> tabs = new ArrayList<>();
         for (Category category : Category.values()) tabs.add(new Tab(category.id(), category.icon(), category::label, category));
+        tabs.add(new Tab("friends", FRIENDS_ICON, () -> Lang.get("category.friends"), null));
         tabs.add(new Tab("configs", CONFIGS_ICON, () -> Lang.get("category.configs"), null));
         return List.copyOf(tabs);
     }

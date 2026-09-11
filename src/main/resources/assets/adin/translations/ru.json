@@ -17,6 +17,12 @@
   "category.misc": "Разное",
   "category.player": "Игрок",
   "category.configs": "Конфиги",
+  "category.friends": "Друзья",
+  "friends.search": "Поиск игроков",
+  "friends.offline": "Не в сети",
+  "friends.noMatch": "Нет подходящих игроков.",
+  "friends.empty.1": "Игроков пока нет.",
+  "friends.empty.2": "Зайдите на сервер, и они появятся здесь.",
   "configs.empty.1": "Так-так, похоже, вы ещё не создали конфиг.",
   "configs.empty.2": "Может, создадим его?",
   "configs.make": "Создать конфиг",
@@ -158,5 +164,7 @@
   "bind.help.hold": "Удержание: работает только пока клавиша зажата",
   "preview.skin": "Имя игрока",
   "preview.loading": "Загрузка скина…",
-  "preview.missing": "Скин не найден"
+  "preview.missing": "Скин не найден",
+  "module.friends": "Friends",
+  "module.friends.description": "Защищает ваших друзей от боевых модулей"
 }

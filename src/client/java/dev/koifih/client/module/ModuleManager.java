@@ -14,6 +14,7 @@ import dev.koifih.client.module.impl.hud.KeybindList;
 import dev.koifih.client.module.impl.hud.ModuleList;
 import dev.koifih.client.module.impl.hud.Notifications;
 import dev.koifih.client.module.impl.hud.Watermark;
+import dev.koifih.client.module.impl.misc.Friends;
 import dev.koifih.client.module.impl.movement.JumpReset;
 import dev.koifih.client.module.impl.movement.MoveFix;
 import dev.koifih.client.module.impl.movement.Sprint;
@@ -65,6 +66,8 @@ public final class ModuleManager {
         register(Category.PLAYER,
                 new KeyPearl(),
                 new AutoTotem());
+        register(Category.MISC,
+                new Friends());
     }
 
     private void register(Category category, Module... group) {

@@ -17,6 +17,12 @@
   "category.misc": "Różne",
   "category.player": "Gracz",
   "category.configs": "Konfiguracje",
+  "category.friends": "Znajomi",
+  "friends.search": "Szukaj graczy",
+  "friends.offline": "Offline",
+  "friends.noMatch": "Brak pasujących graczy.",
+  "friends.empty.1": "Nie ma tu jeszcze graczy.",
+  "friends.empty.2": "Wejdź na serwer, a pojawią się tutaj.",
   "configs.empty.1": "No no, wygląda na to, że nie masz jeszcze konfiguracji.",
   "configs.empty.2": "Może więc jakąś stworzysz?",
   "configs.make": "Utwórz konfigurację",
@@ -158,5 +164,7 @@
   "bind.help.hold": "Przytrzymanie: działa tylko gdy klawisz jest wciśnięty",
   "preview.skin": "Nazwa gracza",
   "preview.loading": "Wczytywanie skina…",
-  "preview.missing": "Nie znaleziono skina"
+  "preview.missing": "Nie znaleziono skina",
+  "module.friends": "Friends",
+  "module.friends.description": "Chroni twoich znajomych przed modułami bojowymi"
 }

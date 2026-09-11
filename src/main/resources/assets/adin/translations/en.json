@@ -17,6 +17,12 @@
   "category.misc": "Misc",
   "category.player": "Player",
   "category.configs": "Configs",
+  "category.friends": "Friends",
+  "friends.search": "Search players",
+  "friends.offline": "Offline",
+  "friends.noMatch": "No players match your search.",
+  "friends.empty.1": "No players here yet.",
+  "friends.empty.2": "Join a server and they'll show up here.",
   "configs.empty.1": "Well well, seems like you haven't made a config yet.",
   "configs.empty.2": "So how about you make one?",
   "configs.make": "Make config",
@@ -158,5 +164,7 @@
   "bind.help.hold": "Hold: stays on only while the key is held",
   "preview.skin": "Username",
   "preview.loading": "Loading skin…",
-  "preview.missing": "No skin found"
+  "preview.missing": "No skin found",
+  "module.friends": "Friends",
+  "module.friends.description": "Keeps your friends safe from combat modules"
 }

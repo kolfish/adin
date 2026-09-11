@@ -36,7 +36,8 @@ public final class ClickGui extends Screen {
     private final PreviewWindow preview = new PreviewWindow(this);
     private final ModulesPage modulesPage = new ModulesPage(this, () -> selectedTab.category());
     private final ConfigsPage configsPage = new ConfigsPage(this);
-    private final List<Page> pages = List.of(modulesPage, configsPage);
+    private final FriendsPage friendsPage = new FriendsPage(this);
+    private final List<Page> pages = List.of(modulesPage, friendsPage, configsPage);
     private final float uiScale = UiScale.current().factor();
     private PanelLayout layout;
     private boolean rebuildPending;
@@ -84,17 +85,19 @@ public final class ClickGui extends Screen {
     }
 
     private Page currentPage() {
-        return selectedTab.category() == null ? configsPage : modulesPage;
+        if (selectedTab.category() != null) return modulesPage;
+        return selectedTab.id().equals("friends") ? friendsPage : configsPage;
     }
 
     private void selectTab(Sidebar.Tab tab) {
         for (Page page : pages) page.reset();
         preview.close();
-        if (selectedTab != tab) {
+        Page before = currentPage();
+        selectedTab = tab;
+        if (currentPage() != before) {
             pageReveal.snap(0f);
             pageReveal.set(1f);
         }
-        selectedTab = tab;
         modulesPage.reloadRows();
         updateStates();
     }
@@ -114,8 +117,8 @@ public final class ClickGui extends Screen {
     private void updateStates() {
         boolean interactive = menu.isHidden();
         sidebar.setActive(interactive);
-        modulesPage.setState(selectedTab.category() != null, interactive);
-        configsPage.setState(selectedTab.category() == null, interactive);
+        Page current = currentPage();
+        for (Page page : pages) page.setState(page == current, interactive);
         menu.updateStates();
         preview.updateStates(interactive);
     }
