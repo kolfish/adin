@@ -18,7 +18,6 @@ import dev.koifih.client.util.Players;
 import dev.koifih.client.util.Time;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.Direction;
 import net.minecraft.network.protocol.game.ServerboundUseItemOnPacket;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.boss.enderdragon.EndCrystal;
@@ -120,8 +119,9 @@ public final class AutoCrystal extends Module {
                 next = top;
             }
         } else if (mc.level.isEmptyBlock(above) && (!awaitingSpawn || sincePlace.elapsed(SPAWN_WAIT))) {
-            next = top;
-            if (ready && hits(new AABB(base), eye, look, player.blockInteractionRange()) && place(player, new BlockHitResult(top, Direction.UP, base, false))) {
+            BlockHitResult spot = Placement.clickOn(mc.level, eye, base);
+            next = spot == null ? top : spot.getLocation();
+            if (spot != null && ready && Placement.looksAt(mc.level, base, eye, look, player.blockInteractionRange()) && place(player, spot)) {
                 sincePlace.reset();
                 lastActionTick = ticks;
                 awaitingSpawn = true;

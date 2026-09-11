@@ -46,7 +46,6 @@ public final class AutoCart extends Module {
     private static final String[] MODES = {"Normal", "Silent"};
     private static final int SILENT = 1;
     private static final int DROP_SEARCH = 8;
-    private static final double RAIL_HEIGHT = 0.0625;
     private static final double CART_CLEARANCE = 1.0;
     private static final double ARROW_SEARCH = 8.0;
     private static final double MOVING = 0.01;
@@ -146,9 +145,8 @@ public final class AutoCart extends Module {
             if (state.is(BlockTags.RAILS)) {
                 stage = Stage.CART;
             } else {
-                Vec3 point = Vec3.atBottomCenterOf(rail);
-                if (!aimed(player, point, ground)) return;
-                BlockHitResult hit = new BlockHitResult(point, Direction.UP, ground, false);
+                BlockHitResult hit = Placement.placeInto(mc.level, player.getEyePosition(), rail);
+                if (hit == null || !aimed(player, hit)) return;
                 int slot = Hotbar.find(player, stack -> stack.is(Items.RAIL));
                 if (slot == Hotbar.NONE || !placeable(player, player.getInventory().getItem(slot), hit)) {
                     stop(player);
@@ -162,12 +160,13 @@ public final class AutoCart extends Module {
             if (sinceAction.elapsed(delay.get() * 4L)) stop(player);
             return;
         }
-        Vec3 point = Vec3.atBottomCenterOf(rail).add(0.0, RAIL_HEIGHT, 0.0);
-        if (!aimed(player, point, rail)) return;
-        if (use(player, new BlockHitResult(point, Direction.UP, rail, false), Items.TNT_MINECART, false)) stage = Stage.IDLE;
+        BlockHitResult hit = Placement.clickOn(mc.level, player.getEyePosition(), rail);
+        if (hit == null || !aimed(player, hit)) return;
+        if (use(player, hit, Items.TNT_MINECART, false)) stage = Stage.IDLE;
     }
 
-    private boolean aimed(LocalPlayer player, Vec3 point, BlockPos block) {
+    private boolean aimed(LocalPlayer player, BlockHitResult hit) {
+        Vec3 point = hit.getLocation();
         Smoothing smoothing = Smoothing.EASE_OUT_CUBIC;
         RotationConfig config = mode.get() == SILENT
                 ? RotationConfig.silent(smoothness.get() / 100f, smoothing)
@@ -176,7 +175,7 @@ public final class AutoCart extends Module {
         if (!sinceAction.elapsed(delay.get())) return false;
         Vec3 eye = player.getEyePosition();
         Vec3 look = AdinClient.ROTATIONS.rotation(player).direction();
-        return new AABB(block).clip(eye, eye.add(look.scale(player.blockInteractionRange()))).isPresent();
+        return Placement.looksAt(mc.level, hit.getBlockPos(), eye, look, player.blockInteractionRange());
     }
 
     private BlockPos ground(BlockHitResult landing) {

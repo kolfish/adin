@@ -31,6 +31,7 @@ import dev.koifih.client.ui.component.Keybind;
 import dev.koifih.client.ui.component.Popup;
 import dev.koifih.client.ui.component.Segmented;
 import dev.koifih.client.ui.component.Slider;
+import dev.koifih.client.util.Colors;
 import dev.koifih.client.util.Lang;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.AbstractWidget;
@@ -70,10 +71,13 @@ public final class ModulesPage implements Page {
     private static final int HELP_SIZE = 12;
     private static final int PICKER_INSET = 4;
     private static final int PREVIEW_BUTTON_SIZE = 16;
+    private static final int SCROLL_MILLIS = 150;
+    private static final int FADE_HEIGHT = 24;
 
     private final ClickGui gui;
     private final Supplier<Category> category;
     private final Transition overlayReveal = new Transition(0f, OVERLAY_REVEAL_MILLIS);
+    private final Transition rowScrollShown = new Transition(0f, SCROLL_MILLIS);
     private final List<Module> modules = new ArrayList<>();
     private final List<RowControl> rowControls = new ArrayList<>();
     private final List<Control> settingControls = new ArrayList<>();
@@ -116,6 +120,7 @@ public final class ModulesPage implements Page {
         for (RowControl control : rowControls) gui.remove(control.widget());
         rowControls.clear();
         rowScroll = 0f;
+        rowScrollShown.snap(0f);
         buildRows();
     }
 
@@ -182,7 +187,7 @@ public final class ModulesPage implements Page {
         }
         if (!layout.inContent(x, y) || maxRowScroll() <= 0f) return false;
         rowScroll = Math.clamp((float) (rowScroll - dy * ROW_STRIDE * layout.scale()), 0f, maxRowScroll());
-        layoutRowControls();
+        rowScrollShown.set(rowScroll);
         return true;
     }
 
@@ -317,7 +322,7 @@ public final class ModulesPage implements Page {
     }
 
     private int rowY(int row) {
-        return layout.contentY() + layout.padding() + layout.scaled(row * ROW_STRIDE) - Math.round(rowScroll);
+        return layout.contentY() + layout.padding() + layout.scaled(row * ROW_STRIDE) - Math.round(rowScrollShown.value());
     }
 
     private int overlayX() {
@@ -458,10 +463,22 @@ public final class ModulesPage implements Page {
 
     @Override
     public void draw(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float delta) {
+        rowScrollShown.set(rowScroll);
+        layoutRowControls();
         Scissor.clip(contentArea(), () -> {
             drawRows(graphics);
             for (RowControl control : rowControls) control.widget().extractRenderState(graphics, mouseX, mouseY, delta);
+            drawFade(graphics);
         });
+    }
+
+    private void drawFade(GuiGraphicsExtractor graphics) {
+        int height = Math.min(layout.scaled(FADE_HEIGHT), layout.contentHeight());
+        float remaining = maxRowScroll() - rowScrollShown.value();
+        if (remaining <= 0f || height <= 0) return;
+        int bottom = Colors.withAlpha(Theme.MAIN, Math.clamp(remaining / height, 0f, 1f));
+        Draw.gradient(graphics, layout.contentX(), layout.bottom() - height, layout.contentWidth(), height,
+                layout.atLeastOne(PanelLayout.RADIUS), Draw.BOTTOM_RIGHT, Colors.withAlpha(Theme.MAIN, 0f), bottom);
     }
 
     public void drawOverlay(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float delta) {

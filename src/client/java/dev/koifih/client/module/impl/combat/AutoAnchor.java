@@ -18,7 +18,6 @@ import dev.koifih.client.util.Players;
 import dev.koifih.client.util.Time;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.Direction;
 import net.minecraft.core.Vec3i;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.network.protocol.game.ServerboundUseItemOnPacket;
@@ -32,7 +31,6 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.RespawnAnchorBlock;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
@@ -126,9 +124,12 @@ public final class AutoAnchor extends Module {
             shield = null;
             return;
         }
-        Vec3 point = Vec3.atBottomCenterOf(shield);
-        if (!aimed(player, point, ground)) return;
-        BlockHitResult hit = new BlockHitResult(point, Direction.UP, ground, false);
+        BlockHitResult hit = Placement.placeInto(mc.level, player.getEyePosition(), shield);
+        if (hit == null) {
+            shield = null;
+            return;
+        }
+        if (!aimed(player, hit)) return;
         int slot = nearest(player, stack -> stack.is(Items.GLOWSTONE));
         if (slot == Hotbar.NONE || !placeable(player, player.getInventory().getItem(slot), hit, Blocks.GLOWSTONE) || use(player, hit, stack -> stack.is(Items.GLOWSTONE), true)) shield = null;
     }
@@ -139,10 +140,8 @@ public final class AutoAnchor extends Module {
             if (sincePlace.elapsed(PLACE_WAIT)) idle(player);
             return;
         }
-        Direction face = facing(player, anchor);
-        Vec3 point = Vec3.atCenterOf(anchor).add(face.getStepX() * 0.5, face.getStepY() * 0.5, face.getStepZ() * 0.5);
-        if (!aimed(player, point, anchor)) return;
-        BlockHitResult hit = new BlockHitResult(point, face, anchor, false);
+        BlockHitResult hit = Placement.clickOn(mc.level, player.getEyePosition(), anchor);
+        if (hit == null || !aimed(player, hit)) return;
         if (state.getValue(RespawnAnchorBlock.CHARGE) == 0 && !anchor.equals(charged)) {
             if (use(player, hit, stack -> stack.is(Items.GLOWSTONE), false)) charged = anchor;
         } else if (mc.level.environmentAttributes().getValue(EnvironmentAttributes.RESPAWN_ANCHOR_WORKS, anchor)) {
@@ -152,19 +151,13 @@ public final class AutoAnchor extends Module {
         }
     }
 
-    private static Direction facing(LocalPlayer player, BlockPos pos) {
-        Vec3 eye = player.getEyePosition();
-        if (eye.y > pos.getY() + 1.0) return Direction.UP;
-        if (eye.y < pos.getY()) return Direction.DOWN;
-        return Direction.getApproximateNearest(eye.subtract(Vec3.atCenterOf(pos)).multiply(1.0, 0.0, 1.0));
-    }
-
-    private boolean aimed(LocalPlayer player, Vec3 point, BlockPos block) {
+    private boolean aimed(LocalPlayer player, BlockHitResult hit) {
+        Vec3 point = hit.getLocation();
         AdinClient.ROTATIONS.aim(partialTick -> Rotation.toward(player.getEyePosition(partialTick), point), Priority.HIGH, SNAP);
         if (!sinceAction.elapsed(delay.get())) return false;
         Vec3 eye = player.getEyePosition();
         Vec3 look = AdinClient.ROTATIONS.rotation(player).direction();
-        return new AABB(block).clip(eye, eye.add(look.scale(player.blockInteractionRange()))).isPresent();
+        return Placement.looksAt(mc.level, hit.getBlockPos(), eye, look, player.blockInteractionRange());
     }
 
     private void idle(LocalPlayer player) {

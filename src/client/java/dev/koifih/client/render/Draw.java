@@ -58,6 +58,11 @@ public final class Draw {
         rect(graphics, x, y, width, height, radius, FILLET | corner, color, Pipelines.RECT);
     }
 
+    public static void gradient(GuiGraphicsExtractor graphics, int x, int y, int width, int height, int radius,
+                                int corners, int top, int bottom) {
+        rect(graphics, x, y, width, height, radius, corners, top, bottom, Pipelines.RECT);
+    }
+
     public static void bordered(GuiGraphicsExtractor graphics, float x, float y, float width, float height,
                                 float radius, int fill, int border) {
         int r = Math.max(0, Math.round(radius));
@@ -118,13 +123,19 @@ public final class Draw {
 
     private static void rect(GuiGraphicsExtractor graphics, int x, int y, int width, int height, int radius,
                              int shape, int color, RenderPipeline pipeline) {
+        rect(graphics, x, y, width, height, radius, shape, color, color, pipeline);
+    }
+
+    private static void rect(GuiGraphicsExtractor graphics, int x, int y, int width, int height, int radius,
+                             int shape, int color, int bottomColor, RenderPipeline pipeline) {
         color = Opacity.apply(color);
-        if (width <= 0 || height <= 0 || Colors.transparent(color)) return;
+        bottomColor = Opacity.apply(bottomColor);
+        if (width <= 0 || height <= 0 || (Colors.transparent(color) && Colors.transparent(bottomColor))) return;
         if (width > Short.MAX_VALUE || height > Short.MAX_VALUE) {
             throw new IllegalArgumentException("Rectangle dimensions exceed the vertex format's range");
         }
         int limit = (shape & FILLET) != 0 ? Math.max(width, height) : Math.min(width, height) / 2;
         Submit.submit(graphics, new RectState(new Matrix3x2f(graphics.pose()), x, y, width, height,
-                Math.clamp(radius, 0, limit), shape, color, pipeline));
+                Math.clamp(radius, 0, limit), shape, color, bottomColor, pipeline));
     }
 }

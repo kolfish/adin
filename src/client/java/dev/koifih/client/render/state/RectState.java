@@ -9,25 +9,25 @@ import net.minecraft.client.renderer.state.gui.GuiElementRenderState;
 import org.joml.Matrix3x2fc;
 
 public record RectState(Matrix3x2fc pose, int x, int y, int width, int height, int radius, int shape, int color,
-                        RenderPipeline pipeline, ScreenRectangle scissorArea) implements GuiElementRenderState {
+                        int bottomColor, RenderPipeline pipeline, ScreenRectangle scissorArea) implements GuiElementRenderState {
     private static final int ANTIALIAS_PADDING = 1;
 
     public RectState(Matrix3x2fc pose, int x, int y, int width, int height, int radius, int shape, int color,
-                     RenderPipeline pipeline) {
-        this(pose, x, y, width, height, radius, shape, color, pipeline, Scissor.current());
+                     int bottomColor, RenderPipeline pipeline) {
+        this(pose, x, y, width, height, radius, shape, color, bottomColor, pipeline, Scissor.current());
     }
 
     @Override
     public void buildVertices(VertexConsumer vertices) {
-        vertex(vertices, -ANTIALIAS_PADDING, -ANTIALIAS_PADDING);
-        vertex(vertices, -ANTIALIAS_PADDING, height + ANTIALIAS_PADDING);
-        vertex(vertices, width + ANTIALIAS_PADDING, height + ANTIALIAS_PADDING);
-        vertex(vertices, width + ANTIALIAS_PADDING, -ANTIALIAS_PADDING);
+        vertex(vertices, -ANTIALIAS_PADDING, -ANTIALIAS_PADDING, color);
+        vertex(vertices, -ANTIALIAS_PADDING, height + ANTIALIAS_PADDING, bottomColor);
+        vertex(vertices, width + ANTIALIAS_PADDING, height + ANTIALIAS_PADDING, bottomColor);
+        vertex(vertices, width + ANTIALIAS_PADDING, -ANTIALIAS_PADDING, color);
     }
 
-    private void vertex(VertexConsumer vertices, float localX, float localY) {
+    private void vertex(VertexConsumer vertices, float localX, float localY, int vertexColor) {
         vertices.addVertexWith2DPose(pose, x + localX, y + localY)
-                .setColor(color)
+                .setColor(vertexColor)
                 .setUv(localX, localY)
                 .setUv1(radius, shape)
                 .setUv2(width, height);
