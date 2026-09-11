@@ -28,5 +28,9 @@ public interface Page {
         return false;
     }
 
+    default boolean mouseScrolled(double x, double y, double dx, double dy) {
+        return false;
+    }
+
     default void reset() {}
 }

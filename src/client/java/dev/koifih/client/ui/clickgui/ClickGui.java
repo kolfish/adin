@@ -273,6 +273,7 @@ public final class ClickGui extends Screen implements WidgetHost {
         for (Popup popup : popups()) {
             if (popup.isOpen() && popup.mouseScrolled(x, y, dx, dy)) return true;
         }
+        if (currentPage().mouseScrolled(x, y, dx, dy)) return true;
         return super.mouseScrolled(x, y, dx, dy);
     }
 

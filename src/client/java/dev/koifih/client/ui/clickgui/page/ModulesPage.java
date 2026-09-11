@@ -4,6 +4,7 @@ import dev.koifih.client.AdinClient;
 import dev.koifih.client.module.Category;
 import dev.koifih.client.module.Module;
 import dev.koifih.client.render.Draw;
+import dev.koifih.client.render.Scissor;
 import dev.koifih.client.render.Text;
 import dev.koifih.client.render.Transform;
 import dev.koifih.client.setting.BlockSetting;
@@ -40,6 +41,7 @@ import dev.koifih.client.ui.component.Windowed;
 import dev.koifih.client.util.Lang;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.AbstractWidget;
+import net.minecraft.client.gui.navigation.ScreenRectangle;
 import net.minecraft.client.input.KeyEvent;
 import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.network.chat.Component;
@@ -78,7 +80,7 @@ public final class ModulesPage implements Page {
     private final Supplier<Category> category;
     private final Transition overlayReveal = new Transition(0f, OVERLAY_REVEAL_MILLIS, Easing.EASE_OUT_CUBIC);
     private final List<Module> modules = new ArrayList<>();
-    private final List<AbstractWidget> rowControls = new ArrayList<>();
+    private final List<RowControl> rowControls = new ArrayList<>();
     private final List<Control> settingControls = new ArrayList<>();
     private final List<SettingRow> settingRows = new ArrayList<>();
     private final List<Windowed> windows = new ArrayList<>();
@@ -88,6 +90,10 @@ public final class ModulesPage implements Page {
     private boolean shown;
     private boolean interactive;
     private boolean overlayOpen;
+    private float rowScroll;
+    private float settingScroll;
+
+    private record RowControl(AbstractWidget widget, int row, int inset) {}
 
     private record SettingRow(Setting<?> setting, Control control, String label, Transition reveal) {
         float shown() {
@@ -112,8 +118,9 @@ public final class ModulesPage implements Page {
     }
 
     public void reloadRows() {
-        for (AbstractWidget control : rowControls) host.remove(control);
+        for (RowControl control : rowControls) host.remove(control.widget());
         rowControls.clear();
+        rowScroll = 0f;
         buildRows();
     }
 
@@ -131,12 +138,57 @@ public final class ModulesPage implements Page {
         for (int row = 0; row < modules.size(); row++) {
             Module module = modules.get(row);
             int rowY = rowY(row);
-            rowControls.add(host.add(new Bool(toggleX, rowY + (rowHeight - toggleHeight) / 2, toggleWidth, toggleHeight, scale,
-                    Component.literal(module.name()), module::isEnabled, module::setEnabled)));
+            int toggleInset = (rowHeight - toggleHeight) / 2;
+            rowControls.add(new RowControl(host.add(new Bool(toggleX, rowY + toggleInset, toggleWidth, toggleHeight, scale,
+                    Component.literal(module.name()), module::isEnabled, module::setEnabled)), row, toggleInset));
             if (module.settings().isEmpty()) continue;
-            rowControls.add(host.add(new IconButton(gearX, rowY + (rowHeight - gearSize) / 2, gearSize, scale, SETTINGS_ICON,
-                    Component.literal(module.name() + " settings"), () -> openOverlay(module))));
+            int gearInset = (rowHeight - gearSize) / 2;
+            rowControls.add(new RowControl(host.add(new IconButton(gearX, rowY + gearInset, gearSize, scale, SETTINGS_ICON,
+                    Component.literal(module.name() + " settings"), () -> openOverlay(module))), row, gearInset));
         }
+    }
+
+    private void layoutRowControls() {
+        for (RowControl control : rowControls) control.widget().setY(rowY(control.row()) + control.inset());
+    }
+
+    private int rowsSpan() {
+        if (modules.isEmpty()) return 0;
+        return 2 * layout.padding() + layout.scaled((modules.size() - 1) * ROW_STRIDE) + rowHeight();
+    }
+
+    private float maxRowScroll() {
+        return Math.max(0f, rowsSpan() - layout.contentHeight());
+    }
+
+    private float maxSettingScroll() {
+        return Math.max(0f, naturalOverlayHeight() - overlayHeight());
+    }
+
+    private ScreenRectangle contentArea() {
+        return new ScreenRectangle(layout.contentX(), layout.contentY(), layout.contentWidth(), layout.contentHeight());
+    }
+
+    private ScreenRectangle overlayArea() {
+        return new ScreenRectangle(overlayX(), overlayY(), overlayWidth(), overlayHeight());
+    }
+
+    private boolean within(AbstractWidget widget, ScreenRectangle area) {
+        return widget.getY() >= area.top() && widget.getY() + widget.getHeight() <= area.bottom();
+    }
+
+    public boolean mouseScrolled(double x, double y, double dx, double dy) {
+        if (!shown || !interactive) return false;
+        if (overlayOpen) {
+            if (!inOverlay(x, y)) return false;
+            settingScroll = Math.clamp((float) (settingScroll - dy * SETTING_ROW_STRIDE * layout.scale()), 0f, maxSettingScroll());
+            layoutRows();
+            return true;
+        }
+        if (!layout.inContent(x, y) || maxRowScroll() <= 0f) return false;
+        rowScroll = Math.clamp((float) (rowScroll - dy * ROW_STRIDE * layout.scale()), 0f, maxRowScroll());
+        layoutRowControls();
+        return true;
     }
 
     private void buildSettings(Module module) {
@@ -227,6 +279,7 @@ public final class ModulesPage implements Page {
     }
 
     private void layoutRows() {
+        settingScroll = Math.clamp(settingScroll, 0f, maxSettingScroll());
         for (Control control : settingControls) control.setY(settingY(0f, control.getHeight()));
         float offset = 1f;
         for (SettingRow row : settingRows) {
@@ -267,7 +320,7 @@ public final class ModulesPage implements Page {
     }
 
     private int rowY(int row) {
-        return layout.contentY() + layout.padding() + layout.scaled(row * ROW_STRIDE);
+        return layout.contentY() + layout.padding() + layout.scaled(row * ROW_STRIDE) - Math.round(rowScroll);
     }
 
     private int overlayX() {
@@ -278,8 +331,12 @@ public final class ModulesPage implements Page {
         return layout.contentWidth() - 2 * layout.scaled(OVERLAY_INSET);
     }
 
-    private int overlayHeight() {
+    private int naturalOverlayHeight() {
         return Math.round((2 * OVERLAY_PADDING + rowSpan() * SETTING_ROW_STRIDE) * layout.scale());
+    }
+
+    private int overlayHeight() {
+        return Math.min(naturalOverlayHeight(), layout.contentHeight() - 2 * layout.scaled(OVERLAY_INSET));
     }
 
     private int overlayY() {
@@ -299,7 +356,7 @@ public final class ModulesPage implements Page {
     }
 
     private int settingRowY(float row) {
-        return overlayY() + layout.scaled(OVERLAY_PADDING) + Math.round(row * SETTING_ROW_STRIDE * layout.scale());
+        return overlayY() + layout.scaled(OVERLAY_PADDING) + Math.round(row * SETTING_ROW_STRIDE * layout.scale()) - Math.round(settingScroll);
     }
 
     private int settingY(float row, int controlHeight) {
@@ -313,6 +370,7 @@ public final class ModulesPage implements Page {
 
     private void openOverlay(Module module) {
         openModule = module;
+        settingScroll = 0f;
         buildSettings(module);
         setOverlayOpen(true);
     }
@@ -340,18 +398,20 @@ public final class ModulesPage implements Page {
         this.interactive = interactive;
         float reveal = overlayReveal.value();
         boolean rows = shown && interactive && !overlayOpen && reveal == 0f;
-        for (AbstractWidget control : rowControls) {
-            control.active = rows;
-            control.visible = shown;
+        ScreenRectangle content = contentArea();
+        for (RowControl control : rowControls) {
+            control.widget().active = rows && within(control.widget(), content);
+            control.widget().visible = shown;
         }
         boolean overlayReady = shown && interactive && overlayOpen && reveal == 1f;
+        ScreenRectangle overlay = overlayArea();
         for (Control control : settingControls) {
-            control.active = overlayReady;
+            control.active = overlayReady && within(control, overlay);
             control.visible = shown && reveal > 0f;
         }
         for (SettingRow row : settingRows) {
             float rowShown = row.shown();
-            row.control().active = overlayReady && rowShown >= 1f;
+            row.control().active = overlayReady && rowShown >= 1f && within(row.control(), overlay);
             row.control().visible = shown && reveal > 0f && rowShown > 0f;
         }
     }
@@ -401,8 +461,10 @@ public final class ModulesPage implements Page {
 
     @Override
     public void draw(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float delta) {
-        drawRows(graphics);
-        for (AbstractWidget control : rowControls) control.extractRenderState(graphics, mouseX, mouseY, delta);
+        Scissor.clip(contentArea(), () -> {
+            drawRows(graphics);
+            for (RowControl control : rowControls) control.widget().extractRenderState(graphics, mouseX, mouseY, delta);
+        });
     }
 
     public void drawOverlay(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float delta) {
@@ -436,14 +498,16 @@ public final class ModulesPage implements Page {
         float scale = layout.scale();
         int radius = layout.atLeastOne(OVERLAY_RADIUS);
         Draw.bordered(graphics, overlayX(), overlayY(), overlayWidth(), overlayHeight(), radius, Theme.OVERLAY, Theme.POPUP_BORDER);
-        Text.drawCentered(graphics, Lang.get("keybind"), settingX(), settingRowY(0f) + settingRowHeight() * 0.5f, 8 * scale, Theme.TEXT);
-        for (Control control : settingControls) control.extractRenderState(graphics, mouseX, mouseY, delta);
-        float offset = 1f;
-        for (SettingRow row : settingRows) {
-            float rowShown = row.shown();
-            if (rowShown > 0f) drawRow(graphics, row, offset, rowShown, mouseX, mouseY, delta);
-            offset += rowShown;
-        }
+        Scissor.clip(overlayArea(), () -> {
+            Text.drawCentered(graphics, Lang.get("keybind"), settingX(), settingRowY(0f) + settingRowHeight() * 0.5f, 8 * scale, Theme.TEXT);
+            for (Control control : settingControls) control.extractRenderState(graphics, mouseX, mouseY, delta);
+            float offset = 1f;
+            for (SettingRow row : settingRows) {
+                float rowShown = row.shown();
+                if (rowShown > 0f) drawRow(graphics, row, offset, rowShown, mouseX, mouseY, delta);
+                offset += rowShown;
+            }
+        });
         for (Control control : settingControls) {
             if (control instanceof Popup popup) popup.renderPopup(graphics, mouseX, mouseY);
         }

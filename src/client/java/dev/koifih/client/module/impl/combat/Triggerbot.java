@@ -82,7 +82,7 @@ public final class Triggerbot extends Module {
             return false;
         }
         if (player.isSprinting()) {
-            dropSprint(player);
+            dropSprint(player);                         
             return false;
         }
         return true;
