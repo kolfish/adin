@@ -5,6 +5,7 @@
 	"client": [
 		"accessor.AbstractContainerScreenAccessor",
 		"accessor.FallingBlockEntityAccessor",
+		"accessor.GameRendererAccessor",
 		"accessor.GuiGraphicsExtractorAccessor",
 		"accessor.KeyMappingAccessor",
 		"accessor.LevelRendererAccessor",

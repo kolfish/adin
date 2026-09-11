@@ -121,7 +121,6 @@ public final class EntityOutlines {
     public static void render(RenderTarget mask, RenderTarget main) {
         Area area = region;
         region = null;
-        if (hand != null) area = new Area(0, 0, mask.width, mask.height);
         if (area == null) return;
         int margin = (int) Math.ceil(level.reach()) + 1;
         Area ink = area.pad(margin, margin, mask.width, mask.height);

@@ -7,6 +7,7 @@ import dev.koifih.client.render.entity.EntityFill;
 import dev.koifih.client.render.entity.EntityFills;
 import dev.koifih.client.render.entity.EntityOutline;
 import dev.koifih.client.render.entity.EntityOutlines;
+import dev.koifih.client.render.entity.HandBounds;
 import dev.koifih.client.render.entity.Filled;
 import net.minecraft.client.model.Model;
 import net.minecraft.client.renderer.SubmitNodeCollection;
@@ -37,8 +38,11 @@ public abstract class SubmitNodeCollectionMixin {
         boolean hand = !(state instanceof Filled);
         SubmitNodeCollection collection = (SubmitNodeCollection) (Object) this;
         Identifier texture = EntityFills.texture(type);
-        if (hand && texture != null) adin$outlineHand(fill -> collection.submitModel(model, state, pose,
-                EntityFills.silhouette(texture), fill.light(), fill.visibleOverlay(), fill.visible(), sprite, 0, crumbling));
+        if (hand && texture != null) adin$outlineHand(fill -> {
+            HandBounds.include(model, pose);
+            collection.submitModel(model, state, pose, EntityFills.silhouette(texture), fill.light(), fill.visibleOverlay(),
+                    fill.visible(), sprite, 0, crumbling);
+        });
         EntityFill fill = hand ? adin$hand(pose) : ((Filled) state).adin$fill();
         if (fill == null || texture == null) return;
         if (fill.occluded() != 0) {
@@ -57,8 +61,11 @@ public abstract class SubmitNodeCollectionMixin {
         Identifier texture = EntityFills.texture(quads.getFirst().materialInfo().itemRenderType());
         if (texture == null) return;
         SubmitNodeCollection collection = (SubmitNodeCollection) (Object) this;
-        adin$outlineHand(silhouette -> collection.submitCustomGeometry(pose, EntityFills.silhouette(texture),
-                (entry, consumer) -> adin$putQuads(entry, consumer, quads, silhouette)));
+        adin$outlineHand(silhouette -> {
+            HandBounds.include(quads, pose);
+            collection.submitCustomGeometry(pose, EntityFills.silhouette(texture),
+                    (entry, consumer) -> adin$putQuads(entry, consumer, quads, silhouette));
+        });
         EntityFill fill = adin$hand(pose);
         if (fill == null) return;
         collection.submitCustomGeometry(pose, EntityFills.visibleHand(texture, fill.effect()),

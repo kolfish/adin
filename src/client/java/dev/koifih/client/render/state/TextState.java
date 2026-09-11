@@ -9,14 +9,19 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.navigation.ScreenRectangle;
 import net.minecraft.client.gui.render.TextureSetup;
+import net.minecraft.client.renderer.texture.AbstractTexture;
 import net.minecraft.client.renderer.state.gui.GuiElementRenderState;
 import net.minecraft.resources.Identifier;
 import org.joml.Matrix3x2f;
 import org.joml.Matrix3x2fc;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public record TextState(Matrix3x2fc pose, TextureSetup textureSetup, List<Quad> quads,
                               ScreenRectangle bounds, ScreenRectangle scissorArea) implements GuiElementRenderState {
+    private static final Map<AbstractTexture, TextureSetup> SETUPS = new HashMap<>();
+
     public record Quad(float left, float top, float right, float bottom,
                        float u0, float v0, float u1, float v1, int leftColor, int rightColor) {
         public Quad(float left, float top, float right, float bottom,
@@ -38,9 +43,8 @@ public record TextState(Matrix3x2fc pose, TextureSetup textureSetup, List<Quad> 
         var bounds = new ScreenRectangle((int) Math.floor(left), (int) Math.floor(top),
                 (int) Math.ceil(right) - (int) Math.floor(left),
                 (int) Math.ceil(bottom) - (int) Math.floor(top)).transformMaxBounds(pose);
-        var texture = Minecraft.getInstance().getTextureManager().getTexture(atlas);
-        var textureSetup = TextureSetup.singleTexture(texture.getTextureView(),
-                RenderSystem.getSamplerCache().getClampToEdge(FilterMode.LINEAR));
+        var textureSetup = SETUPS.computeIfAbsent(Minecraft.getInstance().getTextureManager().getTexture(atlas), texture ->
+                TextureSetup.singleTexture(texture.getTextureView(), RenderSystem.getSamplerCache().getClampToEdge(FilterMode.LINEAR)));
         return new TextState(pose, textureSetup, List.copyOf(quads), bounds, Scissor.current());
     }
 

@@ -78,6 +78,7 @@ public final class ModulesPage implements Page {
     private final Supplier<Category> category;
     private final Transition overlayReveal = new Transition(0f, OVERLAY_REVEAL_MILLIS);
     private final Transition rowScrollShown = new Transition(0f, SCROLL_MILLIS);
+    private final Transition settingScrollShown = new Transition(0f, SCROLL_MILLIS);
     private final List<Module> modules = new ArrayList<>();
     private final List<RowControl> rowControls = new ArrayList<>();
     private final List<Control> settingControls = new ArrayList<>();
@@ -182,7 +183,7 @@ public final class ModulesPage implements Page {
         if (overlayOpen) {
             if (!inOverlay(x, y)) return false;
             settingScroll = Math.clamp((float) (settingScroll - dy * SETTING_ROW_STRIDE * layout.scale()), 0f, maxSettingScroll());
-            layoutRows();
+            settingScrollShown.set(settingScroll);
             return true;
         }
         if (!layout.inContent(x, y) || maxRowScroll() <= 0f) return false;
@@ -282,6 +283,7 @@ public final class ModulesPage implements Page {
 
     private void layoutRows() {
         settingScroll = Math.clamp(settingScroll, 0f, maxSettingScroll());
+        settingScrollShown.set(settingScroll);
         for (Control control : settingControls) control.setY(settingY(0f, control.getHeight()));
         float offset = 1f;
         for (SettingRow row : settingRows) {
@@ -358,7 +360,7 @@ public final class ModulesPage implements Page {
     }
 
     private int settingRowY(float row) {
-        return overlayY() + layout.scaled(OVERLAY_PADDING) + Math.round(row * SETTING_ROW_STRIDE * layout.scale()) - Math.round(settingScroll);
+        return overlayY() + layout.scaled(OVERLAY_PADDING) + Math.round(row * SETTING_ROW_STRIDE * layout.scale()) - Math.round(settingScrollShown.value());
     }
 
     private int settingY(float row, int controlHeight) {
@@ -373,6 +375,7 @@ public final class ModulesPage implements Page {
     private void openOverlay(Module module) {
         openModule = module;
         settingScroll = 0f;
+        settingScrollShown.snap(0f);
         buildSettings(module);
         setOverlayOpen(true);
     }

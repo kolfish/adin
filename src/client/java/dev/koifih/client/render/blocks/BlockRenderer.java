@@ -17,6 +17,7 @@ import com.mojang.blaze3d.vertex.DefaultVertexFormat;
 import com.mojang.blaze3d.vertex.MeshData;
 import dev.koifih.Adin;
 import dev.koifih.client.util.Colors;
+import it.unimi.dsi.fastutil.longs.Long2ObjectOpenHashMap;
 import net.fabricmc.fabric.api.client.rendering.v1.level.LevelRenderContext;
 import net.fabricmc.fabric.api.client.rendering.v1.level.LevelRenderEvents;
 import net.minecraft.client.Minecraft;
@@ -31,10 +32,6 @@ import org.joml.Matrix4f;
 import org.joml.Vector3f;
 import org.joml.Vector4f;
 import org.lwjgl.system.MemoryStack;
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.OptionalDouble;
@@ -45,7 +42,16 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 public final class BlockRenderer {
     public record Spec(int color, float fillOpacity, float lineWidth) {}
 
-    private record Section(AABB bounds, int blocks) {}
+    private static final class Section {
+        final AABB bounds;
+        final int blocks;
+        boolean visible;
+
+        private Section(AABB bounds, int blocks) {
+            this.bounds = bounds;
+            this.blocks = blocks;
+        }
+    }
 
     private static final double REANCHOR_DISTANCE = 1024.0;
     private static final int LINE_CONFIG_SIZE = 16;
@@ -69,15 +75,12 @@ public final class BlockRenderer {
     private static final Matrix4f IDENTITY = new Matrix4f();
     private static final Matrix4f MODEL_VIEW = new Matrix4f();
     private static final Vector4f MODULATOR = new Vector4f();
-    private static final Comparator<VertexArena.Range> BY_OFFSET = Comparator.comparingLong(VertexArena.Range::offset);
 
     private static final VertexArena fills = new VertexArena("fills", DefaultVertexFormat.POSITION_COLOR.getVertexSize());
     private static final VertexArena lines = new VertexArena("lines", DefaultVertexFormat.POSITION_COLOR_NORMAL.getVertexSize());
-    private static final Map<Long, Section> sections = new HashMap<>();
+    private static final Long2ObjectOpenHashMap<Section> sections = new Long2ObjectOpenHashMap<>();
     private static final Map<Long, Integer> versions = new ConcurrentHashMap<>();
     private static final Queue<BlockMesh.Built> uploads = new ConcurrentLinkedQueue<>();
-    private static final List<Long> visible = new ArrayList<>();
-    private static final List<VertexArena.Range> ranges = new ArrayList<>();
     private static volatile Spec spec;
     private static volatile Vec3i anchor = Vec3i.ZERO;
     private static GpuBuffer lineConfig;
@@ -130,17 +133,13 @@ public final class BlockRenderer {
             return;
         }
         CameraRenderState camera = context.levelState().cameraRenderState;
-        visible.clear();
         int blocks = 0;
-        if (camera.cullFrustum != null) {
-            for (Map.Entry<Long, Section> entry : sections.entrySet()) {
-                if (!camera.cullFrustum.isVisible(entry.getValue().bounds())) continue;
-                visible.add(entry.getKey());
-                blocks += entry.getValue().blocks();
-            }
+        for (Section section : sections.values()) {
+            section.visible = camera.cullFrustum != null && camera.cullFrustum.isVisible(section.bounds);
+            if (section.visible) blocks += section.blocks;
         }
         visibleBlocks = blocks;
-        if (visible.isEmpty()) return;
+        if (blocks == 0) return;
         RenderTarget main = Minecraft.getInstance().gameRenderer.mainRenderTarget();
         GpuTextureView color = RenderSystem.outputColorTextureOverride != null ? RenderSystem.outputColorTextureOverride : main.getColorTextureView();
         GpuTextureView depth = RenderSystem.outputDepthTextureOverride != null ? RenderSystem.outputDepthTextureOverride : main.getDepthTextureView();
@@ -161,30 +160,29 @@ public final class BlockRenderer {
 
     private static void draw(RenderPass pass, RenderPipeline pipeline, PrimitiveTopology topology, VertexArena arena, int color) {
         if (arena.isEmpty()) return;
-        ranges.clear();
-        for (Long key : visible) {
-            VertexArena.Range range = arena.range(key);
-            if (range != null) ranges.add(range);
-        }
-        if (ranges.isEmpty()) return;
-        ranges.sort(BY_OFFSET);
-        pass.setPipeline(pipeline);
-        MODULATOR.set(Colors.red(color) / 255f, Colors.green(color) / 255f, Colors.blue(color) / 255f, Colors.alpha(color) / 255f);
-        pass.setUniform("DynamicTransforms", RenderSystem.getDynamicUniforms().writeTransform(MODEL_VIEW, MODULATOR, NO_OFFSET, IDENTITY));
-        RenderSystem.AutoStorageIndexBuffer indices = RenderSystem.getSequentialBuffer(topology);
-        pass.setIndexBuffer(indices.getBuffer(arena.usedIndices()), indices.type());
-        pass.setVertexBuffer(0, arena.buffer().slice());
-        long start = ranges.getFirst().offset();
+        boolean started = false;
+        long start = 0;
         long length = 0;
-        for (VertexArena.Range range : ranges) {
-            if (range.offset() != start + length) {
+        for (VertexArena.Range range : arena.ordered()) {
+            Section section = sections.get(range.key);
+            if (section == null || !section.visible) continue;
+            if (!started) {
+                started = true;
+                start = range.offset;
+                pass.setPipeline(pipeline);
+                MODULATOR.set(Colors.red(color) / 255f, Colors.green(color) / 255f, Colors.blue(color) / 255f, Colors.alpha(color) / 255f);
+                pass.setUniform("DynamicTransforms", RenderSystem.getDynamicUniforms().writeTransform(MODEL_VIEW, MODULATOR, NO_OFFSET, IDENTITY));
+                RenderSystem.AutoStorageIndexBuffer indices = RenderSystem.getSequentialBuffer(topology);
+                pass.setIndexBuffer(indices.getBuffer(arena.usedIndices()), indices.type());
+                pass.setVertexBuffer(0, arena.buffer().slice());
+            } else if (range.offset != start + length) {
                 pass.drawIndexed(arena.indexCount(length), 1, arena.indexCount(start), 0, 0);
-                start = range.offset();
+                start = range.offset;
                 length = 0;
             }
-            length += range.bytes();
+            length += range.bytes;
         }
-        pass.drawIndexed(arena.indexCount(length), 1, arena.indexCount(start), 0, 0);
+        if (started) pass.drawIndexed(arena.indexCount(length), 1, arena.indexCount(start), 0, 0);
     }
 
     private static void uploadLineWidth(CommandEncoder encoder, float width) {

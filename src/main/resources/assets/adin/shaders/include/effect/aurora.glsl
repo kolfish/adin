@@ -16,7 +16,7 @@ vec2 tri2(vec2 p) {
     return vec2(tri(p.x) + tri(p.y), tri(p.y + tri(p.x)));
 }
 
-float triNoise2d(vec2 p, float spd, float time) {
+float triNoise2d(vec2 p, mat2 spin) {
     float z = 1.8;
     float z2 = 2.5;
     float rz = 0.0;
@@ -24,7 +24,7 @@ float triNoise2d(vec2 p, float spd, float time) {
     vec2 bp = p;
     for (float i = 0.0; i < 5.0; i++) {
         vec2 dg = tri2(bp * 1.85) * 0.75;
-        dg *= mm2(time * spd);
+        dg *= spin;
         p -= dg / z2;
         bp *= 1.3;
         z2 *= 0.45;
@@ -40,20 +40,25 @@ float hash21(vec2 n) {
     return fract(sin(dot(n, vec2(12.9898, 4.1414))) * 43758.5453);
 }
 
+const float AURORA_STEPS = 50.0;
+const float AURORA_STRIDE = 2.0;
+
 vec4 aurora(vec3 ro, vec3 rd, float time) {
     vec4 col = vec4(0.0);
     vec4 avgCol = vec4(0.0);
-    for (float i = 0.0; i < 50.0; i++) {
-        float of = 0.006 * hash21(gl_FragCoord.xy) * smoothstep(0.0, 15.0, i);
+    mat2 spin = mm2(time * 0.06);
+    float dither = 0.006 * hash21(gl_FragCoord.xy);
+    for (float i = 0.0; i < AURORA_STEPS; i += AURORA_STRIDE) {
+        float of = dither * smoothstep(0.0, 15.0, i);
         float pt = ((0.8 + pow(i, 1.4) * 0.002) - ro.y) / (rd.y * 2.0 + 0.4);
         pt -= of;
         vec3 bpos = ro + pt * rd;
         vec2 p = bpos.zx;
-        float rzt = triNoise2d(p, 0.06, time);
+        float rzt = triNoise2d(p, spin);
         vec4 col2 = vec4(0.0, 0.0, 0.0, rzt);
         col2.rgb = (sin(1.0 - vec3(2.15, -0.5, 1.2) + i * 0.043) * 0.5 + 0.5) * rzt;
-        avgCol = mix(avgCol, col2, 0.5);
-        col += avgCol * exp2(-i * 0.065 - 2.5) * smoothstep(0.0, 5.0, i);
+        avgCol = mix(avgCol, col2, 1.0 - pow(0.5, AURORA_STRIDE));
+        col += avgCol * exp2(-i * 0.065 - 2.5) * smoothstep(0.0, 5.0, i) * AURORA_STRIDE;
     }
     col *= clamp(rd.y * 15.0 + 0.4, 0.0, 1.0);
     return col * 1.8;
