@@ -19,6 +19,7 @@ import dev.koifih.client.setting.Setting;
 import dev.koifih.client.setting.SliderSetting;
 import dev.koifih.client.ui.Catalog;
 import dev.koifih.client.ui.Theme;
+import dev.koifih.client.ui.Tooltips;
 import dev.koifih.client.ui.Transition;
 import dev.koifih.client.ui.component.Bool;
 import dev.koifih.client.ui.component.Button;
@@ -31,6 +32,8 @@ import dev.koifih.client.ui.component.Keybind;
 import dev.koifih.client.ui.component.Popup;
 import dev.koifih.client.ui.component.Segmented;
 import dev.koifih.client.ui.component.Slider;
+import dev.koifih.client.ui.component.VideoPopup;
+import dev.koifih.client.ui.video.Videos;
 import dev.koifih.client.util.Colors;
 import dev.koifih.client.util.Lang;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
@@ -109,6 +112,7 @@ public final class ModulesPage implements Page {
     @Override
     public void init(PanelLayout layout) {
         this.layout = layout;
+        dismissRows();
         rowControls.clear();
         settingControls.clear();
         settingRows.clear();
@@ -117,7 +121,12 @@ public final class ModulesPage implements Page {
         if (openModule != null) buildSettings(openModule);
     }
 
+    private void dismissRows() {
+        for (RowControl control : rowControls) if (control.widget() instanceof Control widget) widget.dismiss();
+    }
+
     public void reloadRows() {
+        dismissRows();
         for (RowControl control : rowControls) gui.remove(control.widget());
         rowControls.clear();
         rowScroll = 0f;
@@ -142,10 +151,18 @@ public final class ModulesPage implements Page {
             int toggleInset = (rowHeight - toggleHeight) / 2;
             rowControls.add(new RowControl(gui.add(new Bool(toggleX, rowY + toggleInset, toggleWidth, toggleHeight, scale,
                     Component.literal(module.name()), module::isEnabled, module::setEnabled)), row, toggleInset));
-            if (module.settings().isEmpty()) continue;
             int gearInset = (rowHeight - gearSize) / 2;
-            rowControls.add(new RowControl(gui.add(Button.icon(gearX, rowY + gearInset, gearSize, scale, SETTINGS_ICON,
-                    Component.literal(module.name() + " settings"), () -> openOverlay(module))), row, gearInset));
+            boolean gear = !module.settings().isEmpty();
+            if (gear) {
+                rowControls.add(new RowControl(gui.add(Button.icon(gearX, rowY + gearInset, gearSize, scale, SETTINGS_ICON,
+                        Component.literal(module.name() + " settings"), () -> openOverlay(module))), row, gearInset));
+            }
+            List<Videos.Clip> clips = Tooltips.current() == Tooltips.VIDEO ? Videos.of(module.id()) : List.<Videos.Clip>of();
+            if (clips.isEmpty()) continue;
+            int videoX = (gear ? gearX : toggleX) - layout.scaled(PanelLayout.GAP) - gearSize;
+            VideoPopup video = new VideoPopup(videoX, rowY + gearInset, gearSize, scale, clips);
+            video.setArea(layout.rowX(), layout.rowWidth());
+            rowControls.add(new RowControl(gui.add(bounded(video)), row, gearInset));
         }
     }
 
@@ -312,6 +329,9 @@ public final class ModulesPage implements Page {
     @Override
     public void relayout(PanelLayout layout) {
         this.layout = layout;
+        for (RowControl control : rowControls) {
+            if (control.widget() instanceof VideoPopup video) video.setArea(layout.rowX(), layout.rowWidth());
+        }
         int inset = layout.scaled(PICKER_INSET);
         for (CatalogPicker window : windows) {
             window.setWindow(layout.contentX() + inset, layout.contentY() + inset,
@@ -385,6 +405,7 @@ public final class ModulesPage implements Page {
     }
 
     private void setOverlayOpen(boolean open) {
+        dismissRows();
         for (Control control : settingControls) control.dismiss();
         for (SettingRow row : settingRows) row.control().dismiss();
         overlayOpen = open;
@@ -424,6 +445,7 @@ public final class ModulesPage implements Page {
     @Override
     public List<Popup> popups() {
         List<Popup> popups = new ArrayList<>();
+        for (RowControl control : rowControls) if (control.widget() instanceof Popup popup) popups.add(popup);
         for (Control control : settingControls) if (control instanceof Popup popup) popups.add(popup);
         for (SettingRow row : settingRows) if (row.control() instanceof Popup popup) popups.add(popup);
         return popups;
@@ -473,6 +495,9 @@ public final class ModulesPage implements Page {
             for (RowControl control : rowControls) control.widget().extractRenderState(graphics, mouseX, mouseY, delta);
             drawFade(graphics);
         });
+        for (RowControl control : rowControls) {
+            if (control.widget() instanceof Popup popup) popup.renderPopup(graphics, mouseX, mouseY);
+        }
     }
 
     private void drawFade(GuiGraphicsExtractor graphics) {
@@ -501,7 +526,7 @@ public final class ModulesPage implements Page {
             int y = rowY(row);
             Draw.rect(graphics, layout.rowX(), y, layout.rowWidth(), rowHeight(), radius, Theme.ROW);
             float textX = layout.rowX() + PanelLayout.PADDING * scale;
-            String description = module.description();
+            String description = Tooltips.current() == Tooltips.VIDEO && !Videos.of(module.id()).isEmpty() ? "" : module.description();
             if (description.isEmpty()) {
                 Text.drawCentered(graphics, module.name(), textX, y + rowHeight() * 0.5f, 8.5f * scale, Theme.TEXT);
             } else {

@@ -28,35 +28,8 @@ float shapeDistance(vec2 position, vec2 rectSize, float cornerRadius, int shape)
     return boxDistance(position, rectSize, cornerRadiusAt(position, rectSize, cornerRadius, shape & CORNER_MASK));
 }
 
-bool curvedAt(vec2 position, vec2 rectSize, float cornerRadius, int shape) {
-    if ((shape & FILLET) != 0) {
-        float outsideCircle = cornerRadius - length(position - filletCenter(rectSize, shape & CORNER_MASK));
-        return outsideCircle > boxDistance(position, rectSize, 0.0);
-    }
-    float radius = cornerRadiusAt(position, rectSize, cornerRadius, shape & CORNER_MASK);
-    vec2 q = abs(position - rectSize * 0.5) - rectSize * 0.5 + radius;
-    return radius > 0.0 && q.x > 0.0 && q.y > 0.0;
-}
-
 float rectCoverage(vec2 localPosition, vec2 rectSize, float cornerRadius, int shape) {
-    vec2 dx = dFdx(localPosition);
-    vec2 dy = dFdy(localPosition);
     float distanceToEdge = shapeDistance(localPosition, rectSize, cornerRadius, shape);
-    float footprint = max(length(dx) + length(dy), 0.0001);
-    float coverage = distanceToEdge < 0.0 ? 1.0 : 0.0;
-    float pixel = length(vec2(dFdx(distanceToEdge), dFdy(distanceToEdge)));
-    float softness = curvedAt(localPosition, rectSize, cornerRadius, shape) ? 1.0 : 0.25;
-    float cell = max(softness * pixel, 0.0001);
-    if (abs(distanceToEdge) < footprint) {
-        coverage = 0.0;
-        for (int y = 0; y < 4; ++y) {
-            for (int x = 0; x < 4; ++x) {
-                vec2 offset = (float(x) - 1.5) * 0.25 * dx + (float(y) - 1.5) * 0.25 * dy;
-                float d = shapeDistance(localPosition + offset, rectSize, cornerRadius, shape);
-                coverage += clamp(0.5 - d / cell, 0.0, 1.0);
-            }
-        }
-        coverage *= 0.0625;
-    }
-    return coverage;
+    float pixel = max(length(vec2(dFdx(distanceToEdge), dFdy(distanceToEdge))), 0.0001);
+    return clamp(0.5 - distanceToEdge / pixel, 0.0, 1.0);
 }

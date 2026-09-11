@@ -1,0 +1,12 @@
+{
+  "clips": {
+    "aim_assist": {"module": "aimAssist", "label": null},
+    "triggerbot": {"module": "triggerbot", "label": null},
+    "shield_breaker": {"module": "shieldBreaker", "label": null},
+    "auto_hit_crystal": {"module": "autoHitCrystal", "label": null},
+    "auto_crystal": {"module": "autoCrystal", "label": null},
+    "auto_cart": {"module": "autoCart", "label": null},
+    "auto_anchor": {"module": "autoAnchor", "label": "video.normal"},
+    "auto_anchor_safe": {"module": "autoAnchor", "label": "video.safe"}
+  }
+}

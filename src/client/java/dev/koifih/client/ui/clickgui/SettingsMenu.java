@@ -5,6 +5,7 @@ import dev.koifih.client.render.Draw;
 import dev.koifih.client.render.Text;
 import dev.koifih.client.render.Transform;
 import dev.koifih.client.ui.Theme;
+import dev.koifih.client.ui.Tooltips;
 import dev.koifih.client.ui.Transition;
 import dev.koifih.client.ui.UiScale;
 import dev.koifih.client.ui.Units;
@@ -28,7 +29,8 @@ public final class SettingsMenu {
     private static final int PADDING = 10;
     private static final int TITLE_HEIGHT = 18;
     private static final int ROW_STRIDE = 22;
-    private static final int ROW_COUNT = 6;
+    private static final int ROW_COUNT = 7;
+    private static final int TOOLTIPS_ICON = 0xe88e;
     private static final int GEAR_GAP = 6;
     private static final int GEAR_SIZE = 16;
     private static final int RADIUS = 6;
@@ -50,6 +52,7 @@ public final class SettingsMenu {
     private Dropdown language;
     private Dropdown size;
     private Dropdown units;
+    private Dropdown tooltips;
     private AccentPicker accent;
     private Keybind bind;
 
@@ -106,7 +109,7 @@ public final class SettingsMenu {
         units.setBottomLimit(layout.bottom());
 
         int accentHeight = layout.atLeastOne(14);
-        AccentPicker picker = new AccentPicker(0, rowY(4) + (rowHeight - accentHeight) / 2, accentHeight, scale,
+        AccentPicker picker = new AccentPicker(0, rowY(5) + (rowHeight - accentHeight) / 2, accentHeight, scale,
                 Theme::accentRgb, Theme::setAccent);
         picker.setX(right() - inner - picker.getWidth());
         accent = gui.add(picker);
@@ -114,12 +117,23 @@ public final class SettingsMenu {
 
         int bindWidth = layout.atLeastOne(BIND_WIDTH);
         int bindHeight = layout.atLeastOne(BIND_HEIGHT);
-        bind = gui.add(new Keybind(right() - inner - bindWidth, rowY(5) + (rowHeight - bindHeight) / 2,
+        String[] tooltipModes = new String[Tooltips.ALL.length];
+        for (int i = 0; i < tooltipModes.length; i++) tooltipModes[i] = Tooltips.ALL[i].displayName();
+        tooltips = gui.add(Dropdown.single(x() + inner, rowY(4) + (rowHeight - dropdownHeight) / 2,
+                width() - 2 * inner, dropdownHeight, scale, Component.literal(Lang.get("tooltips")), tooltipModes,
+                () -> Tooltips.current().ordinal(), index -> {
+                    Tooltips.set(Tooltips.ALL[index]);
+                    gui.requestRebuild();
+                }));
+        tooltips.setIcon(TOOLTIPS_ICON);
+        tooltips.setBottomLimit(layout.bottom());
+
+        bind = gui.add(new Keybind(right() - inner - bindWidth, rowY(6) + (rowHeight - bindHeight) / 2,
                 bindWidth, bindHeight, scale, Component.literal(Lang.get("clickgui_bind")),
                 Keybinds::clickGuiKey, Keybinds::setClickGuiKey));
         bind.setClearable(false);
 
-        controls.addAll(List.of(close, theme, language, size, units, accent, bind));
+        controls.addAll(List.of(close, theme, language, size, units, tooltips, accent, bind));
     }
 
     public void relayout(PanelLayout layout) {
@@ -211,15 +225,13 @@ public final class SettingsMenu {
         float textX = x() + PADDING * scale;
         Text.drawCentered(graphics, Lang.get("settings"), textX,
                 y() + (PADDING + TITLE_HEIGHT * 0.5f) * scale, 8 * scale, Theme.TEXT);
-        String[] labels = {Lang.get("accent"), Lang.get("clickgui_bind")};
-        for (int row = 0; row < labels.length; row++) {
-            Text.drawCentered(graphics, labels[row], textX,
-                    rowY(row + 4) + ROW_STRIDE * 0.5f * scale, 7 * scale, Theme.TEXT);
-        }
+        Text.drawCentered(graphics, Lang.get("accent"), textX, rowY(5) + ROW_STRIDE * 0.5f * scale, 7 * scale, Theme.TEXT);
+        Text.drawCentered(graphics, Lang.get("clickgui_bind"), textX, rowY(6) + ROW_STRIDE * 0.5f * scale, 7 * scale, Theme.TEXT);
         for (Control control : controls) control.extractRenderState(graphics, mouseX, mouseY, delta);
         language.renderPopup(graphics, mouseX, mouseY);
         size.renderPopup(graphics, mouseX, mouseY);
         units.renderPopup(graphics, mouseX, mouseY);
+        tooltips.renderPopup(graphics, mouseX, mouseY);
         accent.renderPopup(graphics, mouseX, mouseY);
     }
 }
