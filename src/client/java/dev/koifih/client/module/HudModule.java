@@ -12,7 +12,7 @@ public abstract class HudModule extends Module {
     private float height;
 
     protected HudModule(String id, Anchor horizontal, Anchor vertical, float offsetX, float offsetY) {
-        super(id, Category.HUD);
+        super(id);
         position = add(new PositionSetting("position", new Position(horizontal, vertical, offsetX, offsetY)));
     }
 

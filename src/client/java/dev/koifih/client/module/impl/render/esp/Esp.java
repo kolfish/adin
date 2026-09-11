@@ -5,7 +5,6 @@ import dev.koifih.client.event.events.FrameEvent;
 import dev.koifih.client.event.events.HandRenderEvent;
 import dev.koifih.client.event.events.ScreenRenderEvent;
 import dev.koifih.client.event.events.WorldRenderEvent;
-import dev.koifih.client.module.Category;
 import dev.koifih.client.module.Module;
 import dev.koifih.client.render.Rect;
 import dev.koifih.client.render.Style;
@@ -56,7 +55,7 @@ public final class Esp extends Module {
             box::worldStyle, Box::fitPlayer, health::side, shader::shade, outline::spec));
 
     public Esp() {
-        super("esp", Category.RENDER);
+        super("esp");
         entities.visibleWhen(() -> targets.get().contains(ENTITIES));
         targets.optionVisibleWhen(option -> option != HAND || shaded() || outlined());
     }

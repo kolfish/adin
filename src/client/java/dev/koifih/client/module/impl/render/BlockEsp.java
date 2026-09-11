@@ -1,7 +1,6 @@
 package dev.koifih.client.module.impl.render;
 
 import dev.koifih.client.event.events.PreTickEvent;
-import dev.koifih.client.module.Category;
 import dev.koifih.client.module.Module;
 import dev.koifih.client.render.blocks.BlockIndex;
 import dev.koifih.client.render.blocks.BlockRenderer;
@@ -24,7 +23,7 @@ public final class BlockEsp extends Module {
     private Set<String> tracked = Set.of();
 
     public BlockEsp() {
-        super("blockEsp", Category.RENDER);
+        super("blockEsp");
     }
 
     @Override

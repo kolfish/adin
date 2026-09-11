@@ -1,14 +1,13 @@
 package dev.koifih.client.module.impl.movement;
 
 import dev.koifih.client.event.events.TickEvent;
-import dev.koifih.client.module.Category;
 import dev.koifih.client.module.Module;
 public final class Sprint extends Module {
 
     boolean wasSprinting;
 
     public Sprint() {
-        super("sprint", Category.MOVEMENT);
+        super("sprint");
     }
 
     @Override

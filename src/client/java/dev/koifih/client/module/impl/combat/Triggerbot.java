@@ -2,7 +2,6 @@ package dev.koifih.client.module.impl.combat;
 
 import dev.koifih.client.AdinClient;
 import dev.koifih.client.event.events.PreTickEvent;
-import dev.koifih.client.module.Category;
 import dev.koifih.client.module.Module;
 import dev.koifih.client.setting.BoolSetting;
 import dev.koifih.client.setting.Measure;
@@ -32,7 +31,7 @@ public final class Triggerbot extends Module {
     private boolean holdingSprint;
 
     public Triggerbot() {
-        super("triggerbot", Category.COMBAT);
+        super("triggerbot");
     }
 
     @Override

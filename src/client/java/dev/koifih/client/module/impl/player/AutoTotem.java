@@ -3,7 +3,6 @@ package dev.koifih.client.module.impl.player;
 import dev.koifih.client.event.events.PreTickEvent;
 import dev.koifih.client.event.events.TotemPopEvent;
 import dev.koifih.client.mixin.accessor.AbstractContainerScreenAccessor;
-import dev.koifih.client.module.Category;
 import dev.koifih.client.module.Module;
 import dev.koifih.client.setting.BoolSetting;
 import dev.koifih.client.setting.EnumSetting;
@@ -35,7 +34,7 @@ public final class AutoTotem extends Module {
     private enum Step { IDLE, POPPED, OPENED, HAND, HOTBAR }
 
     public AutoTotem() {
-        super("autoTotem", Category.PLAYER);
+        super("autoTotem");
         openInventory.visibleWhen(() -> mode.get() == HOVER);
     }
 

@@ -2,7 +2,6 @@ package dev.koifih.client.module.impl.hud;
 
 import dev.koifih.client.event.events.HudRenderEvent;
 import dev.koifih.client.event.events.ModuleToggleEvent;
-import dev.koifih.client.module.Category;
 import dev.koifih.client.module.Module;
 import dev.koifih.client.render.Draw;
 import dev.koifih.client.render.Opacity;
@@ -36,7 +35,7 @@ public final class Notifications extends Module {
     private final List<Toast> toasts = new ArrayList<>();
 
     public Notifications() {
-        super("notifications", Category.HUD);
+        super("notifications");
     }
 
     @Override

@@ -2,7 +2,6 @@ package dev.koifih.client.module.impl.render;
 
 import dev.koifih.client.event.events.EntityRenderStateEvent;
 import dev.koifih.client.event.events.HudRenderEvent;
-import dev.koifih.client.module.Category;
 import dev.koifih.client.module.Module;
 import dev.koifih.client.render.Draw;
 import dev.koifih.client.render.Point;
@@ -50,7 +49,7 @@ public final class Nametags extends Module {
     private final TargetSettings targets = add(new TargetSettings());
 
     public Nametags() {
-        super("nametags", Category.RENDER);
+        super("nametags");
     }
 
     @Override

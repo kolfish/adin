@@ -3,7 +3,6 @@ package dev.koifih.client.module.impl.combat;
 import dev.koifih.client.AdinClient;
 import dev.koifih.client.event.Priority;
 import dev.koifih.client.event.events.TickEvent;
-import dev.koifih.client.module.Category;
 import dev.koifih.client.module.Module;
 import dev.koifih.client.rotation.Bone;
 import dev.koifih.client.rotation.Rotation;
@@ -48,7 +47,7 @@ public final class AimAssist extends Module {
     private final MultiSetting bones = add(new MultiSetting("bones", Bone.NAMES, Bone.HEAD.ordinal()));
 
     public AimAssist() {
-        super("aimAssist", Category.COMBAT);
+        super("aimAssist");
         bones.optionVisibleWhen(option -> option == Bone.MULTIPOINT.ordinal() || !bones.get().contains(Bone.MULTIPOINT.ordinal()));
     }
 

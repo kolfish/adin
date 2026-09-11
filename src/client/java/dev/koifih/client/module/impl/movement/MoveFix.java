@@ -1,6 +1,5 @@
 package dev.koifih.client.module.impl.movement;
 
-import dev.koifih.client.module.Category;
 import dev.koifih.client.module.Module;
 import dev.koifih.client.setting.EnumSetting;
 
@@ -11,7 +10,7 @@ public final class MoveFix extends Module {
     private final EnumSetting mode = add(new EnumSetting("mode", SILENT, MODES));
 
     public MoveFix() {
-        super("moveFix", Category.MOVEMENT);
+        super("moveFix");
     }
 
     @Override

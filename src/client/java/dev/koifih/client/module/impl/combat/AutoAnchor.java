@@ -4,7 +4,6 @@ import dev.koifih.client.AdinClient;
 import dev.koifih.client.event.Priority;
 import dev.koifih.client.event.events.PreTickEvent;
 import dev.koifih.client.mixin.accessor.MultiPlayerGameModeAccessor;
-import dev.koifih.client.module.Category;
 import dev.koifih.client.module.Module;
 import dev.koifih.client.rotation.Rotation;
 import dev.koifih.client.rotation.RotationConfig;
@@ -56,7 +55,7 @@ public final class AutoAnchor extends Module {
     private boolean spent;
 
     public AutoAnchor() {
-        super("autoAnchor", Category.COMBAT);
+        super("autoAnchor");
         swapBack.visibleWhen(() -> !silentSwap.get());
     }
 

@@ -18,7 +18,7 @@ import java.util.List;
 public abstract class Module {
     public static Minecraft mc = Minecraft.getInstance();
     private final String id;
-    private final Category category;
+    Category category;
     private final List<Setting<?>> settings = new ArrayList<>();
     private final List<Subscription> subscriptions = new ArrayList<>();
     private boolean enabled;
@@ -26,9 +26,8 @@ public abstract class Module {
     private boolean hold;
     private boolean keyWasDown;
 
-    protected Module(String id, Category category) {
+    protected Module(String id) {
         this.id = id;
-        this.category = category;
     }
 
     public String id() {

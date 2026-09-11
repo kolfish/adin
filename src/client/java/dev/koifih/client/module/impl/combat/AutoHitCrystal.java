@@ -3,7 +3,6 @@ package dev.koifih.client.module.impl.combat;
 import dev.koifih.client.AdinClient;
 import dev.koifih.client.event.events.PreTickEvent;
 import dev.koifih.client.mixin.accessor.MultiPlayerGameModeAccessor;
-import dev.koifih.client.module.Category;
 import dev.koifih.client.module.Module;
 import dev.koifih.client.setting.BoolSetting;
 import dev.koifih.client.setting.SliderSetting;
@@ -37,7 +36,7 @@ public final class AutoHitCrystal extends Module {
     private boolean placed;
 
     public AutoHitCrystal() {
-        super("autoHitCrystal", Category.COMBAT);
+        super("autoHitCrystal");
         swapBack.visibleWhen(() -> !silentSwap.get());
     }
 

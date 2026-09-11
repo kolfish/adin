@@ -1,7 +1,6 @@
 package dev.koifih.client.module.impl.movement;
 
 import dev.koifih.client.event.events.PreTickEvent;
-import dev.koifih.client.module.Category;
 import dev.koifih.client.module.Module;
 import dev.koifih.client.setting.Measure;
 import dev.koifih.client.setting.SliderSetting;
@@ -14,7 +13,7 @@ public final class JumpReset extends Module {
     private boolean wasDown;
 
     public JumpReset() {
-        super("jumpReset", Category.MOVEMENT);
+        super("jumpReset");
     }
 
     @Override
