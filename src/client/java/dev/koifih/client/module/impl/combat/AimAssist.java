@@ -45,6 +45,7 @@ public final class AimAssist extends Module {
     private final EnumSetting target = add(new EnumSetting("target", 0, PRIORITIES));
     private final TargetSettings targets = add(new TargetSettings());
     private final MultiSetting bones = add(new MultiSetting("bones", Bone.NAMES, Bone.HEAD.ordinal()));
+    private boolean targeting;
 
     public AimAssist() {
         super("aimAssist");
@@ -57,7 +58,7 @@ public final class AimAssist extends Module {
     }
 
     public boolean blocksBreaking() {
-        return isEnabled() && (onHold.get() || AdinClient.ROTATIONS.active());
+        return isEnabled() && targeting;
     }
 
     @Override
@@ -66,9 +67,11 @@ public final class AimAssist extends Module {
     }
 
     private void onTick(TickEvent event) {
+        targeting = false;
         if (onHold.get() && !event.client().options.keyAttack.isDown()) return;
         Aim aim = aim(event.client());
         if (aim == null) return;
+        targeting = true;
         Smoothing smoothing = Smoothing.values()[rotation.get()];
         RotationConfig config = mode.get() == SILENT
                 ? RotationConfig.silent(smoothness.get() / 100f, smoothing)
