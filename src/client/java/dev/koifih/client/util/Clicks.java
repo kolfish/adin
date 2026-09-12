@@ -3,10 +3,14 @@ package dev.koifih.client.util;
 import dev.koifih.client.AdinClient;
 import dev.koifih.client.event.Priority;
 import dev.koifih.client.event.events.PreTickEvent;
+import dev.koifih.client.mixin.accessor.KeyMappingAccessor;
+import dev.koifih.client.mixin.accessor.KeyboardHandlerAccessor;
 import dev.koifih.client.mixin.accessor.MouseHandlerAccessor;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
+import com.mojang.blaze3d.platform.InputConstants;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.input.KeyEvent;
 import net.minecraft.client.input.MouseButtonInfo;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.entity.Entity;
@@ -41,6 +45,22 @@ public final class Clicks {
 
     public static boolean right(Minecraft client) {
         return client.hitResult != null && client.hitResult.getType() == HitResult.Type.MISS && press(client, GLFW.GLFW_MOUSE_BUTTON_RIGHT);
+    }
+
+    public static boolean hotbar(Minecraft client, int slot) {
+        if (!simulate || client.gui.screen() == null) return false;
+        InputConstants.Key key = ((KeyMappingAccessor) client.options.keyHotbarSlots[slot]).adin$getKey();
+        KeyEvent event = switch (key.getType()) {
+            case KEYSYM -> new KeyEvent(key.getValue(), 0, 0);
+            case SCANCODE -> new KeyEvent(InputConstants.UNKNOWN.getValue(), key.getValue(), 0);
+            default -> null;
+        };
+        if (event == null) return false;
+        KeyboardHandlerAccessor keyboard = (KeyboardHandlerAccessor) client.keyboardHandler;
+        long window = client.getWindow().handle();
+        keyboard.adin$keyPress(window, GLFW.GLFW_PRESS, event);
+        keyboard.adin$keyPress(window, GLFW.GLFW_RELEASE, event);
+        return true;
     }
 
     public static boolean simulating(int button) {

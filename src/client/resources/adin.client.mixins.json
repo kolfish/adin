@@ -8,6 +8,7 @@
 		"accessor.GameRendererAccessor",
 		"accessor.GuiGraphicsExtractorAccessor",
 		"accessor.KeyMappingAccessor",
+		"accessor.KeyboardHandlerAccessor",
 		"accessor.LevelRendererAccessor",
 		"accessor.MinecraftAccessor",
 		"accessor.MouseHandlerAccessor",

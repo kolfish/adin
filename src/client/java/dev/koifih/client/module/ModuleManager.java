@@ -20,6 +20,7 @@ import dev.koifih.client.module.impl.movement.MoveFix;
 import dev.koifih.client.module.impl.movement.Sprint;
 import dev.koifih.client.module.impl.player.AutoTotem;
 import dev.koifih.client.module.impl.player.KeyPearl;
+import dev.koifih.client.module.impl.player.Refill;
 import dev.koifih.client.module.impl.render.BlockEsp;
 import dev.koifih.client.module.impl.render.Nametags;
 import dev.koifih.client.module.impl.render.esp.Esp;
@@ -65,7 +66,8 @@ public final class ModuleManager {
                 new KeybindList());
         register(Category.PLAYER,
                 new KeyPearl(),
-                new AutoTotem());
+                new AutoTotem(),
+                new Refill());
         register(Category.MISC,
                 new Friends());
     }

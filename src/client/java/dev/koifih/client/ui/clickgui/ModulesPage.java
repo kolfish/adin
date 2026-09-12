@@ -12,6 +12,7 @@ import dev.koifih.client.setting.BoolSetting;
 import dev.koifih.client.setting.ColorSetting;
 import dev.koifih.client.setting.EntitySetting;
 import dev.koifih.client.setting.EnumSetting;
+import dev.koifih.client.setting.HotbarSetting;
 import dev.koifih.client.setting.MultiSetting;
 import dev.koifih.client.setting.PreviewSetting;
 import dev.koifih.client.setting.RangeSetting;
@@ -28,6 +29,7 @@ import dev.koifih.client.ui.component.ColorPicker;
 import dev.koifih.client.ui.component.Control;
 import dev.koifih.client.ui.component.Dropdown;
 import dev.koifih.client.ui.component.HelpDot;
+import dev.koifih.client.ui.component.HotbarPicker;
 import dev.koifih.client.ui.component.Keybind;
 import dev.koifih.client.ui.component.Popup;
 import dev.koifih.client.ui.component.Segmented;
@@ -52,6 +54,9 @@ import java.util.function.Supplier;
 public final class ModulesPage implements Page {
     private static final int ROW_HEIGHT = 40;
     private static final int ROW_STRIDE = 46;
+    private static final float DESCRIPTION_SIZE = 6.8f;
+    private static final float DESCRIPTION_PITCH = 9f;
+    private static final int DESCRIPTION_LINES = 2;
     private static final int ROW_RADIUS = 6;
     private static final int TOGGLE_WIDTH = 24;
     private static final int TOGGLE_HEIGHT = 12;
@@ -161,6 +166,14 @@ public final class ModulesPage implements Page {
             video.setArea(layout.rowX(), layout.rowWidth());
             rowControls.add(new RowControl(gui.add(bounded(video)), row, gearInset));
         }
+    }
+
+    private float controlsLeft(int row) {
+        float left = layout.rowX() + layout.rowWidth();
+        for (RowControl control : rowControls) {
+            if (control.row() == row) left = Math.min(left, control.widget().getX());
+        }
+        return left;
     }
 
     private void layoutRowControls() {
@@ -277,6 +290,10 @@ public final class ModulesPage implements Page {
                         windowed(new CatalogPicker(x, 0, width, fieldHeight, scale, label, Catalog.BLOCKS, blocks::get));
                 case PreviewSetting preview ->
                         Button.icon(right - previewSize, 0, previewSize, scale, PREVIEW_ICON, label, () -> gui.openPreview(preview));
+                case HotbarSetting hotbar -> {
+                    int pickerWidth = HotbarPicker.preferredWidth(bindHeight, scale);
+                    yield new HotbarPicker(right - pickerWidth, 0, pickerWidth, bindHeight, scale, label, hotbar::has, hotbar::toggle);
+                }
                 default -> null;
             };
             if (control == null) continue;
@@ -515,9 +532,19 @@ public final class ModulesPage implements Page {
             String description = Tooltips.current() == Tooltips.VIDEO && !Videos.of(module.id()).isEmpty() ? "" : module.description();
             if (description.isEmpty()) {
                 Text.drawCentered(graphics, module.name(), textX, y + rowHeight() * 0.5f, 8.5f * scale, Theme.TEXT);
-            } else {
+                continue;
+            }
+            float textWidth = controlsLeft(row) - layout.scaled(PanelLayout.GAP) - textX;
+            List<String> lines = Text.wrap(description, textWidth, DESCRIPTION_SIZE * scale, DESCRIPTION_LINES);
+            if (lines.size() == 1) {
                 Text.drawCentered(graphics, module.name(), textX, y + 13 * scale, 8.5f * scale, Theme.TEXT);
-                Text.drawCentered(graphics, description, textX, y + 27 * scale, 6.8f * scale, Theme.MUTED);
+                Text.drawCentered(graphics, lines.getFirst(), textX, y + 27 * scale, DESCRIPTION_SIZE * scale, Theme.MUTED);
+                continue;
+            }
+            Text.drawCentered(graphics, module.name(), textX, y + 10 * scale, 8.5f * scale, Theme.TEXT);
+            for (int i = 0; i < lines.size(); i++) {
+                Text.drawCentered(graphics, lines.get(i), textX, y + (21.5f + i * DESCRIPTION_PITCH) * scale,
+                        DESCRIPTION_SIZE * scale, Theme.MUTED);
             }
         }
     }

@@ -92,6 +92,30 @@ public final class Text {
         return text + "...";
     }
 
+    public static List<String> wrap(String text, float width, float size, int maxLines) {
+        List<String> lines = new ArrayList<>();
+        StringBuilder line = new StringBuilder();
+        for (String word : text.split(" ")) {
+            String candidate = line.isEmpty() ? word : line + " " + word;
+            if (line.isEmpty() || width(candidate, size) <= width) {
+                line.setLength(0);
+                line.append(candidate);
+                continue;
+            }
+            lines.add(line.toString());
+            line.setLength(0);
+            line.append(word);
+            if (lines.size() == maxLines - 1) break;
+        }
+        if (lines.size() == maxLines - 1) {
+            String rest = text.substring(Math.min(text.length(), String.join(" ", lines).length() + 1));
+            lines.add(fit(rest, width, size));
+        } else if (!line.isEmpty()) {
+            lines.add(line.toString());
+        }
+        return lines;
+    }
+
     public static void drawFaded(GuiGraphicsExtractor graphics, String text, float x, float baseline, float size,
                                  int color, float transparentX, float opaqueX) {
         float fadeWidth = opaqueX - transparentX;
