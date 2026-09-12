@@ -1,6 +1,7 @@
 package dev.koifih.client.module.impl.combat;
 
 import dev.koifih.client.AdinClient;
+import dev.koifih.client.util.Clicks;
 import dev.koifih.client.event.events.PreTickEvent;
 import dev.koifih.client.module.Module;
 import dev.koifih.client.setting.BoolSetting;
@@ -65,7 +66,7 @@ public final class Triggerbot extends Module {
         if (crits.get() && !critReady(client, player)) return;
         if (!charged(player, 0.5f)) return;
         AdinClient.MODULES.get(ShieldBreaker.class).prepare(player, target);
-        client.gameMode.attack(player, target);
+        if (!Clicks.left(client, target)) client.gameMode.attack(player, target);
         player.swing(InteractionHand.MAIN_HAND);
         holdingSprint = false;
         threshold = roll();

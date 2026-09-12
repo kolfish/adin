@@ -1,6 +1,7 @@
 package dev.koifih.client.module.impl.combat;
 
 import dev.koifih.client.AdinClient;
+import dev.koifih.client.util.Clicks;
 import dev.koifih.client.event.Priority;
 import dev.koifih.client.event.events.PreTickEvent;
 import dev.koifih.client.mixin.accessor.MultiPlayerGameModeAccessor;
@@ -229,7 +230,7 @@ public final class AutoCart extends Module {
                 if (placing) Placement.predict(player, stack, hit);
                 return new ServerboundUseItemOnPacket(InteractionHand.MAIN_HAND, hit, sequence);
             });
-        } else {
+        } else if (!Clicks.right(mc, hit)) {
             mc.gameMode.useItemOn(player, InteractionHand.MAIN_HAND, hit);
         }
         player.swing(InteractionHand.MAIN_HAND);

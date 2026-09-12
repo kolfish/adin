@@ -8,6 +8,7 @@
   "size": "Rozmiar",
   "units": "Jednostki",
   "tooltips": "Podpowiedzi",
+  "click_simulation": "Symulacja kliknięć",
   "tooltips.description": "Opis",
   "tooltips.video": "Wideo",
   "units.metric": "Metryczne",

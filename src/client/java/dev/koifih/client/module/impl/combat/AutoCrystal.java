@@ -1,6 +1,7 @@
 package dev.koifih.client.module.impl.combat;
 
 import dev.koifih.client.AdinClient;
+import dev.koifih.client.util.Clicks;
 import dev.koifih.client.event.Priority;
 import dev.koifih.client.event.events.PreTickEvent;
 import dev.koifih.client.mixin.accessor.MultiPlayerGameModeAccessor;
@@ -160,7 +161,7 @@ public final class AutoCrystal extends Module {
     }
 
     private void attack(LocalPlayer player, EndCrystal crystal) {
-        mc.gameMode.attack(player, crystal);
+        if (!Clicks.left(mc, crystal)) mc.gameMode.attack(player, crystal);
         player.swing(InteractionHand.MAIN_HAND);
         sinceAction.reset();
     }
@@ -195,7 +196,7 @@ public final class AutoCrystal extends Module {
         if (silent && slot != selected) {
             ((MultiPlayerGameModeAccessor) mc.gameMode).adin$startPrediction(mc.level,
                     sequence -> new ServerboundUseItemOnPacket(InteractionHand.MAIN_HAND, hit, sequence));
-        } else {
+        } else if (!Clicks.right(mc, hit.getBlockPos())) {
             mc.gameMode.useItemOn(player, InteractionHand.MAIN_HAND, hit);
         }
         player.swing(InteractionHand.MAIN_HAND);

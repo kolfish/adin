@@ -8,6 +8,7 @@
   "size": "Veličina",
   "units": "Jedinice",
   "tooltips": "Opisi",
+  "click_simulation": "Simulacija klikova",
   "tooltips.description": "Opis",
   "tooltips.video": "Video",
   "units.metric": "Metričke",

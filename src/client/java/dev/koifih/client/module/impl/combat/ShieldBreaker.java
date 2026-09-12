@@ -1,6 +1,7 @@
 package dev.koifih.client.module.impl.combat;
 
 import dev.koifih.client.event.events.PreTickEvent;
+import dev.koifih.client.util.Clicks;
 import dev.koifih.client.mixin.accessor.MinecraftAccessor;
 import dev.koifih.client.friends.FriendList;
 import dev.koifih.client.module.Module;
@@ -49,7 +50,8 @@ public final class ShieldBreaker extends Module {
         Player target = crosshairPlayer(client, player);
         if (target == null) return;
         prepare(player, target);
-        if (player.getMainHandItem().is(ItemTags.AXES)) ((MinecraftAccessor) client).adin$startAttack();
+        if (!player.getMainHandItem().is(ItemTags.AXES)) return;
+        if (!Clicks.left(client, target)) ((MinecraftAccessor) client).adin$startAttack();
     }
 
     public void prepare(LocalPlayer player, Entity target) {

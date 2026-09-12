@@ -3,6 +3,7 @@ package dev.koifih.client.mixin.input;
 import com.mojang.blaze3d.platform.InputConstants;
 import dev.koifih.client.AdinClient;
 import dev.koifih.client.module.impl.combat.AimAssist;
+import dev.koifih.client.util.Clicks;
 import dev.koifih.client.util.Players;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.MultiPlayerGameMode;
@@ -35,7 +36,7 @@ public abstract class MinecraftMixin {
 
     @Unique
     private static boolean adin$activates(int button) {
-        return AdinClient.MODULES.activates(InputConstants.Type.MOUSE.getOrCreate(button));
+        return !Clicks.simulating(button) && AdinClient.MODULES.activates(InputConstants.Type.MOUSE.getOrCreate(button));
     }
 
     @Inject(method = "continueAttack", at = @At("HEAD"), cancellable = true)

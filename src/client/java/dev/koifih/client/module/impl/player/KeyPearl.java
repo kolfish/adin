@@ -1,6 +1,7 @@
 package dev.koifih.client.module.impl.player;
 
 import dev.koifih.client.event.events.PreTickEvent;
+import dev.koifih.client.util.Clicks;
 import dev.koifih.client.mixin.accessor.MultiPlayerGameModeAccessor;
 import dev.koifih.client.module.Module;
 import dev.koifih.client.setting.BoolSetting;
@@ -61,7 +62,7 @@ public final class KeyPearl extends Module {
         if (silent && slot != selected) {
             ((MultiPlayerGameModeAccessor) mc.gameMode).adin$startPrediction(mc.level,
                     sequence -> new ServerboundUseItemPacket(InteractionHand.MAIN_HAND, sequence, player.getYRot(), player.getXRot()));
-        } else if (!mc.gameMode.useItem(player, InteractionHand.MAIN_HAND).consumesAction()) {
+        } else if (!Clicks.right(mc) && !mc.gameMode.useItem(player, InteractionHand.MAIN_HAND).consumesAction()) {
             return;
         }
         player.swing(InteractionHand.MAIN_HAND);
