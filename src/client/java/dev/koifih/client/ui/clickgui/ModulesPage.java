@@ -552,6 +552,7 @@ public final class ModulesPage implements Page {
         });
         for (Control control : settingControls) {
             if (control instanceof Popup popup) popup.renderPopup(graphics, mouseX, mouseY);
+            if (control instanceof HelpDot help) help.renderTooltip(graphics);
         }
         for (SettingRow row : settingRows) {
             if (row.control() instanceof Popup popup && row.shown() >= 1f) popup.renderPopup(graphics, mouseX, mouseY);

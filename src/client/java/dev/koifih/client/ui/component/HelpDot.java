@@ -32,6 +32,9 @@ public final class HelpDot extends Control {
         rect(graphics, getX(), getY(), getWidth(), getHeight(), radius, Theme.CONTROL);
         float size = px(6.5f);
         Text.drawCenteredX(graphics, "?", getX() + getWidth() / 2f, centerY(), size, Theme.DIM);
+    }
+
+    public void renderTooltip(GuiGraphicsExtractor graphics) {
         float amount = shown.value();
         if (amount <= 0f) return;
         graphics.nextStratum();
