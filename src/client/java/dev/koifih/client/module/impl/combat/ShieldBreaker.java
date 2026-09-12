@@ -1,6 +1,7 @@
 package dev.koifih.client.module.impl.combat;
 
 import dev.koifih.client.event.events.PreTickEvent;
+import dev.koifih.client.setting.Measure;
 import dev.koifih.client.util.Clicks;
 import dev.koifih.client.mixin.accessor.MinecraftAccessor;
 import dev.koifih.client.friends.FriendList;
@@ -19,10 +20,10 @@ import net.minecraft.world.phys.EntityHitResult;
 import net.minecraft.world.phys.Vec3;
 
 public final class ShieldBreaker extends Module {
-    private final SliderSetting delay = add(new SliderSetting("delay", 100, 1, 500));
+    private final SliderSetting delay = add(new SliderSetting("delay", 100, 50, 500, Measure.MILLIS));
     private final BoolSetting facing = add(new BoolSetting("facing", true));
     private final BoolSetting switchBack = add(new BoolSetting("switchBack", true));
-    private final Time.Stopwatch sinceSwitch = new Time.Stopwatch();
+    private final Time.Ticker sinceSwitch = new Time.Ticker();
     private int originalSlot = Hotbar.NONE;
 
     public ShieldBreaker() {
@@ -62,7 +63,7 @@ public final class ShieldBreaker extends Module {
         int selected = Hotbar.selected(player);
         if (!Hotbar.swap(player, axe, false)) return;
         originalSlot = selected;
-        sinceSwitch.reset();
+        sinceSwitch.mark();
     }
 
     private void restore(LocalPlayer player) {

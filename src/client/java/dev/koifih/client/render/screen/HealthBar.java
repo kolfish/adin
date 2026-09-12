@@ -3,7 +3,10 @@ package dev.koifih.client.render.screen;
 import dev.koifih.client.render.Rect;
 import dev.koifih.client.render.Style;
 import dev.koifih.client.util.Colors;
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
 
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
 public final class HealthBar {
     public enum Side {
         LEFT,
@@ -23,8 +26,6 @@ public final class HealthBar {
     private static final int LOW = 0xFFFF3B30;
     private static final int MID = 0xFFFFD60A;
     private static final int HIGH = 0xFF34C759;
-
-    private HealthBar() {}
 
     public static int color(float fraction) {
         float f = Math.clamp(fraction, 0f, 1f);

@@ -6,10 +6,13 @@ import dev.koifih.client.render.font.Fonts;
 import dev.koifih.client.render.state.Submit;
 import dev.koifih.client.render.state.TextState;
 import dev.koifih.client.util.Colors;
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import java.util.ArrayList;
 import java.util.List;
 
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
 public final class Text {
     private static final Font FONT = Fonts.COMFORTAA_BOLD;
 
@@ -25,8 +28,6 @@ public final class Text {
     public interface ColorAt {
         int at(float x);
     }
-
-    private Text() {}
 
     public static float width(String text, float size) {
         float advance = 0;

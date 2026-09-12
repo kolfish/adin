@@ -1,7 +1,10 @@
 package dev.koifih.client.render;
 
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
 import net.minecraft.world.phys.AABB;
 
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
 public final class Corners {
     public static final int COUNT = 8;
     public static final int[] EDGES = {
@@ -12,8 +15,6 @@ public final class Corners {
     public static final int[][] FACES = {
             {0, 1, 3, 2}, {4, 5, 7, 6}, {0, 1, 5, 4}, {2, 3, 7, 6}, {0, 2, 6, 4}, {1, 3, 7, 5}
     };
-
-    private Corners() {}
 
     public static double x(AABB box, int corner) {
         return (corner & 1) == 0 ? box.minX : box.maxX;

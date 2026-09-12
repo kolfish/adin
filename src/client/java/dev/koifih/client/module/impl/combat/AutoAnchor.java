@@ -1,6 +1,7 @@
 package dev.koifih.client.module.impl.combat;
 
 import dev.koifih.client.AdinClient;
+import dev.koifih.client.setting.Measure;
 import dev.koifih.client.util.Clicks;
 import dev.koifih.client.event.Priority;
 import dev.koifih.client.event.events.PreTickEvent;
@@ -42,11 +43,11 @@ public final class AutoAnchor extends Module {
     private static final double DIAGONAL = 0.4;
     private static final RotationConfig SNAP = RotationConfig.silent(0f, Smoothing.EASE_OUT_CUBIC);
 
-    private final SliderSetting delay = add(new SliderSetting("delay", 100, 1, 500));
+    private final SliderSetting delay = add(new SliderSetting("delay", 100, 50, 500, Measure.MILLIS));
     private final BoolSetting safe = add(new BoolSetting("safe", false));
     private final BoolSetting silentSwap = add(new BoolSetting("silentSwap", false));
     private final BoolSetting swapBack = add(new BoolSetting("swapBack", true));
-    private final Time.Stopwatch sinceAction = new Time.Stopwatch();
+    private final Time.Ticker pacer = new Time.Ticker();
     private final Time.Stopwatch sincePlace = new Time.Stopwatch();
     private int originalSlot = Hotbar.NONE;
     private boolean silent;
@@ -84,7 +85,7 @@ public final class AutoAnchor extends Module {
     }
 
     private void look(LocalPlayer player) {
-        if (!sinceAction.elapsed(delay.get())) return;
+        if (!pacer.ready()) return;
         BlockHitResult hit = mc.hitResult instanceof BlockHitResult block && block.getType() == HitResult.Type.BLOCK ? block : null;
         if (hit == null) {
             idle(player);
@@ -154,7 +155,7 @@ public final class AutoAnchor extends Module {
     private boolean aimed(LocalPlayer player, BlockHitResult hit) {
         Vec3 point = hit.getLocation();
         AdinClient.ROTATIONS.aim(partialTick -> Rotation.toward(player.getEyePosition(partialTick), point), Priority.HIGH, SNAP);
-        if (!sinceAction.elapsed(delay.get())) return false;
+        if (!pacer.ready()) return false;
         Vec3 eye = player.getEyePosition();
         Vec3 look = AdinClient.ROTATIONS.rotation(player).direction();
         return Placement.looksAt(mc.level, hit.getBlockPos(), eye, look, player.blockInteractionRange());
@@ -218,7 +219,7 @@ public final class AutoAnchor extends Module {
             mc.gameMode.useItemOn(player, InteractionHand.MAIN_HAND, hit);
         }
         player.swing(InteractionHand.MAIN_HAND);
-        sinceAction.reset();
+        pacer.pace(delay.get());
         return true;
     }
 

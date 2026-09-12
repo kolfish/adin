@@ -1,5 +1,7 @@
 package dev.koifih.client.friends;
 
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import dev.koifih.Adin;
@@ -18,12 +20,11 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
 public final class FriendList {
     private static final Gson GSON = new GsonBuilder().setPrettyPrinting().create();
     private static final Map<String, String> friends = new LinkedHashMap<>();
     private static boolean loaded;
-
-    private FriendList() {}
 
     public static List<String> all() {
         load();

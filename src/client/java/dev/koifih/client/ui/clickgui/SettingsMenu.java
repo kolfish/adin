@@ -19,12 +19,14 @@ import dev.koifih.client.ui.component.Popup;
 import dev.koifih.client.ui.component.Segmented;
 import dev.koifih.client.util.Clicks;
 import dev.koifih.client.util.Lang;
+import lombok.RequiredArgsConstructor;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.network.chat.Component;
 import java.util.ArrayList;
 import java.util.List;
 
+@RequiredArgsConstructor
 public final class SettingsMenu {
     private static final int REVEAL_MILLIS = 150;
     private static final int WIDTH = 150;
@@ -59,10 +61,6 @@ public final class SettingsMenu {
     private Dropdown tooltips;
     private AccentPicker accent;
     private Keybind bind;
-
-    public SettingsMenu(ClickGui gui) {
-        this.gui = gui;
-    }
 
     public void init(PanelLayout layout) {
         this.layout = layout;

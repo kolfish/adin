@@ -1,5 +1,7 @@
 package dev.koifih.client.render.state;
 
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import dev.koifih.client.render.Rect;
 import dev.koifih.client.util.Maths;
@@ -7,11 +9,10 @@ import net.minecraft.client.gui.navigation.ScreenRectangle;
 import org.joml.Matrix3x2f;
 import org.joml.Matrix3x2fc;
 
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
 final class Geometry {
     static final float PADDING = 1f;
     private static final float FIXED_POINT = 8f;
-
-    private Geometry() {}
 
     static ScreenRectangle bounds(Rect rect, Matrix3x2fc pose) {
         Rect outer = rect.expand(PADDING);

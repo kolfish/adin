@@ -1,5 +1,7 @@
 package dev.koifih.client.util;
 
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -18,6 +20,7 @@ import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.phys.shapes.VoxelShape;
 
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
 public final class Placement {
     private static final float DUPLICATE_ROTATION = 2f;
     private static final float DUPLICATE_TOLERANCE = 0.0001f;
@@ -26,8 +29,6 @@ public final class Placement {
     private static boolean rotated;
     private static float lastRotationDelta;
     private static float lastPlacedDelta = -1f;
-
-    private Placement() {}
 
     public static boolean ready() {
         return !placed && !(rotated && duplicates(lastRotationDelta));

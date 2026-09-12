@@ -1,10 +1,15 @@
 package dev.koifih.client.setting;
 
+import lombok.Getter;
+import lombok.experimental.Accessors;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonPrimitive;
 
+@Accessors(fluent = true)
 public final class SliderSetting extends Setting<Integer> {
+    @Getter
     private final int min;
+    @Getter
     private final int max;
     private final Measure measure;
 
@@ -21,14 +26,6 @@ public final class SliderSetting extends Setting<Integer> {
 
     public String format(int value) {
         return measure.format(value);
-    }
-
-    public int min() {
-        return min;
-    }
-
-    public int max() {
-        return max;
     }
 
     @Override

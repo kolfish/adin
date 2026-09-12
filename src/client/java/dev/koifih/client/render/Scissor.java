@@ -1,11 +1,12 @@
 package dev.koifih.client.render;
 
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
 import net.minecraft.client.gui.navigation.ScreenRectangle;
 
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
 public final class Scissor {
     private static ScreenRectangle current;
-
-    private Scissor() {}
 
     public static ScreenRectangle current() {
         return current;

@@ -1,7 +1,10 @@
 package dev.koifih.client.ui;
 
 import dev.koifih.client.util.Colors;
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
 
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
 public final class Theme {
     public enum Mode { DARK, LIGHT }
 
@@ -81,8 +84,6 @@ public final class Theme {
         accentTo = accentFrom;
         update();
     }
-
-    private Theme() {}
 
     public static Mode mode() {
         return mode;

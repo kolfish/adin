@@ -1,5 +1,7 @@
 package dev.koifih.client.ui;
 
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
 import com.mojang.blaze3d.platform.Window;
 import dev.koifih.client.AdinClient;
 import dev.koifih.client.event.Priority;
@@ -14,14 +16,13 @@ import net.minecraft.util.Mth;
 import org.lwjgl.glfw.GLFW;
 import java.util.List;
 
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
 public final class HudEditor {
     private static final float SNAP = 4f;
     private static final float GUIDE_ALPHA = 0.6f;
     private static HudModule dragging;
     private static float grabX;
     private static float grabY;
-
-    private HudEditor() {}
 
     public static void init() {
         AdinClient.EVENTS.subscribe(HudRenderEvent.class, Priority.LOWEST, HudEditor::onHudRender);

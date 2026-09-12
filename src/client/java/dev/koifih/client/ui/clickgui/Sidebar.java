@@ -8,6 +8,7 @@ import dev.koifih.client.ui.Transition;
 import dev.koifih.client.ui.component.Button;
 import dev.koifih.client.ui.component.TabButton;
 import dev.koifih.client.util.Lang;
+import lombok.RequiredArgsConstructor;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.network.chat.Component;
 import java.util.ArrayList;
@@ -15,6 +16,7 @@ import java.util.List;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
+@RequiredArgsConstructor
 public final class Sidebar {
     public record Tab(String id, int icon, Supplier<String> label, Category category) {}
 
@@ -37,12 +39,6 @@ public final class Sidebar {
     private final Transition pillWidth = new Transition(0f, PILL_MILLIS);
     private boolean pillPlaced;
     private Button settingsButton;
-
-    public Sidebar(ClickGui gui, Consumer<Tab> onSelect, Runnable onSettings) {
-        this.gui = gui;
-        this.onSelect = onSelect;
-        this.onSettings = onSettings;
-    }
 
     private static List<Tab> tabs() {
         List<Tab> tabs = new ArrayList<>();

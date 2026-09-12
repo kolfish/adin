@@ -1,6 +1,7 @@
 package dev.koifih.client.module.impl.player;
 
 import dev.koifih.client.event.events.PreTickEvent;
+import dev.koifih.client.setting.Measure;
 import dev.koifih.client.event.events.TotemPopEvent;
 import dev.koifih.client.mixin.accessor.AbstractContainerScreenAccessor;
 import dev.koifih.client.module.Module;
@@ -26,8 +27,8 @@ public final class AutoTotem extends Module {
     private final EnumSetting mode = add(new EnumSetting("mode", 0, MODES));
     private final BoolSetting openInventory = add(new BoolSetting("openInventory", true));
     private final SliderSetting slot = add(new SliderSetting("slot", 9, 1, 9));
-    private final SliderSetting delay = add(new SliderSetting("delay", 50, 0, 500));
-    private final Time.Stopwatch sinceStep = new Time.Stopwatch();
+    private final SliderSetting delay = add(new SliderSetting("delay", 50, 0, 500, Measure.MILLIS));
+    private final Time.Ticker sinceStep = new Time.Ticker();
     private Step step = Step.IDLE;
     private InteractionHand popped = InteractionHand.OFF_HAND;
 
@@ -129,7 +130,7 @@ public final class AutoTotem extends Module {
 
     private void advance(Step next) {
         step = next;
-        sinceStep.reset();
+        sinceStep.mark();
     }
 
     private int handButton(LocalPlayer player) {

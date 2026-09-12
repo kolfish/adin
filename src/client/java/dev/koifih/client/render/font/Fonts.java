@@ -1,7 +1,10 @@
 package dev.koifih.client.render.font;
 
 import dev.koifih.Adin;
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
 
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
 public final class Fonts {
     public static final Font COMFORTAA_BOLD =
             Font.load("comfortaa-bold", Adin.id("textures/font/comfortaa-bold.png"), '?');
@@ -17,6 +20,4 @@ public final class Fonts {
             throw new IllegalStateException("Every MSDF atlas must share the text pipeline's distance range");
         }
     }
-
-    private Fonts() {}
 }

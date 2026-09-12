@@ -13,6 +13,7 @@ import dev.koifih.client.ui.component.Control;
 import dev.koifih.client.ui.component.Segmented;
 import dev.koifih.client.ui.component.TextInput;
 import dev.koifih.client.util.Lang;
+import lombok.RequiredArgsConstructor;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.input.KeyEvent;
@@ -22,6 +23,7 @@ import org.lwjgl.glfw.GLFW;
 import java.util.ArrayList;
 import java.util.List;
 
+@RequiredArgsConstructor
 public final class ConfigsPage implements Page {
     private record Area(float scale, int x, int y, int width, int height, int padding) {
         int scaled(float units) {
@@ -67,10 +69,6 @@ public final class ConfigsPage implements Page {
     private String description = "";
     private int scope = Config.Scope.BOTH.ordinal();
     private boolean dialogOpen;
-
-    public ConfigsPage(ClickGui gui) {
-        this.gui = gui;
-    }
 
     private <T extends AbstractWidget> T add(T widget) {
         return gui.add(widget);
@@ -320,7 +318,6 @@ public final class ConfigsPage implements Page {
         for (Control control : cardControls) control.extractRenderState(graphics, mouseX, mouseY, delta);
         addButton.extractRenderState(graphics, mouseX, mouseY, delta);
     }
-
 
     private void drawDialog(GuiGraphicsExtractor graphics, float reveal, int mouseX, int mouseY, float delta) {
         graphics.nextStratum();

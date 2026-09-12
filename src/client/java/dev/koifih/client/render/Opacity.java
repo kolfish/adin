@@ -1,11 +1,12 @@
 package dev.koifih.client.render;
 
 import dev.koifih.client.util.Colors;
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
 
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
 public final class Opacity {
     private static float current = 1f;
-
-    private Opacity() {}
 
     public static void with(float alpha, Runnable draw) {
         float previous = current;

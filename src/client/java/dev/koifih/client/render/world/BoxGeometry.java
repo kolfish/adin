@@ -1,5 +1,7 @@
 package dev.koifih.client.render.world;
 
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import dev.koifih.client.render.Corners;
@@ -7,9 +9,8 @@ import dev.koifih.client.util.Maths;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
 final class BoxGeometry {
-    private BoxGeometry() {}
-
     static void fill(PoseStack.Pose pose, VertexConsumer consumer, AABB box, Vec3 camera, int color) {
         for (int[] face : Corners.FACES) {
             for (int corner : face) vertex(pose, consumer, box, camera, corner).setColor(color);

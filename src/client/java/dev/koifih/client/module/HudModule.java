@@ -3,12 +3,19 @@ package dev.koifih.client.module;
 import dev.koifih.client.setting.PositionSetting;
 import dev.koifih.client.setting.PositionSetting.Anchor;
 import dev.koifih.client.setting.PositionSetting.Position;
+import lombok.Getter;
+import lombok.experimental.Accessors;
 
+@Accessors(fluent = true)
 public abstract class HudModule extends Module {
     private final PositionSetting position;
+    @Getter
     private float x;
+    @Getter
     private float y;
+    @Getter
     private float width;
+    @Getter
     private float height;
 
     protected HudModule(String id, Anchor horizontal, Anchor vertical, float offsetX, float offsetY) {
@@ -33,22 +40,6 @@ public abstract class HudModule extends Module {
         this.y = y;
         this.width = width;
         this.height = height;
-    }
-
-    public float x() {
-        return x;
-    }
-
-    public float y() {
-        return y;
-    }
-
-    public float width() {
-        return width;
-    }
-
-    public float height() {
-        return height;
     }
 
     public boolean contains(double pointX, double pointY) {

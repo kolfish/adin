@@ -1,5 +1,7 @@
 package dev.koifih.client.render;
 
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
 import com.mojang.blaze3d.pipeline.RenderPipeline;
 import dev.koifih.client.render.font.Font;
 import dev.koifih.client.render.font.Fonts;
@@ -14,6 +16,7 @@ import org.joml.Matrix3x2f;
 import java.util.ArrayList;
 import java.util.List;
 
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
 public final class Draw {
     public static final int TOP_LEFT = 1;
     public static final int TOP_RIGHT = 2;
@@ -28,8 +31,6 @@ public final class Draw {
     private static final int LOGO_BAND_FRONT = 3;
     private static final int LOGO_BACK_COLOR = 0xFFA3A3A3;
     private static final int LOGO_FRONT_COLOR = 0xFFEAEAEA;
-
-    private Draw() {}
 
     public static void rect(GuiGraphicsExtractor graphics, int x, int y, int width, int height, int radius, int color) {
         rect(graphics, x, y, width, height, radius, ALL_CORNERS, color, Pipelines.RECT);

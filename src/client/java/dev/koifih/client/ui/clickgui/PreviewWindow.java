@@ -26,6 +26,7 @@ import dev.koifih.client.util.Colors;
 import dev.koifih.client.util.Game;
 import dev.koifih.client.util.Lang;
 import dev.koifih.client.util.Time;
+import lombok.RequiredArgsConstructor;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.navigation.ScreenRectangle;
@@ -37,6 +38,7 @@ import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import org.lwjgl.glfw.GLFW;
 
+@RequiredArgsConstructor
 public final class PreviewWindow {
     private static final int WIDTH = 150;
     private static final int BACK_ICON = 0xe5c4;
@@ -70,10 +72,6 @@ public final class PreviewWindow {
     private boolean dragged;
     private double pressX;
     private double lastX;
-
-    public PreviewWindow(ClickGui gui) {
-        this.gui = gui;
-    }
 
     public void init(PanelLayout layout) {
         this.layout = layout;

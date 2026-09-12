@@ -54,10 +54,10 @@ public final class AutoCart extends Module {
 
     private final EnumSetting mode = add(new EnumSetting("mode", 0, MODES));
     private final SliderSetting smoothness = add(new SliderSetting("smoothness", 50, 0, 100, Measure.PERCENT));
-    private final SliderSetting delay = add(new SliderSetting("delay", 100, 1, 500));
+    private final SliderSetting delay = add(new SliderSetting("delay", 100, 50, 500, Measure.MILLIS));
     private final BoolSetting silentSwap = add(new BoolSetting("silentSwap", false));
     private final BoolSetting swapBack = add(new BoolSetting("swapBack", true));
-    private final Time.Stopwatch sinceAction = new Time.Stopwatch();
+    private final Time.Ticker pacer = new Time.Ticker();
     private Stage stage = Stage.IDLE;
     private BlockPos ground;
     private AbstractArrow tracked;
@@ -123,7 +123,7 @@ public final class AutoCart extends Module {
         }
         if (stage == Stage.IDLE) {
             AbstractArrow arrow = Game.playing(mc) && holdsFlameBow(player) ? firedArrow(player) : null;
-            if (!sinceAction.elapsed(delay.get())) return;
+            if (!pacer.ready()) return;
             if (originalSlot != Hotbar.NONE) restore(player);
             if (arrow != null) {
                 tracked = arrow;
@@ -157,7 +157,7 @@ public final class AutoCart extends Module {
             }
         }
         if (!state.is(BlockTags.RAILS)) {
-            if (sinceAction.elapsed(delay.get() * 4L)) stop(player);
+            if (pacer.elapsed(delay.get() * 4L)) stop(player);
             return;
         }
         BlockHitResult hit = Placement.clickOn(mc.level, player.getEyePosition(), rail);
@@ -172,7 +172,7 @@ public final class AutoCart extends Module {
                 ? RotationConfig.silent(smoothness.get() / 100f, smoothing)
                 : RotationConfig.visible(smoothness.get() / 100f, smoothing);
         AdinClient.ROTATIONS.aim(partialTick -> Rotation.toward(player.getEyePosition(partialTick), point), Priority.HIGH, config);
-        if (!sinceAction.elapsed(delay.get())) return false;
+        if (!pacer.ready()) return false;
         Vec3 eye = player.getEyePosition();
         Vec3 look = AdinClient.ROTATIONS.rotation(player).direction();
         return Placement.looksAt(mc.level, hit.getBlockPos(), eye, look, player.blockInteractionRange());
@@ -234,7 +234,7 @@ public final class AutoCart extends Module {
             mc.gameMode.useItemOn(player, InteractionHand.MAIN_HAND, hit);
         }
         player.swing(InteractionHand.MAIN_HAND);
-        sinceAction.reset();
+        pacer.pace(delay.get());
         return true;
     }
 

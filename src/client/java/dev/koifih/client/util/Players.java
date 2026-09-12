@@ -1,14 +1,15 @@
 package dev.koifih.client.util;
 
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.ItemStack;
 
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
 public final class Players {
     private static final float MOVE_EPSILON = 1.0E-10f;
-
-    private Players() {}
 
     public static boolean isMoving(LocalPlayer player) {
         return player.input.getMoveVector().lengthSquared() > MOVE_EPSILON;

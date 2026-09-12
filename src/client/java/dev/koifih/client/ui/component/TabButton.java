@@ -6,12 +6,15 @@ import dev.koifih.client.ui.Theme;
 import dev.koifih.client.ui.Transition;
 import dev.koifih.client.ui.clickgui.Sidebar;
 import dev.koifih.client.util.Colors;
+import lombok.Getter;
+import lombok.experimental.Accessors;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.narration.NarratedElementType;
 import net.minecraft.client.gui.narration.NarrationElementOutput;
 import net.minecraft.network.chat.Component;
 import java.util.function.BooleanSupplier;
 
+@Accessors(fluent = true)
 public final class TabButton extends Control {
     private static final float ICON_INSET = 5f;
     private static final float ICON_SIZE = 11f;
@@ -19,6 +22,7 @@ public final class TabButton extends Control {
     private static final float TEXT_SIZE = 8.5f;
     private static final float TEXT_RIGHT_PADDING = 5f;
 
+    @Getter
     private final Sidebar.Tab tab;
     private final BooleanSupplier selected;
     private final Transition onPill = new Transition(0f, 150);
@@ -32,10 +36,6 @@ public final class TabButton extends Control {
 
     public static int iconInset(float scale) {
         return Math.round(ICON_INSET * scale);
-    }
-
-    public Sidebar.Tab tab() {
-        return tab;
     }
 
     @Override

@@ -11,6 +11,7 @@ import dev.koifih.client.ui.component.Bool;
 import dev.koifih.client.ui.component.TextInput;
 import dev.koifih.client.util.Colors;
 import dev.koifih.client.util.Lang;
+import lombok.RequiredArgsConstructor;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.PlayerFaceExtractor;
@@ -26,6 +27,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.TreeMap;
 
+@RequiredArgsConstructor
 public final class FriendsPage implements Page {
     private static final int CARD_HEIGHT = 28;
     private static final int CARD_STRIDE = 32;
@@ -56,10 +58,6 @@ public final class FriendsPage implements Page {
     private boolean shown;
     private boolean interactive;
     private float scroll;
-
-    public FriendsPage(ClickGui gui) {
-        this.gui = gui;
-    }
 
     @Override
     public void init(PanelLayout layout) {

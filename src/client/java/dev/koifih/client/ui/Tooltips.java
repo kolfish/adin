@@ -1,7 +1,9 @@
 package dev.koifih.client.ui;
 
 import dev.koifih.client.util.Lang;
+import lombok.RequiredArgsConstructor;
 
+@RequiredArgsConstructor
 public enum Tooltips {
     DESCRIPTION("tooltips.description"),
     VIDEO("tooltips.video");
@@ -9,10 +11,6 @@ public enum Tooltips {
     public static final Tooltips[] ALL = values();
     private static Tooltips current = DESCRIPTION;
     private final String key;
-
-    Tooltips(String key) {
-        this.key = key;
-    }
 
     public String displayName() {
         return Lang.get(key);

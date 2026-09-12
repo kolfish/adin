@@ -1,5 +1,7 @@
 package dev.koifih.client.render.blocks;
 
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
 import com.mojang.blaze3d.PrimitiveTopology;
 import com.mojang.blaze3d.buffers.GpuBuffer;
 import com.mojang.blaze3d.buffers.Std140Builder;
@@ -39,6 +41,7 @@ import java.util.Queue;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
 public final class BlockRenderer {
     public record Spec(int color, float fillOpacity, float lineWidth) {}
 
@@ -86,8 +89,6 @@ public final class BlockRenderer {
     private static GpuBuffer lineConfig;
     private static float uploadedLineWidth = Float.NaN;
     private static volatile int visibleBlocks;
-
-    private BlockRenderer() {}
 
     public static void init() {
         LevelRenderEvents.END_MAIN.register(BlockRenderer::render);

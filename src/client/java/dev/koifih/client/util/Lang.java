@@ -1,5 +1,7 @@
 package dev.koifih.client.util;
 
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import java.io.InputStreamReader;
@@ -7,6 +9,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.EnumMap;
 import java.util.Map;
 
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
 public final class Lang {
     public enum Language {
         ENGLISH("en", "English"),
@@ -31,8 +34,6 @@ public final class Lang {
 
     private static final Map<Language, Map<String, String>> TRANSLATIONS = new EnumMap<>(Language.class);
     private static Language current = Language.ENGLISH;
-
-    private Lang() {}
 
     public static Language current() {
         return current;

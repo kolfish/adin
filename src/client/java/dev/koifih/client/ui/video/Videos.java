@@ -1,5 +1,7 @@
 package dev.koifih.client.ui.video;
 
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import dev.koifih.Adin;
@@ -12,13 +14,12 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
 public final class Videos {
     public record Clip(String id, String label) {}
 
     private static final String DIRECTORY = "/assets/adin/video/";
     private static final Map<String, List<Clip>> BY_MODULE = load();
-
-    private Videos() {}
 
     public static List<Clip> of(String moduleId) {
         return BY_MODULE.getOrDefault(moduleId, List.of());

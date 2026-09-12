@@ -1,11 +1,12 @@
 package dev.koifih.client.render;
 
 import dev.koifih.client.render.Opacity;
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
 public final class Transform {
-    private Transform() {}
-
     public static void translated(GuiGraphicsExtractor graphics, float dx, float dy, Runnable draw) {
         graphics.pose().pushMatrix();
         try {

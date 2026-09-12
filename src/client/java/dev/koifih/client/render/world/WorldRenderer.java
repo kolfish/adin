@@ -1,5 +1,7 @@
 package dev.koifih.client.render.world;
 
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import dev.koifih.client.AdinClient;
@@ -13,13 +15,12 @@ import net.minecraft.client.renderer.SubmitNodeCollector;
 import net.minecraft.world.phys.Vec3;
 import java.util.List;
 
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
 public final class WorldRenderer {
     private static final float MIN_LINE_WIDTH = 1f;
     private static final float MIN_OUTLINE_BORDER = 2f;
 
     private static volatile List<WorldBuffer.Box> frame = List.of();
-
-    private WorldRenderer() {}
 
     public static void init() {
         LevelExtractionEvents.END_EXTRACTION.register(WorldRenderer::extract);

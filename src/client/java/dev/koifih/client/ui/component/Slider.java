@@ -3,6 +3,7 @@ package dev.koifih.client.ui.component;
 import dev.koifih.client.render.Text;
 import dev.koifih.client.ui.Theme;
 import dev.koifih.client.ui.Transition;
+import lombok.Setter;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.narration.NarratedElementType;
 import net.minecraft.client.gui.narration.NarrationElementOutput;
@@ -19,6 +20,7 @@ public final class Slider extends Control {
     private final IntSupplier[] gets;
     private final IntConsumer[] sets;
     private final Transition[] positions;
+    @Setter
     private IntFunction<String> format = Integer::toString;
     private int knob;
     private boolean dragging;
@@ -43,10 +45,6 @@ public final class Slider extends Control {
                                IntSupplier lowGet, IntConsumer lowSet, IntSupplier highGet, IntConsumer highSet) {
         return new Slider(x, y, width, height, scale, label, min, max,
                 new IntSupplier[] {lowGet, highGet}, new IntConsumer[] {lowSet, highSet});
-    }
-
-    public void setFormat(IntFunction<String> format) {
-        this.format = format;
     }
 
     private boolean ranged() {

@@ -10,6 +10,8 @@ import dev.koifih.client.render.state.LineState;
 import dev.koifih.client.render.state.QuadState;
 import dev.koifih.client.render.state.ShapeState;
 import dev.koifih.client.render.state.Submit;
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
 import net.fabricmc.fabric.api.client.rendering.v1.hud.HudElementRegistry;
 import net.minecraft.client.DeltaTracker;
 import net.minecraft.client.Minecraft;
@@ -18,9 +20,8 @@ import net.minecraft.client.gui.navigation.ScreenRectangle;
 import org.joml.Matrix3x2f;
 import org.joml.Matrix3x2fc;
 
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
 public final class ScreenRenderer {
-    private ScreenRenderer() {}
-
     public static void init() {
         HudElementRegistry.addLast(Adin.id("overlay"), ScreenRenderer::extract);
     }

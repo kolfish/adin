@@ -4,6 +4,7 @@ plugins {
 }
 
 repositories {
+	mavenCentral()
 }
 
 loom {
@@ -23,6 +24,11 @@ dependencies {
 
 	implementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_api_version}"
 	clientCompileOnly "io.github.llamalad7:mixinextras-fabric:0.5.5"
+
+	compileOnly "org.projectlombok:lombok:${project.lombok_version}"
+	annotationProcessor "org.projectlombok:lombok:${project.lombok_version}"
+	clientCompileOnly "org.projectlombok:lombok:${project.lombok_version}"
+	clientAnnotationProcessor "org.projectlombok:lombok:${project.lombok_version}"
 }
 
 processResources {

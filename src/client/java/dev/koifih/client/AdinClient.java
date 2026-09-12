@@ -1,6 +1,8 @@
 package dev.koifih.client;
 
 import dev.koifih.client.util.Clicks;
+import dev.koifih.client.util.Time;
+import dev.koifih.client.event.Priority;
 import dev.koifih.client.bench.Probe;
 import dev.koifih.client.event.EventBus;
 import dev.koifih.client.event.events.PreTickEvent;
@@ -32,6 +34,7 @@ public final class AdinClient implements ClientModInitializer {
         BlockIndex.init(BlockRenderer::onSectionChanged);
         BlockRenderer.init();
         ScreenRenderer.init();
+        EVENTS.subscribe(PreTickEvent.class, Priority.HIGHEST, event -> Time.tick());
         EVENTS.subscribe(PreTickEvent.class, event -> MODULES.tickKeybinds(event.client()));
         ClientTickEvents.START_CLIENT_TICK.register(client -> EVENTS.post(new PreTickEvent(client)));
         ClientTickEvents.END_CLIENT_TICK.register(client -> EVENTS.post(new TickEvent(client)));

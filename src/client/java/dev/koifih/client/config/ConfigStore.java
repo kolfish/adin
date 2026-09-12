@@ -1,5 +1,7 @@
 package dev.koifih.client.config;
 
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import dev.koifih.Adin;
@@ -17,10 +19,9 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Stream;
 
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
 public final class ConfigStore {
     private static final Gson GSON = new GsonBuilder().setPrettyPrinting().create();
-
-    private ConfigStore() {}
 
     public static Path directory() {
         return Minecraft.getInstance().gameDirectory.toPath().resolve("config").resolve(Adin.MOD_ID).resolve("configs");

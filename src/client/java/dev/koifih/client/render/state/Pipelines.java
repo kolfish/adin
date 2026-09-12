@@ -1,5 +1,7 @@
 package dev.koifih.client.render.state;
 
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
 import com.mojang.blaze3d.GpuFormat;
 import com.mojang.blaze3d.PrimitiveTopology;
 import com.mojang.blaze3d.pipeline.BlendFunction;
@@ -13,6 +15,7 @@ import net.minecraft.client.renderer.BindGroupLayouts;
 import net.minecraft.client.renderer.RenderPipelines;
 import java.util.Optional;
 
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
 public final class Pipelines {
     public static final VertexFormat SHAPE_FORMAT = VertexFormat.builder(0)
             .addAttribute("Position", GpuFormat.RGB32_FLOAT)
@@ -45,8 +48,6 @@ public final class Pipelines {
             .withLocation(Adin.id("pipeline/quad"))
             .withCull(false)
             .build();
-
-    private Pipelines() {}
 
     private static RenderPipeline rect(String name, int mode) {
         return shape("gui/" + name, "gui/rect", "gui/rect")

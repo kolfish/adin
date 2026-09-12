@@ -1,13 +1,14 @@
 package dev.koifih.client.util;
 
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
 import net.minecraft.util.Mth;
 import net.minecraft.world.phys.Vec3;
 import java.util.concurrent.ThreadLocalRandom;
 
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
 public final class Maths {
     private static final float EPSILON = 1e-6f;
-
-    private Maths() {}
 
     public static float length(float x, float y) {
         return (float) Math.sqrt(x * x + y * y);

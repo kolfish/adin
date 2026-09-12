@@ -1,18 +1,18 @@
 package dev.koifih.client.setting;
 
+import lombok.Getter;
+import lombok.experimental.Accessors;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonPrimitive;
 
+@Accessors(fluent = true)
 public final class EnumSetting extends Setting<Integer> {
+    @Getter
     private final String[] options;
 
     public EnumSetting(String id, int defaultIndex, String... options) {
         super(id, defaultIndex);
         this.options = options;
-    }
-
-    public String[] options() {
-        return options;
     }
 
     public String selected() {

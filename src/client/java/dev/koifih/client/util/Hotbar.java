@@ -1,6 +1,8 @@
 package dev.koifih.client.util;
 
 import dev.koifih.client.mixin.accessor.MultiPlayerGameModeAccessor;
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.network.protocol.Packet;
@@ -20,14 +22,13 @@ import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.item.ItemStack;
 import java.util.function.Predicate;
 
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
 public final class Hotbar {
     public static final int NONE = -1;
 
     private static boolean acted;
     private static int silentSlot = NONE;
     private static int silentBase = NONE;
-
-    private Hotbar() {}
 
     public static int selected(LocalPlayer player) {
         return player.getInventory().getSelectedSlot();

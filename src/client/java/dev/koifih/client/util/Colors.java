@@ -1,8 +1,10 @@
 package dev.koifih.client.util;
 
-public final class Colors {
-    private Colors() {}
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
 
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
+public final class Colors {
     public static int alpha(int argb) {
         return argb >>> 24;
     }

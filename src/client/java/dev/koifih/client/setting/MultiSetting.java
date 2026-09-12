@@ -1,12 +1,16 @@
 package dev.koifih.client.setting;
 
+import lombok.Getter;
+import lombok.experimental.Accessors;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import java.util.LinkedHashSet;
 import java.util.Set;
 import java.util.function.IntPredicate;
 
+@Accessors(fluent = true)
 public final class MultiSetting extends Setting<Set<Integer>> {
+    @Getter
     private final String[] options;
     private IntPredicate optionVisible = option -> true;
 
@@ -14,10 +18,6 @@ public final class MultiSetting extends Setting<Set<Integer>> {
         super(id, new LinkedHashSet<>());
         this.options = options;
         for (int index : defaults) value.add(index);
-    }
-
-    public String[] options() {
-        return options;
     }
 
     public void optionVisibleWhen(IntPredicate condition) {

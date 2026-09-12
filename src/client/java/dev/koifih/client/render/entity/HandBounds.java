@@ -1,5 +1,7 @@
 package dev.koifih.client.render.entity;
 
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
 import com.mojang.blaze3d.pipeline.RenderTarget;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
@@ -11,6 +13,7 @@ import org.joml.Matrix4f;
 import org.joml.Vector4f;
 import java.util.List;
 
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
 public final class HandBounds {
     private static final float NEAR = 1e-4f;
     private static final int BLUR_SLACK = 2;
@@ -23,8 +26,6 @@ public final class HandBounds {
     private static float maxY;
     private static boolean any;
     private static boolean behind;
-
-    private HandBounds() {}
 
     public static void begin() {
         ((GameRendererAccessor) Minecraft.getInstance().gameRenderer).adin$getHudProjection().getMatrix(clip)

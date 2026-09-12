@@ -1,5 +1,7 @@
 package dev.koifih.client.render.blocks;
 
+import lombok.AccessLevel;
+import lombok.RequiredArgsConstructor;
 import com.mojang.blaze3d.buffers.GpuBuffer;
 import com.mojang.blaze3d.systems.CommandEncoder;
 import com.mojang.blaze3d.systems.RenderSystem;
@@ -8,6 +10,7 @@ import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.List;
 
+@RequiredArgsConstructor(access = AccessLevel.PACKAGE)
 final class VertexArena {
     static final class Range {
         final long key;
@@ -34,11 +37,6 @@ final class VertexArena {
     private long capacity;
     private long used;
     private long live;
-
-    VertexArena(String label, int vertexSize) {
-        this.label = label;
-        this.vertexSize = vertexSize;
-    }
 
     Range put(CommandEncoder encoder, long key, ByteBuffer data) {
         remove(key);

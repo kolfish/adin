@@ -1,5 +1,9 @@
 package dev.koifih.client.module;
 
+import lombok.AccessLevel;
+import lombok.Getter;
+import lombok.RequiredArgsConstructor;
+import lombok.experimental.Accessors;
 import com.mojang.blaze3d.platform.InputConstants;
 import dev.koifih.client.AdinClient;
 import dev.koifih.client.event.Event;
@@ -15,28 +19,23 @@ import org.lwjgl.glfw.GLFW;
 import java.util.ArrayList;
 import java.util.List;
 
+@RequiredArgsConstructor(access = AccessLevel.PROTECTED)
+@Accessors(fluent = true)
 public abstract class Module {
     public static Minecraft mc = Minecraft.getInstance();
+    @Getter
     private final String id;
+    @Getter
     Category category;
+    @Getter
     private final List<Setting<?>> settings = new ArrayList<>();
     private final List<Subscription> subscriptions = new ArrayList<>();
     private boolean enabled;
+    @Getter
     private InputConstants.Key key = InputConstants.UNKNOWN;
+    @Getter
     private boolean hold;
     private boolean keyWasDown;
-
-    protected Module(String id) {
-        this.id = id;
-    }
-
-    public String id() {
-        return id;
-    }
-
-    public Category category() {
-        return category;
-    }
 
     public String name() {
         return Lang.getOrDefault("module." + id, Lang.capitalize(id));
@@ -61,10 +60,6 @@ public abstract class Module {
         return group;
     }
 
-    public List<Setting<?>> settings() {
-        return settings;
-    }
-
     public boolean isEnabled() {
         return enabled;
     }
@@ -86,16 +81,8 @@ public abstract class Module {
         setEnabled(!enabled);
     }
 
-    public InputConstants.Key key() {
-        return key;
-    }
-
     public void setKey(InputConstants.Key key) {
         this.key = key == null ? InputConstants.UNKNOWN : key;
-    }
-
-    public boolean hold() {
-        return hold;
     }
 
     public void setHold(boolean hold) {

@@ -1,5 +1,7 @@
 package dev.koifih.client.ui.video;
 
+import lombok.AccessLevel;
+import lombok.RequiredArgsConstructor;
 import com.mojang.blaze3d.platform.NativeImage;
 import org.lwjgl.stb.STBImage;
 import org.lwjgl.system.MemoryStack;
@@ -12,6 +14,7 @@ import java.nio.IntBuffer;
 import java.util.ArrayList;
 import java.util.List;
 
+@RequiredArgsConstructor(access = AccessLevel.PRIVATE)
 public final class AviVideo {
     private record Chunk(int offset, int length) {}
 
@@ -25,10 +28,6 @@ public final class AviVideo {
     private final ByteBuffer bytes;
     private final List<Chunk> frames = new ArrayList<>();
     private float fps = 15f;
-
-    private AviVideo(ByteBuffer bytes) {
-        this.bytes = bytes;
-    }
 
     public static AviVideo read(InputStream stream) throws IOException {
         byte[] data = stream.readAllBytes();

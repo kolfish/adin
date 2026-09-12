@@ -1,5 +1,7 @@
 package dev.koifih.client.input;
 
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
 import com.mojang.blaze3d.platform.InputConstants;
 import dev.koifih.Adin;
 import dev.koifih.client.mixin.accessor.KeyMappingAccessor;
@@ -10,12 +12,11 @@ import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
 import org.lwjgl.glfw.GLFW;
 
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
 public final class Keybinds {
     private static final KeyMapping.Category CATEGORY = KeyMapping.Category.register(Adin.id("keybinds"));
 
     public static final KeyMapping OPEN_CLICK_GUI = register("open_click_gui", GLFW.GLFW_KEY_RIGHT_SHIFT);
-
-    private Keybinds() {}
 
     public static void register() {
         ClientTickEvents.END_CLIENT_TICK.register(Keybinds::onClientTick);

@@ -8,6 +8,8 @@ import dev.koifih.client.render.entity.EntityOutline;
 import dev.koifih.client.render.entity.Filled;
 import dev.koifih.client.render.screen.Projector;
 import dev.koifih.client.util.Game;
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.player.LocalPlayer;
@@ -29,12 +31,11 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
 public final class EntityPreview {
     private static final Map<EntityType<?>, Optional<Entity>> ENTITIES = new HashMap<>();
     private static int nextId = -1_000_000;
     private static FallingBlockEntity fallingBlock;
-
-    private EntityPreview() {}
 
     public static void clear() {
         ENTITIES.clear();

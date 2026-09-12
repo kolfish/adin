@@ -1,6 +1,7 @@
 package dev.koifih.client.ui.component;
 
 import dev.koifih.client.ui.Transition;
+import lombok.Setter;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.input.KeyEvent;
 import net.minecraft.client.input.MouseButtonEvent;
@@ -10,6 +11,7 @@ import org.lwjgl.glfw.GLFW;
 public abstract class Popup extends Control {
     private boolean open;
     private final Transition reveal = new Transition(0f, 150);
+    @Setter
     private int bottomLimit = Integer.MAX_VALUE;
 
     protected Popup(int x, int y, int width, int height, float scale, Component label) {
@@ -18,10 +20,6 @@ public abstract class Popup extends Control {
 
     public boolean isOpen() {
         return open;
-    }
-
-    public void setBottomLimit(int bottomLimit) {
-        this.bottomLimit = bottomLimit;
     }
 
     protected int bottomLimit() {

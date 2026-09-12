@@ -1,5 +1,7 @@
 package dev.koifih.client.util;
 
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.world.entity.projectile.arrow.AbstractArrow;
 import net.minecraft.world.level.ClipContext;
@@ -7,14 +9,13 @@ import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
 
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
 public final class ProjectilePrediction {
     public static final float ARROW_SPEED = 3f;
     private static final float ARROW_DRAG = 0.99f;
     private static final float ARROW_GRAVITY = 0.05f;
     private static final double EYE_DROP = 0.1;
     private static final int FLIGHT_TICKS = 100;
-
-    private ProjectilePrediction() {}
 
     public static BlockHitResult arrow(LocalPlayer player, float speed) {
         return landing(player, player.getEyePosition().subtract(0.0, EYE_DROP, 0.0),

@@ -4,11 +4,12 @@ import dev.koifih.client.render.Corners;
 import dev.koifih.client.render.Point;
 import dev.koifih.client.render.Rect;
 import dev.koifih.client.render.Style;
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
 import net.minecraft.world.phys.AABB;
 
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
 public final class Boxes {
-    private Boxes() {}
-
     public static Point[] project(Projector projector, AABB box) {
         Point[] corners = new Point[Corners.COUNT];
         for (int i = 0; i < corners.length; i++) {

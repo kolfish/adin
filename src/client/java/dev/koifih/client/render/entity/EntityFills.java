@@ -1,5 +1,7 @@
 package dev.koifih.client.render.entity;
 
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
 import com.mojang.blaze3d.PrimitiveTopology;
 import com.mojang.blaze3d.pipeline.BlendFunction;
 import com.mojang.blaze3d.pipeline.ColorTargetState;
@@ -21,6 +23,7 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
 public final class EntityFills {
     public static final int EFFECTS = 6;
 
@@ -50,8 +53,6 @@ public final class EntityFills {
         for (RenderPipeline pipeline : HAND) ALL.add(pipeline);
         ALL.add(SILHOUETTE);
     }
-
-    private EntityFills() {}
 
     public static void beginHand(EntityFill fill) {
         hand = fill;

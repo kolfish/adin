@@ -1,10 +1,14 @@
 package dev.koifih.client.setting;
 
+import lombok.Getter;
+import lombok.experimental.Accessors;
 import com.google.gson.JsonElement;
 import dev.koifih.client.util.Lang;
 import java.util.function.BooleanSupplier;
 
+@Accessors(fluent = true)
 public abstract class Setting<T> {
+    @Getter
     private final String id;
     private final T defaultValue;
     private String moduleId = "";
@@ -19,10 +23,6 @@ public abstract class Setting<T> {
 
     public void attach(String moduleId) {
         this.moduleId = moduleId;
-    }
-
-    public String id() {
-        return id;
     }
 
     public void visibleWhen(BooleanSupplier condition) {

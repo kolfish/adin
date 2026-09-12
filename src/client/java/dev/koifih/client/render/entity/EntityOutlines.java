@@ -1,5 +1,7 @@
 package dev.koifih.client.render.entity;
 
+import lombok.AccessLevel;
+import lombok.RequiredArgsConstructor;
 import com.mojang.blaze3d.GpuFormat;
 import com.mojang.blaze3d.PrimitiveTopology;
 import com.mojang.blaze3d.buffers.GpuBuffer;
@@ -30,6 +32,7 @@ import org.lwjgl.system.MemoryStack;
 import java.util.Optional;
 import java.util.OptionalDouble;
 
+@RequiredArgsConstructor(access = AccessLevel.PRIVATE)
 public final class EntityOutlines {
     public static final EntityOutlines LEVEL = new EntityOutlines("level");
     public static final EntityOutlines PREVIEW = new EntityOutlines("preview");
@@ -88,10 +91,6 @@ public final class EntityOutlines {
     private EntityOutline uploaded;
     private float uploadedRadius = Float.NaN;
     private int blurPasses;
-
-    private EntityOutlines(String name) {
-        this.name = name;
-    }
 
     public static boolean active() {
         return level != null;

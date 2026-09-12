@@ -1,5 +1,7 @@
 package dev.koifih.client.render.screen;
 
+import lombok.Getter;
+import lombok.experimental.Accessors;
 import com.mojang.math.Axis;
 import dev.koifih.client.render.Corners;
 import dev.koifih.client.render.Point;
@@ -18,6 +20,7 @@ import org.joml.Matrix4fc;
 import org.joml.Vector4f;
 import org.joml.Vector4fc;
 
+@Accessors(fluent = true)
 public final class Projection implements Projector {
     public static final float NEAR = 0.05f;
 
@@ -25,6 +28,7 @@ public final class Projection implements Projector {
     private final Vec3 origin;
     private final float width;
     private final float height;
+    @Getter
     private final float pixel;
 
     public Projection(Matrix4fc viewProjection, Vec3 origin, float width, float height, float pixel) {
@@ -65,10 +69,6 @@ public final class Projection implements Projector {
             if (inFront(a) != inFront(b)) extent.add(toScreen(nearIntersection(a, b)));
         }
         return extent.toRect();
-    }
-
-    public float pixel() {
-        return pixel;
     }
 
     public int framebufferX(float x) {

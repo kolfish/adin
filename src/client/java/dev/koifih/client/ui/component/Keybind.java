@@ -1,5 +1,6 @@
 package dev.koifih.client.ui.component;
 
+import lombok.Setter;
 import com.mojang.blaze3d.platform.InputConstants;
 import dev.koifih.client.render.Text;
 import dev.koifih.client.ui.Theme;
@@ -20,6 +21,7 @@ public final class Keybind extends Control {
     private final Supplier<InputConstants.Key> get;
     private final Consumer<InputConstants.Key> set;
     private boolean capturing;
+    @Setter
     private boolean clearable = true;
     private final Transition listening = new Transition(0f, 120);
 
@@ -28,10 +30,6 @@ public final class Keybind extends Control {
         super(x, y, width, height, scale, label);
         this.get = get;
         this.set = set;
-    }
-
-    public void setClearable(boolean clearable) {
-        this.clearable = clearable;
     }
 
     @Override

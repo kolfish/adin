@@ -1,13 +1,17 @@
 package dev.koifih.client.setting;
 
+import lombok.Getter;
+import lombok.experimental.Accessors;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonPrimitive;
 import dev.koifih.client.util.Colors;
 import java.util.function.BooleanSupplier;
 
+@Accessors(fluent = true)
 public final class ColorSetting extends Setting<Integer> {
     private final int defaultSecondary;
+    @Getter
     private int secondary;
     private BooleanSupplier gradient = () -> false;
 
@@ -27,10 +31,6 @@ public final class ColorSetting extends Setting<Integer> {
 
     public boolean isGradient() {
         return gradient.getAsBoolean();
-    }
-
-    public int secondary() {
-        return secondary;
     }
 
     public void setSecondary(int rgb) {

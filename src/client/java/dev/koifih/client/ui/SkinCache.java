@@ -1,5 +1,7 @@
 package dev.koifih.client.ui;
 
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
 import com.mojang.authlib.GameProfile;
 import net.minecraft.client.Minecraft;
 import net.minecraft.util.Util;
@@ -10,6 +12,7 @@ import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
 
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
 public final class SkinCache {
     public enum Status {
         LOADING,
@@ -18,8 +21,6 @@ public final class SkinCache {
     }
 
     private static final Map<String, CompletableFuture<Optional<PlayerSkin>>> CACHE = new ConcurrentHashMap<>();
-
-    private SkinCache() {}
 
     public static void request(String name) {
         String key = key(name);

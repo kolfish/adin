@@ -1,11 +1,13 @@
 package dev.koifih.client.rotation;
 
+import lombok.RequiredArgsConstructor;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 
+@RequiredArgsConstructor
 public enum Bone {
     MULTIPOINT(null),
     HEAD(new Vec3(0.0, 1.75, 0.0)),
@@ -21,10 +23,6 @@ public enum Bone {
     private static final double MARGIN_FRACTION = 0.25;
     private static final int REFINEMENTS = 2;
     private final Vec3 center;
-
-    Bone(Vec3 center) {
-        this.center = center;
-    }
 
     public Vec3 point(Entity viewer, LivingEntity entity, float partialTick) {
         Vec3 position = entity.getPosition(partialTick);

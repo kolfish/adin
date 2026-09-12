@@ -3,6 +3,7 @@ package dev.koifih.client.ui.component;
 import dev.koifih.client.render.Text;
 import dev.koifih.client.ui.Theme;
 import dev.koifih.client.util.Time;
+import lombok.Setter;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.narration.NarratedElementType;
@@ -23,6 +24,7 @@ public final class TextInput extends Control {
     private final Consumer<String> set;
     private int cursor;
     private boolean selectAll;
+    @Setter
     private String placeholder = "";
 
     public TextInput(int x, int y, int width, int height, float scale, Component label,
@@ -31,10 +33,6 @@ public final class TextInput extends Control {
         this.maxLength = maxLength;
         this.get = get;
         this.set = set;
-    }
-
-    public void setPlaceholder(String placeholder) {
-        this.placeholder = placeholder;
     }
 
     @Override

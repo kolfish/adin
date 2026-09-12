@@ -1,6 +1,7 @@
 package dev.koifih.client.module.impl.player;
 
 import dev.koifih.client.event.events.PreTickEvent;
+import dev.koifih.client.setting.Measure;
 import dev.koifih.client.util.Clicks;
 import dev.koifih.client.mixin.accessor.MultiPlayerGameModeAccessor;
 import dev.koifih.client.module.Module;
@@ -15,10 +16,10 @@ import net.minecraft.world.InteractionHand;
 import net.minecraft.world.item.Items;
 
 public final class KeyPearl extends Module {
-    private final SliderSetting delay = add(new SliderSetting("delay", 100, 1, 500));
+    private final SliderSetting delay = add(new SliderSetting("delay", 100, 50, 500, Measure.MILLIS));
     private final BoolSetting silentSwap = add(new BoolSetting("silentSwap", false));
     private final BoolSetting swapBack = add(new BoolSetting("swapBack", true));
-    private final Time.Stopwatch sinceSwap = new Time.Stopwatch();
+    private final Time.Ticker sinceSwap = new Time.Ticker();
     private int originalSlot = Hotbar.NONE;
     private boolean silent;
     private boolean threw;
@@ -57,7 +58,7 @@ public final class KeyPearl extends Module {
                 originalSlot = Hotbar.NONE;
                 return;
             }
-            sinceSwap.reset();
+            sinceSwap.mark();
         }
         if (silent && slot != selected) {
             ((MultiPlayerGameModeAccessor) mc.gameMode).adin$startPrediction(mc.level,

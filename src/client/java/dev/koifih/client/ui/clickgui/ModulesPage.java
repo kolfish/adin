@@ -36,6 +36,7 @@ import dev.koifih.client.ui.component.VideoPopup;
 import dev.koifih.client.ui.video.Videos;
 import dev.koifih.client.util.Colors;
 import dev.koifih.client.util.Lang;
+import lombok.RequiredArgsConstructor;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.navigation.ScreenRectangle;
@@ -47,6 +48,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Supplier;
 
+@RequiredArgsConstructor
 public final class ModulesPage implements Page {
     private static final int ROW_HEIGHT = 40;
     private static final int ROW_STRIDE = 46;
@@ -102,11 +104,6 @@ public final class ModulesPage implements Page {
         float shown() {
             return reveal.value();
         }
-    }
-
-    public ModulesPage(ClickGui gui, Supplier<Category> category) {
-        this.gui = gui;
-        this.category = category;
     }
 
     @Override

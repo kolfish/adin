@@ -1,7 +1,9 @@
 package dev.koifih.client.ui;
 
 import dev.koifih.client.util.Lang;
+import lombok.RequiredArgsConstructor;
 
+@RequiredArgsConstructor
 public enum Units {
     METRIC("units.metric") {
         @Override
@@ -20,10 +22,6 @@ public enum Units {
     private static final float FEET_PER_BLOCK = 3.28084f;
     private static Units current = METRIC;
     private final String key;
-
-    Units(String key) {
-        this.key = key;
-    }
 
     public abstract String distance(int blocks);
 

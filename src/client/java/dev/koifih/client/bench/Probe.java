@@ -1,5 +1,7 @@
 package dev.koifih.client.bench;
 
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
 import com.mojang.blaze3d.platform.NativeImage;
 import dev.koifih.Adin;
 import dev.koifih.client.AdinClient;
@@ -12,6 +14,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
 public final class Probe {
     private static final Path TRIGGER = Path.of("adin-probe.json");
     private static final String[] ENABLED = {"arraylist", "watermark", "keybinds", "notifications", "sprint", "esp", "nametags"};
@@ -20,8 +23,6 @@ public final class Probe {
 
     private static Stage stage = Stage.TITLE;
     private static long stageStart = System.currentTimeMillis();
-
-    private Probe() {}
 
     public static void init() {
         if (!Files.exists(TRIGGER)) return;

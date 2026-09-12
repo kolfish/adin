@@ -4,6 +4,8 @@ import dev.koifih.client.AdinClient;
 import dev.koifih.client.event.Priority;
 import dev.koifih.client.event.events.PreTickEvent;
 import dev.koifih.client.mixin.accessor.MouseHandlerAccessor;
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.input.MouseButtonInfo;
 import net.minecraft.core.BlockPos;
@@ -13,11 +15,10 @@ import net.minecraft.world.phys.EntityHitResult;
 import net.minecraft.world.phys.HitResult;
 import org.lwjgl.glfw.GLFW;
 
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
 public final class Clicks {
     public static boolean simulate;
     private static final boolean[] held = new boolean[2];
-
-    private Clicks() {}
 
     public static void init() {
         AdinClient.EVENTS.subscribe(PreTickEvent.class, Priority.HIGHEST, event -> release(event.client()));

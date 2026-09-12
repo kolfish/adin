@@ -1,5 +1,7 @@
 package dev.koifih.client.render.blocks;
 
+import lombok.AccessLevel;
+import lombok.RequiredArgsConstructor;
 import com.mojang.blaze3d.PrimitiveTopology;
 import com.mojang.blaze3d.vertex.BufferBuilder;
 import com.mojang.blaze3d.vertex.ByteBufferBuilder;
@@ -11,6 +13,7 @@ import net.minecraft.core.Vec3i;
 import net.minecraft.world.phys.AABB;
 import java.util.Arrays;
 
+@RequiredArgsConstructor(access = AccessLevel.PRIVATE)
 final class BlockMesh {
     record Built(long key, int version, MeshData fill, MeshData lines, ByteBufferBuilder fillBytes, ByteBufferBuilder lineBytes) {
         static Built empty(long key, int version) {
@@ -44,15 +47,6 @@ final class BlockMesh {
     private final BufferBuilder fill;
     private final BufferBuilder lines;
     private final boolean[] mask = new boolean[SIZE * SIZE];
-
-    private BlockMesh(BlockIndex.Matches matches, float originX, float originY, float originZ, BufferBuilder fill, BufferBuilder lines) {
-        this.matches = matches;
-        this.originX = originX;
-        this.originY = originY;
-        this.originZ = originZ;
-        this.fill = fill;
-        this.lines = lines;
-    }
 
     static Built build(long key, int version, BlockIndex.Matches matches, Vec3i anchor) {
         ByteBufferBuilder fillBytes = new ByteBufferBuilder(INITIAL_BYTES);

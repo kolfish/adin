@@ -1,6 +1,7 @@
 package dev.koifih.client.module.impl.combat;
 
 import dev.koifih.client.AdinClient;
+import dev.koifih.client.setting.Measure;
 import dev.koifih.client.util.Clicks;
 import dev.koifih.client.event.events.PreTickEvent;
 import dev.koifih.client.mixin.accessor.MultiPlayerGameModeAccessor;
@@ -28,10 +29,10 @@ import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.shapes.CollisionContext;
 
 public final class AutoHitCrystal extends Module {
-    private final SliderSetting delay = add(new SliderSetting("delay", 100, 1, 500));
+    private final SliderSetting delay = add(new SliderSetting("delay", 100, 50, 500, Measure.MILLIS));
     private final BoolSetting silentSwap = add(new BoolSetting("silentSwap", false));
     private final BoolSetting swapBack = add(new BoolSetting("swapBack", true));
-    private final Time.Stopwatch sinceSwap = new Time.Stopwatch();
+    private final Time.Ticker sinceSwap = new Time.Ticker();
     private int originalSlot = Hotbar.NONE;
     private boolean silent;
     private boolean placed;
@@ -75,7 +76,7 @@ public final class AutoHitCrystal extends Module {
                 originalSlot = Hotbar.NONE;
                 return;
             }
-            sinceSwap.reset();
+            sinceSwap.mark();
         }
         if (quiet && slot != selected) {
             ItemStack stack = player.getInventory().getItem(slot);

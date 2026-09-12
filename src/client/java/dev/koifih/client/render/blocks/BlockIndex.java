@@ -1,5 +1,7 @@
 package dev.koifih.client.render.blocks;
 
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientChunkEvents;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents;
 import net.minecraft.client.Minecraft;
@@ -22,6 +24,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.LongConsumer;
 import java.util.function.Predicate;
 
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
 public final class BlockIndex {
     public record Matches(long[] bits, AABB[] shapes) {
         public boolean has(int index) {
@@ -50,8 +53,6 @@ public final class BlockIndex {
     private static final Set<Long> dirty = ConcurrentHashMap.newKeySet();
     private static volatile Set<Block> blocks = Set.of();
     private static LongConsumer listener = key -> {};
-
-    private BlockIndex() {}
 
     public static void init(LongConsumer onChanged) {
         listener = onChanged;

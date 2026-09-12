@@ -1,6 +1,7 @@
 package dev.koifih.client.module.impl.combat;
 
 import dev.koifih.client.AdinClient;
+import dev.koifih.client.setting.Measure;
 import dev.koifih.client.util.Clicks;
 import dev.koifih.client.event.Priority;
 import dev.koifih.client.event.events.PreTickEvent;
@@ -33,21 +34,18 @@ import net.minecraft.world.phys.Vec3;
 
 public final class AutoCrystal extends Module {
     private static final long SPAWN_WAIT = 250;
-    private static final float TICK_MILLIS = 50f;
     private static final RotationConfig SNAP = RotationConfig.silent(0f, Smoothing.EASE_OUT_CUBIC);
 
-    private final SliderSetting delay = add(new SliderSetting("delay", 50, 1, 500));
+    private final SliderSetting delay = add(new SliderSetting("delay", 50, 50, 500, Measure.MILLIS));
     private final BoolSetting headBob = add(new BoolSetting("headBob", false));
     private final BoolSetting silentSwap = add(new BoolSetting("silentSwap", false));
     private final BoolSetting swapBack = add(new BoolSetting("swapBack", true));
-    private final Time.Stopwatch sinceAction = new Time.Stopwatch();
+    private final Time.Ticker pacer = new Time.Ticker();
     private final Time.Stopwatch sincePlace = new Time.Stopwatch();
     private int originalSlot = Hotbar.NONE;
     private boolean silent;
     private boolean releasing;
     private EndCrystal hit;
-    private int ticks;
-    private int lastActionTick;
     private boolean awaitingSpawn;
 
     public AutoCrystal() {
@@ -63,7 +61,6 @@ public final class AutoCrystal extends Module {
     @Override
     protected void onEnable() {
         listen(PreTickEvent.class, event -> {
-            ticks++;
             if (releasing) restore(event.client().player);
         });
     }
@@ -83,7 +80,7 @@ public final class AutoCrystal extends Module {
             bob(player);
             return;
         }
-        if (!sinceAction.elapsed(delay.get())) return;
+        if (!pacer.ready()) return;
         if (mc.hitResult instanceof EntityHitResult hit && hit.getEntity() instanceof EndCrystal crystal) {
             attack(player, crystal);
         } else if (mc.hitResult instanceof BlockHitResult hit && hit.getType() == HitResult.Type.BLOCK && placeable(hit.getBlockPos())) {
@@ -107,7 +104,7 @@ public final class AutoCrystal extends Module {
         Vec3 top = Vec3.atBottomCenterOf(above);
         Vec3 center = top.add(0.0, 1.0, 0.0);
         EndCrystal crystal = crystalAbove(base);
-        boolean ready = ticks - lastActionTick >= Math.max(1, Math.round(delay.get() / TICK_MILLIS));
+        boolean ready = pacer.ready();
         Vec3 next;
         if (crystal != null) {
             awaitingSpawn = false;
@@ -115,7 +112,6 @@ public final class AutoCrystal extends Module {
             if (ready && hits(crystal.getBoundingBox(), eye, look, player.entityInteractionRange())) {
                 attack(player, crystal);
                 hit = crystal;
-                lastActionTick = ticks;
                 next = top;
             }
         } else if (mc.level.isEmptyBlock(above) && (!awaitingSpawn || sincePlace.elapsed(SPAWN_WAIT))) {
@@ -123,7 +119,6 @@ public final class AutoCrystal extends Module {
             next = spot == null ? top : spot.getLocation();
             if (spot != null && ready && Placement.looksAt(mc.level, base, eye, look, player.blockInteractionRange()) && place(player, spot)) {
                 sincePlace.reset();
-                lastActionTick = ticks;
                 awaitingSpawn = true;
                 next = center;
             }
@@ -163,7 +158,7 @@ public final class AutoCrystal extends Module {
     private void attack(LocalPlayer player, EndCrystal crystal) {
         if (!Clicks.left(mc, crystal)) mc.gameMode.attack(player, crystal);
         player.swing(InteractionHand.MAIN_HAND);
-        sinceAction.reset();
+        pacer.pace(delay.get());
     }
 
     public boolean holding() {
@@ -200,7 +195,7 @@ public final class AutoCrystal extends Module {
             mc.gameMode.useItemOn(player, InteractionHand.MAIN_HAND, hit);
         }
         player.swing(InteractionHand.MAIN_HAND);
-        sinceAction.reset();
+        pacer.pace(delay.get());
         return true;
     }
 
