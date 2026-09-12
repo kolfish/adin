@@ -471,17 +471,6 @@ public final class ModulesPage implements Page {
         return true;
     }
 
-    public Setting<?> highlightedSetting(double mouseX, double mouseY) {
-        for (SettingRow row : settingRows) {
-            if (row.control() instanceof Popup popup && popup.isOpen()) return row.setting();
-        }
-        for (SettingRow row : settingRows) {
-            Control control = row.control();
-            if (control.visible && control.active && control.isMouseOver(mouseX, mouseY)) return row.setting();
-        }
-        return null;
-    }
-
     public float dimAmount() {
         return 1f - 0.6f * overlayReveal.value();
     }

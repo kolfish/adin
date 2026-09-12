@@ -7,7 +7,7 @@ import dev.koifih.client.render.entity.EntityOutline;
 import dev.koifih.client.render.screen.HealthBar;
 import net.minecraft.world.phys.AABB;
 import java.util.function.BooleanSupplier;
-import java.util.function.Function;
+import java.util.function.IntFunction;
 import java.util.function.Supplier;
 import java.util.function.UnaryOperator;
 
@@ -20,12 +20,12 @@ public final class PreviewSetting extends Setting<Void> {
     private final Supplier<Style> worldStyle;
     private final UnaryOperator<AABB> flatFit;
     private final Supplier<HealthBar.Side> healthSide;
-    private final Function<Setting<?>, Shade> shade;
+    private final IntFunction<Shade> shade;
     private final Supplier<EntityOutline> outline;
 
     public PreviewSetting(String id, BooleanSupplier flat, BooleanSupplier boxShown, Supplier<Style> screenStyle,
                           Supplier<Style> worldStyle, UnaryOperator<AABB> flatFit, Supplier<HealthBar.Side> healthSide,
-                          Function<Setting<?>, Shade> shade, Supplier<EntityOutline> outline) {
+                          IntFunction<Shade> shade, Supplier<EntityOutline> outline) {
         super(id, null);
         this.flat = flat;
         this.boxShown = boxShown;
@@ -61,8 +61,8 @@ public final class PreviewSetting extends Setting<Void> {
         return healthSide.get();
     }
 
-    public Shade shade(Setting<?> highlighted) {
-        return highlighted == null ? null : shade.apply(highlighted);
+    public Shade shade(int layer) {
+        return shade.apply(layer);
     }
 
     public EntityOutline outline() {

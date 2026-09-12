@@ -169,6 +169,8 @@
   "bind.help.toggle": "Bascule : appuyer active ou désactive",
   "bind.help.hold": "Maintien : actif seulement tant que la touche est enfoncée",
   "preview.skin": "Nom d'utilisateur",
+  "preview.visible": "Visible",
+  "preview.invisible": "Invisible",
   "preview.loading": "Chargement du skin…",
   "preview.missing": "Aucun skin trouvé",
   "module.friends": "Friends",

@@ -169,6 +169,8 @@
   "bind.help.toggle": "Przełącznik: naciśnięcie włącza lub wyłącza",
   "bind.help.hold": "Przytrzymanie: działa tylko gdy klawisz jest wciśnięty",
   "preview.skin": "Nazwa gracza",
+  "preview.visible": "Widoczny",
+  "preview.invisible": "Niewidoczny",
   "preview.loading": "Wczytywanie skina…",
   "preview.missing": "Nie znaleziono skina",
   "module.friends": "Friends",

@@ -169,6 +169,8 @@
   "bind.help.toggle": "Prekidač: pritisak uključuje ili isključuje",
   "bind.help.hold": "Držanje: radi samo dok je tipka pritisnuta",
   "preview.skin": "Korisničko ime",
+  "preview.visible": "Vidljivo",
+  "preview.invisible": "Nevidljivo",
   "preview.loading": "Učitavanje skina…",
   "preview.missing": "Skin nije pronađen",
   "module.friends": "Friends",

@@ -15,10 +15,10 @@ import dev.koifih.client.render.screen.Projector;
 import dev.koifih.client.render.screen.ScreenBuffer;
 import dev.koifih.client.render.screen.ScreenRenderer;
 import dev.koifih.client.setting.PreviewSetting;
-import dev.koifih.client.setting.Setting;
 import dev.koifih.client.ui.Theme;
 import dev.koifih.client.ui.Transition;
 import dev.koifih.client.ui.component.Button;
+import dev.koifih.client.ui.component.Segmented;
 import dev.koifih.client.ui.component.TextInput;
 import dev.koifih.client.ui.EntityPreview;
 import dev.koifih.client.ui.SkinCache;
@@ -51,6 +51,8 @@ public final class PreviewWindow {
     private static final int NAME_MAX_LENGTH = 16;
     private static final int INPUT_HEIGHT = 16;
     private static final int STATUS_HEIGHT = 10;
+    private static final int LAYER_HEIGHT = 16;
+    private static int layer;
     private static final long FETCH_DELAY_MILLIS = 600L;
     private static String skinName = DEFAULT_SKIN;
     private final ClickGui gui;
@@ -59,8 +61,8 @@ public final class PreviewWindow {
     private PanelLayout layout;
     private Button back;
     private TextInput nameInput;
+    private Segmented layers;
     private PreviewSetting preview;
-    private Setting<?> highlighted;
     private String requestedName = "";
     private final Time.Stopwatch sinceEdit = new Time.Stopwatch();
     private boolean open;
@@ -80,6 +82,10 @@ public final class PreviewWindow {
         nameInput = gui.add(new TextInput(contentX(), inputY(), contentWidth(), layout.atLeastOne(INPUT_HEIGHT), layout.scale(),
                 Component.literal(Lang.get("preview.skin")), NAME_MAX_LENGTH, () -> skinName, this::setSkinName));
         nameInput.setPlaceholder(Lang.get("preview.skin"));
+        layers = gui.add(new Segmented(contentX(), layerY(), contentWidth(), layout.atLeastOne(LAYER_HEIGHT), layout.scale(),
+                Component.literal(Lang.get("preview.visible")),
+                new Segmented.Segment[] {Segmented.Segment.of(Lang.get("preview.visible")), Segmented.Segment.of(Lang.get("preview.invisible"))},
+                () -> layer, value -> layer = value));
         SkinCache.request(skinName);
         requestedName = skinName;
         updateStates(true);
@@ -92,6 +98,9 @@ public final class PreviewWindow {
         nameInput.setX(contentX());
         nameInput.setY(inputY());
         nameInput.setWidth(contentWidth());
+        layers.setX(contentX());
+        layers.setY(layerY());
+        layers.setWidth(contentWidth());
     }
 
     private void setSkinName(String name) {
@@ -142,6 +151,12 @@ public final class PreviewWindow {
         back.visible = reveal.value() > 0f;
         nameInput.active = ready;
         nameInput.visible = reveal.value() > 0f;
+        layers.active = ready && shaded();
+        layers.visible = reveal.value() > 0f && shaded();
+    }
+
+    private boolean shaded() {
+        return preview != null && preview.shade(0) != null;
     }
 
     private boolean onRight() {
@@ -189,8 +204,13 @@ public final class PreviewWindow {
         return width() - 2 * layout.padding();
     }
 
+    private int layerY() {
+        return y() + height() - layout.padding() - layout.atLeastOne(LAYER_HEIGHT);
+    }
+
     private int contentHeight() {
-        return y() + height() - layout.padding() - contentY();
+        int bottom = shaded() ? layerY() - layout.scaled(PanelLayout.GAP) : y() + height() - layout.padding();
+        return bottom - contentY();
     }
 
     public boolean contains(double pointX, double pointY) {
@@ -202,8 +222,7 @@ public final class PreviewWindow {
                 && pointY >= contentY() && pointY < contentY() + contentHeight();
     }
 
-    public void draw(GuiGraphicsExtractor graphics, Setting<?> highlighted, int mouseX, int mouseY, float delta) {
-        this.highlighted = highlighted;
+    public void draw(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float delta) {
         float shown = reveal.value();
         if (shown <= 0f || preview == null) return;
         float slide = (onRight() ? -1f : 1f) * SLIDE * layout.scale() * (1f - shown);
@@ -225,6 +244,7 @@ public final class PreviewWindow {
             Text.drawCentered(graphics, status, contentX() + layout.scaled(2), inputY() + layout.atLeastOne(INPUT_HEIGHT) + layout.scaled(STATUS_HEIGHT) * 0.5f,
                     6.5f * layout.scale(), Theme.MUTED);
         }
+        if (shaded()) layers.extractRenderState(graphics, mouseX, mouseY, delta);
         if (!open) return;
         var clip = new ScreenRectangle(contentX(), contentY(), contentWidth(), contentHeight());
         Scissor.clip(clip, () -> drawModel(graphics));
@@ -239,7 +259,7 @@ public final class PreviewWindow {
         Projector projector = EntityPreview.playerProjector(x0, y0, x1, y1, angle);
         AABB bounds = EntityPreview.playerLocalBounds();
         if (projector == null || bounds == null) return;
-        PreviewSetting.Shade shade = preview.shade(highlighted);
+        PreviewSetting.Shade shade = preview.shade(layer);
         if (shade != null) {
             EntityPreview.drawPlayer(graphics, x0, y0, x1, y1, angle, currentSkin(), fill(shade, projector, bounds, y1), preview.outline());
             return;
@@ -290,7 +310,8 @@ public final class PreviewWindow {
             lastX = event.x();
             gui.dropFocus();
         }
-        return !back.isMouseOver(event.x(), event.y()) && !nameInput.isMouseOver(event.x(), event.y());
+        return !back.isMouseOver(event.x(), event.y()) && !nameInput.isMouseOver(event.x(), event.y())
+                && !(layers.visible && layers.isMouseOver(event.x(), event.y()));
     }
 
     public boolean mouseDragged(MouseButtonEvent event) {

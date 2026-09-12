@@ -7,7 +7,6 @@ import dev.koifih.client.setting.BoolSetting;
 import dev.koifih.client.setting.ColorSetting;
 import dev.koifih.client.setting.EnumSetting;
 import dev.koifih.client.setting.PreviewSetting;
-import dev.koifih.client.setting.Setting;
 import dev.koifih.client.util.Colors;
 import net.minecraft.client.Camera;
 import net.minecraft.client.Minecraft;
@@ -25,6 +24,7 @@ final class Shader {
     private static final int INVISIBLE_COLOR = 0xE5B6C4;
     private static final int INVISIBLE_COLOR_END = 0xD2BCE7;
 
+    private final Esp esp;
     private final EnumSetting mode;
     private final EnumSetting effect;
     private final BoolSetting invisible;
@@ -33,6 +33,7 @@ final class Shader {
     private final ColorSetting handColor;
 
     Shader(Esp esp) {
+        this.esp = esp;
         mode = esp.setting(new EnumSetting("shaderMode", 0, MODES));
         effect = esp.setting(new EnumSetting("shader", 0, EFFECTS));
         invisible = esp.setting(new BoolSetting("invisible", true));
@@ -64,7 +65,7 @@ final class Shader {
 
     EntityFill entityFill(Vec3 position, Camera camera, EntityRenderState state) {
         int visible = Colors.opaque(visibleColor.get());
-        int occluded = invisible.get() ? Colors.opaque(invisibleColor.get()) : 0;
+        int occluded = invisible.get() ? Colors.opaque(invisibleColor.get()) : visible;
         if (effect()) return EntityFill.effect(visible, occluded, effectIndex(), position.subtract(camera.position()), 1f);
         if (!gradient()) return EntityFill.solid(visible, occluded);
         Projection projection = Projection.capture();
@@ -73,7 +74,8 @@ final class Shader {
                 position.x + half, position.y + state.boundingBoxHeight, position.z + half));
         int minY = rect == null ? 0 : projection.framebufferY(rect.maxY());
         int maxY = rect == null ? 0 : projection.framebufferY(rect.minY());
-        return EntityFill.gradient(visible, visibleColor.secondary(), occluded, invisibleColor.secondary(), minY, maxY);
+        int occludedEnd = invisible.get() ? invisibleColor.secondary() : visibleColor.secondary();
+        return EntityFill.gradient(visible, visibleColor.secondary(), occluded, occludedEnd, minY, maxY);
     }
 
     EntityFill handFill() {
@@ -83,9 +85,9 @@ final class Shader {
         return EntityFill.gradient(color, handColor.secondary(), 0, 0, 0, Minecraft.getInstance().getWindow().getHeight());
     }
 
-    PreviewSetting.Shade shade(Setting<?> highlighted) {
-        if (highlighted != visibleColor && highlighted != invisibleColor && highlighted != handColor) return null;
-        ColorSetting color = (ColorSetting) highlighted;
+    PreviewSetting.Shade shade(int layer) {
+        if (!esp.shaded()) return null;
+        ColorSetting color = layer == 1 && invisible.get() ? invisibleColor : visibleColor;
         return new PreviewSetting.Shade(color.get(), color.secondary(), gradient(), effectIndex());
     }
 }

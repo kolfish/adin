@@ -156,7 +156,7 @@ public final class ClickGui extends Screen {
             drawPanel(graphics);
             drawContent(graphics, mouseX, mouseY, delta);
             sidebar.draw(graphics, layout, selectedTab, mouseX, mouseY, delta);
-            preview.draw(graphics, modulesPage.highlightedSetting(mouseX, mouseY), mouseX, mouseY, delta);
+            preview.draw(graphics, mouseX, mouseY, delta);
             menu.draw(graphics, mouseX, mouseY, delta);
         });
     }
