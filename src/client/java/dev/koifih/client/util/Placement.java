@@ -44,10 +44,14 @@ public final class Placement {
     }
 
     public static BlockHitResult placeInto(Level level, Vec3 eye, BlockPos target) {
+        return placeInto(level, eye, target, null);
+    }
+
+    public static BlockHitResult placeInto(Level level, Vec3 eye, BlockPos target, BlockPos avoid) {
         BlockHitResult best = null;
         for (Direction face : Direction.values()) {
             BlockPos against = target.relative(face.getOpposite());
-            if (!level.getBlockState(against).isFaceSturdy(level, against, face)) continue;
+            if (against.equals(avoid) || !level.getBlockState(against).isFaceSturdy(level, against, face)) continue;
             best = nearer(eye, best, candidate(level, eye, against, face));
         }
         return best;

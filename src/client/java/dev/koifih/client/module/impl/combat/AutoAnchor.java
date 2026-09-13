@@ -79,9 +79,9 @@ public final class AutoAnchor extends Module {
             if (shield == null && anchor == null) idle(player);
             return;
         }
-        if (shield != null) shield(player);
-        else if (anchor != null) work(player);
-        else look(player);
+        if (anchor == null) look(player);
+        if (shield != null && shield(player)) return;
+        if (anchor != null) work(player);
     }
 
     private void look(LocalPlayer player) {
@@ -101,7 +101,7 @@ public final class AutoAnchor extends Module {
         int slot = nearest(player, stack -> stack.is(Items.RESPAWN_ANCHOR));
         if (spent || slot == Hotbar.NONE || !placeable(player, player.getInventory().getItem(slot), hit, Blocks.RESPAWN_ANCHOR)) {
             idle(player);
-        } else if (use(player, hit, stack -> stack.is(Items.RESPAWN_ANCHOR), true)) {
+        } else if (act(player, hit, stack -> stack.is(Items.RESPAWN_ANCHOR), true)) {
             anchor = target;
             spent = true;
             sincePlace.reset();
@@ -119,20 +119,21 @@ public final class AutoAnchor extends Module {
         return new Vec3i(stepX, 0, stepZ);
     }
 
-    private void shield(LocalPlayer player) {
+    private boolean shield(LocalPlayer player) {
         BlockPos ground = shield.below();
-        if (!mc.level.getBlockState(shield).canBeReplaced() || mc.level.getBlockState(ground).canBeReplaced()) {
+        if (sincePlace.elapsed(PLACE_WAIT) || !mc.level.getBlockState(shield).canBeReplaced() || mc.level.getBlockState(ground).canBeReplaced()) {
             shield = null;
-            return;
+            return false;
         }
-        BlockHitResult hit = Placement.placeInto(mc.level, player.getEyePosition(), shield);
-        if (hit == null) {
-            shield = null;
-            return;
-        }
-        if (!aimed(player, hit)) return;
+        BlockHitResult hit = Placement.placeInto(mc.level, player.getEyePosition(), shield, anchor);
         int slot = nearest(player, stack -> stack.is(Items.GLOWSTONE));
-        if (slot == Hotbar.NONE || !placeable(player, player.getInventory().getItem(slot), hit, Blocks.GLOWSTONE) || use(player, hit, stack -> stack.is(Items.GLOWSTONE), true)) shield = null;
+        if (hit == null || slot == Hotbar.NONE || !placeable(player, player.getInventory().getItem(slot), hit, Blocks.GLOWSTONE)
+                || (facing(player, hit) && use(player, hit, stack -> stack.is(Items.GLOWSTONE), true))) {
+            shield = null;
+            return false;
+        }
+        aim(player, hit);
+        return true;
     }
 
     private void work(LocalPlayer player) {
@@ -142,20 +143,24 @@ public final class AutoAnchor extends Module {
             return;
         }
         BlockHitResult hit = Placement.clickOn(mc.level, player.getEyePosition(), anchor);
-        if (hit == null || !aimed(player, hit)) return;
+        if (hit == null) return;
+        aim(player, hit);
+        if (!pacer.ready() || !facing(player, hit)) return;
         if (state.getValue(RespawnAnchorBlock.CHARGE) == 0 && !anchor.equals(charged)) {
-            if (use(player, hit, stack -> stack.is(Items.GLOWSTONE), false)) charged = anchor;
+            if (act(player, hit, stack -> stack.is(Items.GLOWSTONE), false)) charged = anchor;
         } else if (mc.level.environmentAttributes().getValue(EnvironmentAttributes.RESPAWN_ANCHOR_WORKS, anchor)) {
             idle(player);
         } else {
-            use(player, hit, detonator(player), false);
+            act(player, hit, detonator(player), false);
         }
     }
 
-    private boolean aimed(LocalPlayer player, BlockHitResult hit) {
+    private void aim(LocalPlayer player, BlockHitResult hit) {
         Vec3 point = hit.getLocation();
         AdinClient.ROTATIONS.aim(partialTick -> Rotation.toward(player.getEyePosition(partialTick), point), Priority.HIGH, SNAP);
-        if (!pacer.ready()) return false;
+    }
+
+    private boolean facing(LocalPlayer player, BlockHitResult hit) {
         Vec3 eye = player.getEyePosition();
         Vec3 look = AdinClient.ROTATIONS.rotation(player).direction();
         return Placement.looksAt(mc.level, hit.getBlockPos(), eye, look, player.blockInteractionRange());
@@ -197,6 +202,12 @@ public final class AutoAnchor extends Module {
         return Hotbar.NONE;
     }
 
+    private boolean act(LocalPlayer player, BlockHitResult hit, Predicate<ItemStack> matcher, boolean placing) {
+        if (!use(player, hit, matcher, placing)) return false;
+        pacer.pace(delay.get());
+        return true;
+    }
+
     private boolean use(LocalPlayer player, BlockHitResult hit, Predicate<ItemStack> matcher, boolean placing) {
         int slot = nearest(player, matcher);
         if (slot == Hotbar.NONE || !Placement.ready()) return false;
@@ -219,7 +230,6 @@ public final class AutoAnchor extends Module {
             mc.gameMode.useItemOn(player, InteractionHand.MAIN_HAND, hit);
         }
         player.swing(InteractionHand.MAIN_HAND);
-        pacer.pace(delay.get());
         return true;
     }
 
