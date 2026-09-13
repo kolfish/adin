@@ -27,13 +27,12 @@ import net.minecraft.tags.BlockTags;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.projectile.arrow.AbstractArrow;
 import net.minecraft.world.entity.vehicle.minecart.MinecartTNT;
-import net.minecraft.world.item.Item;
+import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.item.enchantment.Enchantment;
 import net.minecraft.world.item.enchantment.Enchantments;
-import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.BlockHitResult;
@@ -41,6 +40,7 @@ import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.function.Predicate;
 
 public final class AutoCart extends Module {
     private static final String[] MODES = {"Normal", "Silent"};
@@ -49,6 +49,8 @@ public final class AutoCart extends Module {
     private static final double CART_CLEARANCE = 1.0;
     private static final double ARROW_SEARCH = 8.0;
     private static final double MOVING = 0.01;
+    private static final Predicate<ItemStack> RAIL = stack -> stack.getItem() instanceof BlockItem item
+            && item.getBlock().defaultBlockState().is(BlockTags.RAILS);
 
     private enum Stage { IDLE, TRACK, RAIL, CART }
 
@@ -147,12 +149,7 @@ public final class AutoCart extends Module {
             } else {
                 BlockHitResult hit = Placement.placeInto(mc.level, player.getEyePosition(), rail);
                 if (hit == null || !aimed(player, hit)) return;
-                int slot = Hotbar.find(player, stack -> stack.is(Items.RAIL));
-                if (slot == Hotbar.NONE || !placeable(player, player.getInventory().getItem(slot), hit)) {
-                    stop(player);
-                    return;
-                }
-                if (use(player, hit, Items.RAIL, true)) stage = Stage.CART;
+                if (use(player, hit, RAIL.and(stack -> placeable(player, stack, hit)), true)) stage = Stage.CART;
                 return;
             }
         }
@@ -162,7 +159,7 @@ public final class AutoCart extends Module {
         }
         BlockHitResult hit = Placement.clickOn(mc.level, player.getEyePosition(), rail);
         if (hit == null || !aimed(player, hit)) return;
-        if (use(player, hit, Items.TNT_MINECART, false)) stage = Stage.IDLE;
+        if (use(player, hit, stack -> stack.is(Items.TNT_MINECART), false)) stage = Stage.IDLE;
     }
 
     private boolean aimed(LocalPlayer player, BlockHitResult hit) {
@@ -192,9 +189,10 @@ public final class AutoCart extends Module {
     }
 
     private static boolean placeable(LocalPlayer player, ItemStack stack, BlockHitResult hit) {
+        if (!(stack.getItem() instanceof BlockItem item)) return false;
         BlockPlaceContext context = new BlockPlaceContext(player, InteractionHand.MAIN_HAND, stack, hit);
         if (!context.canPlace()) return false;
-        BlockState state = Blocks.RAIL.getStateForPlacement(context);
+        BlockState state = item.getBlock().getStateForPlacement(context);
         return state != null && state.canSurvive(mc.level, context.getClickedPos())
                 && mc.level.isUnobstructed(state, context.getClickedPos(), CollisionContext.of(player));
     }
@@ -208,8 +206,8 @@ public final class AutoCart extends Module {
         return false;
     }
 
-    private boolean use(LocalPlayer player, BlockHitResult hit, Item item, boolean placing) {
-        int slot = Hotbar.find(player, stack -> stack.is(item));
+    private boolean use(LocalPlayer player, BlockHitResult hit, Predicate<ItemStack> matcher, boolean placing) {
+        int slot = Hotbar.find(player, matcher);
         if (slot == Hotbar.NONE) {
             stop(player);
             return false;
