@@ -4,6 +4,7 @@ import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 import com.mojang.blaze3d.platform.Window;
 import dev.koifih.client.AdinClient;
+import dev.koifih.client.config.StateStore;
 import dev.koifih.client.event.Priority;
 import dev.koifih.client.event.events.HudRenderEvent;
 import dev.koifih.client.module.HudModule;
@@ -48,6 +49,7 @@ public final class HudEditor {
                 && GLFW.glfwGetMouseButton(window.handle(), GLFW.GLFW_MOUSE_BUTTON_LEFT) == GLFW.GLFW_PRESS;
         if (!held) {
             dragging = null;
+            StateStore.save();
             return;
         }
         int screenWidth = window.getGuiScaledWidth();

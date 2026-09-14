@@ -2,7 +2,7 @@ package dev.koifih.client.module;
 
 import com.google.gson.JsonElement;
 import com.mojang.blaze3d.platform.InputConstants;
-import dev.koifih.client.config.Config;
+import dev.koifih.client.config.State;
 import dev.koifih.client.module.impl.combat.AimAssist;
 import dev.koifih.client.module.impl.combat.AutoAnchor;
 import dev.koifih.client.module.impl.combat.AutoCart;
@@ -121,10 +121,10 @@ public final class ModuleManager {
         return false;
     }
 
-    public Map<String, Config.ModuleState> snapshot() {
-        Map<String, Config.ModuleState> states = new LinkedHashMap<>();
+    public Map<String, State.ModuleState> snapshot() {
+        Map<String, State.ModuleState> states = new LinkedHashMap<>();
         for (Module module : modules) {
-            Config.ModuleState state = new Config.ModuleState();
+            State.ModuleState state = new State.ModuleState();
             state.enabled = module.isEnabled();
             state.key = module.key().getName();
             state.hold = module.hold();
@@ -135,9 +135,9 @@ public final class ModuleManager {
         return states;
     }
 
-    public void apply(Map<String, Config.ModuleState> states) {
+    public void apply(Map<String, State.ModuleState> states) {
         for (Module module : modules) {
-            Config.ModuleState state = states.get(module.id());
+            State.ModuleState state = states.get(module.id());
             if (state == null) continue;
             module.setHold(state.hold);
             module.setKey(parseKey(state.key));

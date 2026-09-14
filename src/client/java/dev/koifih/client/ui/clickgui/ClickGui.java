@@ -1,5 +1,6 @@
 package dev.koifih.client.ui.clickgui;
 
+import dev.koifih.client.config.StateStore;
 import dev.koifih.client.input.Keybinds;
 import dev.koifih.client.render.Draw;
 import dev.koifih.client.render.Opacity;
@@ -134,6 +135,7 @@ public final class ClickGui extends Screen {
         if (closing) return;
         closing = true;
         panelReveal.set(0f);
+        StateStore.save();
     }
 
     @Override

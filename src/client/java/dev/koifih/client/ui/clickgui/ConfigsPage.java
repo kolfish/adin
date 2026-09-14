@@ -205,7 +205,7 @@ public final class ConfigsPage implements Page {
     }
 
     private void load(Config config) {
-        ConfigStore.apply(config, true, true);
+        ConfigStore.apply(config);
         gui.requestRebuild();
     }
 
@@ -283,7 +283,7 @@ public final class ConfigsPage implements Page {
     }
 
     private static String scopeText(Config config) {
-        return switch (config.scope == null ? Config.Scope.BOTH : config.scope) {
+        return switch (config.scope) {
             case COLORS -> Lang.get("configs.scope.colors");
             case SETTINGS -> Lang.get("configs.scope.settings");
             case BOTH -> Lang.get("configs.scope.both");

@@ -4,6 +4,7 @@ import dev.koifih.client.util.Clicks;
 import dev.koifih.client.util.Time;
 import dev.koifih.client.event.Priority;
 import dev.koifih.client.bench.Probe;
+import dev.koifih.client.config.StateStore;
 import dev.koifih.client.event.EventBus;
 import dev.koifih.client.event.events.PreTickEvent;
 import dev.koifih.client.event.events.TickEvent;
@@ -27,6 +28,7 @@ public final class AdinClient implements ClientModInitializer {
 
     @Override
     public void onInitializeClient() {
+        StateStore.init();
         Keybinds.register();
         ROTATIONS.init();
         HudEditor.init();

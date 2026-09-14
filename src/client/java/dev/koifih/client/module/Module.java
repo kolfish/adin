@@ -50,6 +50,11 @@ public abstract class Module {
     }
 
     protected <S extends Setting<?>> S add(S setting) {
+        for (Setting<?> existing : settings) {
+            if (existing.id().equals(setting.id())) {
+                throw new IllegalArgumentException("Duplicate setting id: " + id + "." + setting.id());
+            }
+        }
         setting.attach(id);
         settings.add(setting);
         return setting;
