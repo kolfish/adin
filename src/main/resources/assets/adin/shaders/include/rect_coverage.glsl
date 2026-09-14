@@ -1,6 +1,7 @@
 #version 330
 
 const int FILLET = 16;
+const int TILED = 32;
 const int CORNER_MASK = 15;
 
 float cornerRadiusAt(vec2 position, vec2 rectSize, float cornerRadius, int corners) {
@@ -28,30 +29,36 @@ float shapeDistance(vec2 position, vec2 rectSize, float cornerRadius, int shape)
     return boxDistance(position, rectSize, cornerRadiusAt(position, rectSize, cornerRadius, shape & CORNER_MASK));
 }
 
-#ifndef AA_SOFTNESS
-#define AA_SOFTNESS 1.0
-#endif
-
-const float SOFTEN_FULL_RADIUS = 4.0;
-const float SOFTEN_RAMP = 1.0;
-
-float arcDepth(vec2 position, vec2 rectSize, float cornerRadius, int shape) {
+bool curvedAt(vec2 position, vec2 rectSize, float cornerRadius, int shape) {
     if ((shape & FILLET) != 0) {
         float outsideCircle = cornerRadius - length(position - filletCenter(rectSize, shape & CORNER_MASK));
-        return outsideCircle - boxDistance(position, rectSize, 0.0);
+        return outsideCircle > boxDistance(position, rectSize, 0.0);
     }
     float radius = cornerRadiusAt(position, rectSize, cornerRadius, shape & CORNER_MASK);
-    if (radius <= 0.0) return -1.0;
     vec2 q = abs(position - rectSize * 0.5) - rectSize * 0.5 + radius;
-    return min(q.x, q.y);
+    return radius > 0.0 && q.x > 0.0 && q.y > 0.0;
 }
 
 float rectCoverage(vec2 localPosition, vec2 rectSize, float cornerRadius, int shape) {
+    vec2 dx = dFdx(localPosition);
+    vec2 dy = dFdy(localPosition);
     float distanceToEdge = shapeDistance(localPosition, rectSize, cornerRadius, shape);
-    float pixel = max(length(vec2(dFdx(distanceToEdge), dFdy(distanceToEdge))), 0.0001);
-    float arc = clamp(arcDepth(localPosition, rectSize, cornerRadius, shape) / (pixel * SOFTEN_RAMP), 0.0, 1.0)
-            * clamp(cornerRadius / (pixel * SOFTEN_FULL_RADIUS), 0.0, 1.0);
-    float crisp = clamp(0.5 - distanceToEdge / pixel, 0.0, 1.0);
-    float soft = 1.0 - smoothstep(-0.5, 0.5, distanceToEdge / (pixel * AA_SOFTNESS));
-    return mix(crisp, soft, arc);
+    float width = (shape & TILED) != 0
+            ? (curvedAt(localPosition, rectSize, cornerRadius, shape) ? 1.0 : 0.25) : 2.0;
+    float filterWidth = max(width * length(vec2(dFdx(distanceToEdge), dFdy(distanceToEdge))), 0.0001);
+    float footprint = max(length(dx) + length(dy), 0.0001) + filterWidth;
+    float coverage = distanceToEdge < 0.0 ? 1.0 : 0.0;
+    if (abs(distanceToEdge) < footprint) {
+        coverage = 0.0;
+        for (int y = 0; y < 4; ++y) {
+            for (int x = 0; x < 4; ++x) {
+                vec2 offset = (float(x) - 1.5) * 0.25 * dx + (float(y) - 1.5) * 0.25 * dy;
+                float d = shapeDistance(localPosition + offset, rectSize, cornerRadius, shape);
+                float t = clamp(0.5 - 0.5 * d / filterWidth, 0.0, 1.0);
+                coverage += t * t * t * (t * (t * 6.0 - 15.0) + 10.0);
+            }
+        }
+        coverage *= 0.0625;
+    }
+    return coverage;
 }

@@ -106,7 +106,7 @@ public final class ModuleList extends HudModule {
             int rowX = rightAligned ? edge - rowWidth + slide : edge - slide;
             int rowY = y + tops[i];
             int step = i + 1 < widths.length ? Math.min(radius, (rowWidth - widths[i + 1]) / 2) : radius;
-            int corners = rightAligned ? Draw.BOTTOM_LEFT : Draw.BOTTOM_RIGHT;
+            int corners = Draw.TILED | (rightAligned ? Draw.BOTTOM_LEFT : Draw.BOTTOM_RIGHT);
             if (i == 0 && !flushTop) corners |= rightAligned ? Draw.TOP_LEFT : Draw.TOP_RIGHT;
             if (i == 0 && !flushTop && !flushSide) corners |= rightAligned ? Draw.TOP_RIGHT : Draw.TOP_LEFT;
             if (i == widths.length - 1 && !flushSide) corners |= rightAligned ? Draw.BOTTOM_RIGHT : Draw.BOTTOM_LEFT;
@@ -115,8 +115,8 @@ public final class ModuleList extends HudModule {
             Opacity.with(row.shown(), () -> {
                 Draw.rect(graphics, rowX, rowY, rowWidth, rowHeight, Math.min(step, rowHeight / 2), rowCorners, background);
                 if (fillet > 0) {
-                    if (rightAligned) Draw.fillet(graphics, rowX - fillet, rowY, fillet, fillet, fillet, Draw.BOTTOM_LEFT, background);
-                    else Draw.fillet(graphics, rowX + rowWidth, rowY, fillet, fillet, fillet, Draw.BOTTOM_RIGHT, background);
+                    if (rightAligned) Draw.fillet(graphics, rowX - fillet, rowY, fillet, fillet, fillet, Draw.TILED | Draw.BOTTOM_LEFT, background);
+                    else Draw.fillet(graphics, rowX + rowWidth, rowY, fillet, fillet, fillet, Draw.TILED | Draw.BOTTOM_RIGHT, background);
                 }
                 float textX = rowX + (rightAligned ? padding : edgePadding);
                 float centerY = rowY + rowHeight * 0.5f;

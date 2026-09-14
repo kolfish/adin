@@ -23,6 +23,7 @@ public final class Draw {
     public static final int BOTTOM_RIGHT = 4;
     public static final int BOTTOM_LEFT = 8;
     public static final int ALL_CORNERS = 15;
+    public static final int TILED = 32;
 
     private static final int FILLET = 16;
     private static final float SMALL_LOGO_PIXELS = 40f;
