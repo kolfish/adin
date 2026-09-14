@@ -8,6 +8,7 @@ import dev.koifih.client.module.impl.combat.AutoAnchor;
 import dev.koifih.client.module.impl.combat.AutoCart;
 import dev.koifih.client.module.impl.combat.AutoCrystal;
 import dev.koifih.client.module.impl.combat.AutoHitCrystal;
+import dev.koifih.client.module.impl.combat.Backtrack;
 import dev.koifih.client.module.impl.combat.ShieldBreaker;
 import dev.koifih.client.module.impl.combat.Triggerbot;
 import dev.koifih.client.module.impl.hud.KeybindList;
@@ -50,7 +51,8 @@ public final class ModuleManager {
                 new AutoHitCrystal(),
                 new AutoCrystal(),
                 new AutoAnchor(),
-                new AutoCart());
+                new AutoCart(),
+                new Backtrack());
         register(Category.MOVEMENT,
                 new Sprint(),
                 new MoveFix(),

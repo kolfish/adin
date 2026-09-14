@@ -8,7 +8,18 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 public final class EventBus {
-    private record Handler<E extends Event>(Class<E> type, int priority, Listener<E> listener) {
+    private static final class Handler<E extends Event> {
+        private final Class<E> type;
+        private final int priority;
+        private final Listener<E> listener;
+        private volatile boolean cancelled;
+
+        private Handler(Class<E> type, int priority, Listener<E> listener) {
+            this.type = type;
+            this.priority = priority;
+            this.listener = listener;
+        }
+
         @SuppressWarnings("unchecked")
         void accept(Event event) {
             listener.on((E) event);
@@ -31,6 +42,7 @@ public final class EventBus {
             dispatch.clear();
         }
         return () -> {
+            handler.cancelled = true;
             synchronized (this) {
                 List<Handler<?>> registered = subscribers.get(type);
                 if (registered != null && registered.remove(handler)) dispatch.clear();
@@ -42,11 +54,12 @@ public final class EventBus {
         Handler<?>[] handlers = dispatch.get(event.getClass());
         if (handlers == null) handlers = resolve(event.getClass());
         for (Handler<?> handler : handlers) {
+            if (handler.cancelled) continue;
             if (event instanceof CancellableEvent cancellable && cancellable.isCancelled()) break;
             try {
                 handler.accept(event);
             } catch (RuntimeException exception) {
-                Adin.LOGGER.error("Listener for {} failed", handler.type().getSimpleName(), exception);
+                Adin.LOGGER.error("Listener for {} failed", handler.type.getSimpleName(), exception);
             }
         }
         return event;
@@ -57,7 +70,7 @@ public final class EventBus {
         subscribers.forEach((registered, handlers) -> {
             if (registered.isAssignableFrom(type)) found.addAll(handlers);
         });
-        found.sort((a, b) -> Integer.compare(b.priority(), a.priority()));
+        found.sort((a, b) -> Integer.compare(b.priority, a.priority));
         Handler<?>[] resolved = found.toArray(NONE);
         dispatch.put(type, resolved);
         return resolved;

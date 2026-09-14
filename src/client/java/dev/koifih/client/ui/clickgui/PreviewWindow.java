@@ -14,6 +14,8 @@ import dev.koifih.client.render.screen.HealthBar;
 import dev.koifih.client.render.screen.Projector;
 import dev.koifih.client.render.screen.ScreenBuffer;
 import dev.koifih.client.render.screen.ScreenRenderer;
+import dev.koifih.client.setting.BacktrackPreview;
+import dev.koifih.client.setting.EspPreview;
 import dev.koifih.client.setting.PreviewSetting;
 import dev.koifih.client.ui.Theme;
 import dev.koifih.client.ui.Transition;
@@ -54,12 +56,19 @@ public final class PreviewWindow {
     private static final int INPUT_HEIGHT = 16;
     private static final int STATUS_HEIGHT = 10;
     private static final int LAYER_HEIGHT = 16;
+    private static final float WALK_AMPLITUDE = 1f;
+    private static final float WALK_SPEED = 2.4f;
+    private static final float MAX_TRAIL = 1.3f;
+    private static final float WALK_ANIMATION_RATE = 10f;
+    private static final float WALK_ANIMATION_SPEED = 0.8f;
+    private static final int FACING_MILLIS = 220;
     private static int layer;
     private static final long FETCH_DELAY_MILLIS = 600L;
     private static String skinName = DEFAULT_SKIN;
     private final ClickGui gui;
     private final Transition reveal = new Transition(0f, REVEAL_MILLIS);
     private final Transition yaw = new Transition(DEFAULT_YAW, 200);
+    private final Transition facing = new Transition(0f, FACING_MILLIS);
     private PanelLayout layout;
     private Button back;
     private TextInput nameInput;
@@ -154,7 +163,7 @@ public final class PreviewWindow {
     }
 
     private boolean shaded() {
-        return preview != null && preview.shade(0) != null;
+        return preview instanceof EspPreview esp && esp.shade(0) != null;
     }
 
     private boolean onRight() {
@@ -253,11 +262,54 @@ public final class PreviewWindow {
         int y0 = contentY();
         int x1 = x0 + contentWidth();
         int y1 = y0 + contentHeight();
+        if (preview instanceof BacktrackPreview backtrack) {
+            drawBacktrack(graphics, backtrack, x0, y0, x1, y1);
+            return;
+        }
+        if (!(preview instanceof EspPreview esp)) return;
+        drawEsp(graphics, esp, x0, y0, x1, y1);
+    }
+
+    private void drawBacktrack(GuiGraphicsExtractor graphics, BacktrackPreview backtrack, int x0, int y0, int x1, int y1) {
+        float now = Time.seconds();
+        float period = 4f * WALK_AMPLITUDE / WALK_SPEED;
+        float modelX = walkOffset(now, period);
+        float trailX = backtrack.frozen() ? 0f
+                : modelX + Math.clamp(walkOffset(now - backtrack.delayMillis() / 1000f, period) - modelX, -MAX_TRAIL, MAX_TRAIL);
+        facing.set(walkingBack(now, period) ? 180f : 0f);
+        Projector projector = EntityPreview.playerProjector(x0, y0, x1, y1, yaw.value(), trailX);
+        AABB bounds = EntityPreview.playerLocalBounds();
+        if (projector == null || bounds == null) return;
+        if (!EntityPreview.drawWalkingPlayer(graphics, x0, y0, x1, y1, yaw.value() + facing.value(), currentSkin(),
+                modelX, now * WALK_ANIMATION_RATE, WALK_ANIMATION_SPEED)) {
+            return;
+        }
+        float pixel = 1f / Math.max(1, Minecraft.getInstance().getWindow().getGuiScale());
+        ScreenBuffer buffer = new ScreenBuffer();
+        Boxes.collect(buffer, Boxes.project(projector, bounds), backtrack.style().scaled(pixel));
+        ScreenRenderer.submit(graphics, buffer);
+    }
+
+    private static float walkPhase(float seconds, float period) {
+        float turns = seconds / period;
+        return turns - (float) Math.floor(turns);
+    }
+
+    private static float walkOffset(float seconds, float period) {
+        float phase = walkPhase(seconds, period);
+        return (phase < 0.5f ? 4f * phase - 1f : 3f - 4f * phase) * WALK_AMPLITUDE;
+    }
+
+    private static boolean walkingBack(float seconds, float period) {
+        return walkPhase(seconds, period) >= 0.5f;
+    }
+
+    private void drawEsp(GuiGraphicsExtractor graphics, EspPreview preview, int x0, int y0, int x1, int y1) {
         float angle = yaw.value();
         Projector projector = EntityPreview.playerProjector(x0, y0, x1, y1, angle);
         AABB bounds = EntityPreview.playerLocalBounds();
         if (projector == null || bounds == null) return;
-        PreviewSetting.Shade shade = preview.shade(layer);
+        EspPreview.Shade shade = preview.shade(layer);
         if (shade != null) {
             EntityPreview.drawPlayer(graphics, x0, y0, x1, y1, angle, currentSkin(), fill(shade, projector, bounds, y1), preview.outline());
             return;
@@ -285,7 +337,7 @@ public final class PreviewWindow {
         ScreenRenderer.submit(graphics, buffer);
     }
 
-    private EntityFill fill(PreviewSetting.Shade shade, Projector projector, AABB bounds, int bottom) {
+    private EntityFill fill(EspPreview.Shade shade, Projector projector, AABB bounds, int bottom) {
         int color = Opacity.apply(Colors.opaque(shade.rgb()));
         if (shade.effect() > 0) {
             return EntityFill.effect(color, 0, shade.effect(), Vec3.ZERO, EntityPreview.playerScale(contentX(), contentY(),

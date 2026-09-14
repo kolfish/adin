@@ -2,6 +2,7 @@ package dev.koifih.client.mixin.input;
 
 import com.mojang.blaze3d.platform.InputConstants;
 import dev.koifih.client.AdinClient;
+import dev.koifih.client.event.events.PacketProcessEvent;
 import dev.koifih.client.module.impl.combat.AimAssist;
 import dev.koifih.client.util.Clicks;
 import dev.koifih.client.util.Players;
@@ -23,6 +24,11 @@ public abstract class MinecraftMixin {
     @Shadow public HitResult hitResult;
     @Shadow public MultiPlayerGameMode gameMode;
     @Shadow public LocalPlayer player;
+
+    @Inject(method = "runTick", at = @At(value = "INVOKE", target = "Lnet/minecraft/network/PacketProcessor;processQueuedPackets()V", shift = At.Shift.AFTER))
+    private void adin$packetsProcessed(boolean renderLevel, CallbackInfo info) {
+        AdinClient.EVENTS.post(new PacketProcessEvent((Minecraft) (Object) this));
+    }
 
     @Inject(method = "startAttack", at = @At("HEAD"), cancellable = true)
     private void adin$startAttack(CallbackInfoReturnable<Boolean> info) {

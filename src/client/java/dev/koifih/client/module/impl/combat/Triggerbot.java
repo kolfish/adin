@@ -30,6 +30,7 @@ public final class Triggerbot extends Module {
 
     private float threshold;
     private boolean holdingSprint;
+    private LivingEntity current;
 
     public Triggerbot() {
         super("triggerbot");
@@ -44,6 +45,10 @@ public final class Triggerbot extends Module {
         return isEnabled() && holdingSprint;
     }
 
+    public LivingEntity target() {
+        return isEnabled() ? current : null;
+    }
+
     @Override
     protected void onEnable() {
         threshold = roll();
@@ -53,12 +58,14 @@ public final class Triggerbot extends Module {
     @Override
     protected void onDisable() {
         holdingSprint = false;
+        current = null;
     }
 
     private void onTick(PreTickEvent event) {
         Minecraft client = event.client();
         LocalPlayer player = client.player;
         LivingEntity target = armed(client, player) ? crosshairTarget(client, player) : null;
+        current = target;
         if (target == null) {
             holdingSprint = false;
             return;

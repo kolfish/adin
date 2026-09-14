@@ -36,7 +36,7 @@ public final class AimAssist extends Module {
         }
     }
 
-    private final SliderSetting fov = add(new SliderSetting("fov", 80, 10, 180, Measure.DEGREES));
+    private final SliderSetting fov = add(new SliderSetting("fov", 80, 10, 360, Measure.DEGREES));
     private final EnumSetting mode = add(new EnumSetting("mode", 0, MODES));
     private final EnumSetting rotation = add(new EnumSetting("rotation", 0, Smoothing.NAMES));
     private final SliderSetting smoothness = add(new SliderSetting("smoothness", 50, 0, 100, Measure.PERCENT));
@@ -46,6 +46,7 @@ public final class AimAssist extends Module {
     private final TargetSettings targets = add(new TargetSettings());
     private final MultiSetting bones = add(new MultiSetting("bones", Bone.NAMES, Bone.HEAD.ordinal()));
     private boolean targeting;
+    private LivingEntity current;
 
     public AimAssist() {
         super("aimAssist");
@@ -61,17 +62,29 @@ public final class AimAssist extends Module {
         return isEnabled() && targeting;
     }
 
+    public LivingEntity target() {
+        return isEnabled() ? current : null;
+    }
+
     @Override
     protected void onEnable() {
         listen(TickEvent.class, this::onTick);
     }
 
+    @Override
+    protected void onDisable() {
+        targeting = false;
+        current = null;
+    }
+
     private void onTick(TickEvent event) {
         targeting = false;
+        current = null;
         if (onHold.get() && !event.client().options.keyAttack.isDown()) return;
         Aim aim = aim(event.client());
         if (aim == null) return;
         targeting = true;
+        current = aim.entity();
         Smoothing smoothing = Smoothing.values()[rotation.get()];
         RotationConfig config = mode.get() == SILENT
                 ? RotationConfig.silent(smoothness.get() / 100f, smoothing)

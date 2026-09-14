@@ -6,7 +6,7 @@ import dev.koifih.client.render.screen.Projection;
 import dev.koifih.client.setting.BoolSetting;
 import dev.koifih.client.setting.ColorSetting;
 import dev.koifih.client.setting.EnumSetting;
-import dev.koifih.client.setting.PreviewSetting;
+import dev.koifih.client.setting.EspPreview;
 import dev.koifih.client.util.Colors;
 import net.minecraft.client.Camera;
 import net.minecraft.client.Minecraft;
@@ -85,9 +85,9 @@ final class Shader {
         return EntityFill.gradient(color, handColor.secondary(), 0, 0, 0, Minecraft.getInstance().getWindow().getHeight());
     }
 
-    PreviewSetting.Shade shade(int layer) {
+    EspPreview.Shade shade(int layer) {
         if (!esp.shaded()) return null;
         ColorSetting color = layer == 1 && invisible.get() ? invisibleColor : visibleColor;
-        return new PreviewSetting.Shade(color.get(), color.secondary(), gradient(), effectIndex());
+        return new EspPreview.Shade(color.get(), color.secondary(), gradient(), effectIndex());
     }
 }

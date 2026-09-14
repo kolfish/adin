@@ -15,7 +15,7 @@ import dev.koifih.client.setting.EntitySetting;
 import dev.koifih.client.setting.EnumSetting;
 import dev.koifih.client.setting.Measure;
 import dev.koifih.client.setting.MultiSetting;
-import dev.koifih.client.setting.PreviewSetting;
+import dev.koifih.client.setting.EspPreview;
 import dev.koifih.client.setting.Setting;
 import dev.koifih.client.setting.SliderSetting;
 import dev.koifih.client.util.Entities;
@@ -51,7 +51,7 @@ public final class Esp extends Module {
     private final Health health = new Health(this, box);
     private final Outline outline = new Outline(this, box);
     private final Shader shader = new Shader(this);
-    private final PreviewSetting preview = add(new PreviewSetting("preview", this::flat, box::shown, box::screenStyle,
+    private final EspPreview preview = add(new EspPreview("preview", this::flat, box::shown, box::screenStyle,
             box::worldStyle, Box::fitPlayer, health::side, shader::shade, outline::spec));
 
     public Esp() {

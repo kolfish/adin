@@ -16,6 +16,8 @@ import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.client.renderer.entity.EntityRenderer;
 import net.minecraft.client.renderer.entity.state.AvatarRenderState;
 import net.minecraft.client.renderer.entity.state.EntityRenderState;
+import net.minecraft.client.renderer.entity.state.LivingEntityRenderState;
+import net.minecraft.world.entity.Pose;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntitySpawnReason;
 import net.minecraft.world.entity.EntityType;
@@ -30,6 +32,7 @@ import org.joml.Vector3f;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
+import java.util.function.Consumer;
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public final class EntityPreview {
@@ -98,12 +101,27 @@ public final class EntityPreview {
         return player != null && render(graphics, player, x0, y0, x1, y1, sceneYawDegrees, skin, fill, outline);
     }
 
+    public static boolean drawWalkingPlayer(GuiGraphicsExtractor graphics, int x0, int y0, int x1, int y1, float sceneYawDegrees,
+                                            PlayerSkin skin, float offsetX, float walkPos, float walkSpeed) {
+        var player = player();
+        return player != null && render(graphics, player, x0, y0, x1, y1, sceneYawDegrees, skin, null, null, offsetX, state -> {
+            if (!(state instanceof LivingEntityRenderState living)) return;
+            living.walkAnimationPos = walkPos;
+            living.walkAnimationSpeed = walkSpeed;
+            living.pose = Pose.STANDING;
+        });
+    }
+
     public static Projector playerProjector(int x0, int y0, int x1, int y1, float sceneYawDegrees) {
+        return playerProjector(x0, y0, x1, y1, sceneYawDegrees, 0f);
+    }
+
+    public static Projector playerProjector(int x0, int y0, int x1, int y1, float sceneYawDegrees, float offsetX) {
         var player = player();
         if (player == null) return null;
         float scale = fitScale(player, x0, y0, x1, y1);
         Quaternionf rotation = sceneRotation(sceneYawDegrees);
-        Vector3f lift = new Vector3f(0f, player.getBbHeight() / 2f, 0f);
+        Vector3f lift = new Vector3f(offsetX, player.getBbHeight() / 2f, 0f);
         float centerX = (x0 + x1) * 0.5f;
         float centerY = (y0 + y1) * 0.5f;
         return (x, y, z) -> {
@@ -137,6 +155,12 @@ public final class EntityPreview {
 
     private static boolean render(GuiGraphicsExtractor graphics, Entity entity, int x0, int y0, int x1, int y1, float sceneYawDegrees,
                                   PlayerSkin skin, EntityFill fill, EntityOutline outline) {
+        return render(graphics, entity, x0, y0, x1, y1, sceneYawDegrees, skin, fill, outline, 0f, null);
+    }
+
+    private static boolean render(GuiGraphicsExtractor graphics, Entity entity, int x0, int y0, int x1, int y1, float sceneYawDegrees,
+                                  PlayerSkin skin, EntityFill fill, EntityOutline outline, float offsetX,
+                                  Consumer<EntityRenderState> adjust) {
         var player = player();
         if (player != null && entity != player) entity.setPos(player.getX(), player.getY(), player.getZ());
         EntityRenderState state;
@@ -152,9 +176,10 @@ public final class EntityPreview {
         if (skin != null && state instanceof AvatarRenderState avatar) avatar.skin = skin;
         ((Filled) state).adin$setFill(fill);
         ((Filled) state).adin$setOutline(outline);
+        if (adjust != null) adjust.accept(state);
         float scale = fitScale(entity, x0, y0, x1, y1);
         Quaternionf camera = new Quaternionf().rotateX((float) Math.toRadians(15));
-        graphics.entity(state, scale, new Vector3f(0f, entity.getBbHeight() / 2f, 0f), sceneRotation(sceneYawDegrees), camera, x0, y0, x1, y1);
+        graphics.entity(state, scale, new Vector3f(offsetX, entity.getBbHeight() / 2f, 0f), sceneRotation(sceneYawDegrees), camera, x0, y0, x1, y1);
         return true;
     }
 }

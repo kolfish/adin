@@ -26,6 +26,8 @@
 		"input.MouseHandlerMixin",
 		"network.ClientCommonPacketListenerImplMixin",
 		"network.ClientPacketListenerMixin",
+		"network.ConnectionMixin",
+		"network.MultiPlayerGameModeMixin",
 		"network.ServerboundUseItemPacketMixin",
 		"render.EntityRendererMixin",
 		"render.GameRendererMixin",
