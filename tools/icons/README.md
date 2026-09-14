@@ -36,6 +36,12 @@ of the example mod's CC0 license.
 | Friends tab | group | E7EF |
 | Module video | play_circle_outline | E039 |
 | Tooltips row | info | E88E |
+| Cape rename | edit | E3C9 |
+| Preview pose: walking | directions_walk | E536 |
+| Preview pose: idle | accessibility | E84E |
+| Preview pose: swimming | pool | EB48 |
+| Preview pose: flying | flight | E539 |
+| Preview pose: sneaking | vertical_align_bottom | E258 |
 
 `material-icons.codepoints` contains the relevant entries from Google's upstream
 codepoint list. `charset.txt` selects these twenty-five glyphs for the MSDF atlas. Icons share `text.vsh` / `text.fsh` with the Comfortaa renderer, including

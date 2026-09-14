@@ -6,6 +6,7 @@ import dev.koifih.client.render.Draw;
 import dev.koifih.client.render.Opacity;
 import dev.koifih.client.render.Scissor;
 import dev.koifih.client.render.Transform;
+import dev.koifih.client.setting.CapeSetting;
 import dev.koifih.client.setting.PreviewSetting;
 import dev.koifih.client.ui.Theme;
 import dev.koifih.client.ui.Transition;
@@ -38,7 +39,9 @@ public final class ClickGui extends Screen {
     private final ModulesPage modulesPage = new ModulesPage(this, () -> selectedTab.category());
     private final ConfigsPage configsPage = new ConfigsPage(this);
     private final FriendsPage friendsPage = new FriendsPage(this);
-    private final List<Page> pages = List.of(modulesPage, friendsPage, configsPage);
+    private final CapeCatalogPage capesPage = new CapeCatalogPage(this);
+    private final List<Page> pages = List.of(capesPage, modulesPage, friendsPage, configsPage);
+    private Page overridePage;
     private final float uiScale = UiScale.current().factor();
     private PanelLayout layout;
     private boolean rebuildPending;
@@ -70,8 +73,30 @@ public final class ClickGui extends Screen {
         clearFocus();
     }
 
+    void focusWidget(AbstractWidget widget) {
+        setFocused(widget);
+    }
+
     void openPreview(PreviewSetting setting) {
         preview.open(setting);
+        updateStates();
+    }
+
+    public void openCapeCatalog(CapeSetting setting) {
+        capesPage.open(setting);
+        overridePage = capesPage;
+        pageReveal.snap(0f);
+        pageReveal.set(1f);
+        preview.open(capesPage.previewSetting());
+        updateStates();
+    }
+
+    void closeCapeCatalog() {
+        if (overridePage == null) return;
+        overridePage = null;
+        pageReveal.snap(0f);
+        pageReveal.set(1f);
+        preview.close();
         updateStates();
     }
 
@@ -86,11 +111,13 @@ public final class ClickGui extends Screen {
     }
 
     private Page currentPage() {
+        if (overridePage != null) return overridePage;
         if (selectedTab.category() != null) return modulesPage;
         return selectedTab.id().equals("friends") ? friendsPage : configsPage;
     }
 
     private void selectTab(Sidebar.Tab tab) {
+        overridePage = null;
         for (Page page : pages) page.reset();
         preview.close();
         Page before = currentPage();
@@ -104,6 +131,7 @@ public final class ClickGui extends Screen {
     }
 
     private void openMenu() {
+        overridePage = null;
         for (Page page : pages) page.reset();
         preview.close();
         menu.open();
@@ -197,6 +225,10 @@ public final class ClickGui extends Screen {
         boolean typing = getFocused() instanceof TextInput input && input.capturesInput();
         if (!typing && Keybinds.OPEN_CLICK_GUI.matches(event)) {
             onClose();
+            return true;
+        }
+        if (overridePage != null && event.key() == GLFW.GLFW_KEY_ESCAPE) {
+            if (!capesPage.cancelRename()) closeCapeCatalog();
             return true;
         }
         if (preview.keyPressed(event)) return true;

@@ -40,6 +40,11 @@ public final class TextInput extends Control {
         return active && visible && isFocused();
     }
 
+    public void highlightAll() {
+        cursor = get.get().length();
+        selectAll = true;
+    }
+
     @Override
     public void dismiss() {
         selectAll = false;

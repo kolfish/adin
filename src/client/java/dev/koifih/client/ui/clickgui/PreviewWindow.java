@@ -14,7 +14,9 @@ import dev.koifih.client.render.screen.HealthBar;
 import dev.koifih.client.render.screen.Projector;
 import dev.koifih.client.render.screen.ScreenBuffer;
 import dev.koifih.client.render.screen.ScreenRenderer;
+import dev.koifih.client.render.cape.Cape;
 import dev.koifih.client.setting.BacktrackPreview;
+import dev.koifih.client.setting.CapePreview;
 import dev.koifih.client.setting.EspPreview;
 import dev.koifih.client.setting.PreviewSetting;
 import dev.koifih.client.ui.Theme;
@@ -23,6 +25,7 @@ import dev.koifih.client.ui.component.Button;
 import dev.koifih.client.ui.component.Segmented;
 import dev.koifih.client.ui.component.TextInput;
 import dev.koifih.client.ui.EntityPreview;
+import dev.koifih.client.ui.PreviewPose;
 import dev.koifih.client.ui.SkinCache;
 import dev.koifih.client.util.Colors;
 import dev.koifih.client.util.Game;
@@ -34,6 +37,7 @@ import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.navigation.ScreenRectangle;
 import net.minecraft.client.input.KeyEvent;
 import net.minecraft.client.input.MouseButtonEvent;
+import net.minecraft.client.renderer.entity.state.AvatarRenderState;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.player.PlayerSkin;
 import net.minecraft.world.phys.AABB;
@@ -59,8 +63,6 @@ public final class PreviewWindow {
     private static final float WALK_AMPLITUDE = 1f;
     private static final float WALK_SPEED = 2.4f;
     private static final float MAX_TRAIL = 1.3f;
-    private static final float WALK_ANIMATION_RATE = 10f;
-    private static final float WALK_ANIMATION_SPEED = 0.8f;
     private static final int FACING_MILLIS = 220;
     private static int layer;
     private static final long FETCH_DELAY_MILLIS = 600L;
@@ -73,6 +75,7 @@ public final class PreviewWindow {
     private Button back;
     private TextInput nameInput;
     private Segmented layers;
+    private Segmented poses;
     private PreviewSetting preview;
     private String requestedName = "";
     private final Time.Stopwatch sinceEdit = new Time.Stopwatch();
@@ -93,6 +96,9 @@ public final class PreviewWindow {
                 Component.literal(Lang.get("preview.visible")),
                 new Segmented.Segment[] {Segmented.Segment.of(Lang.get("preview.visible")), Segmented.Segment.of(Lang.get("preview.invisible"))},
                 () -> layer, value -> layer = value));
+        poses = gui.add(new Segmented(contentX(), posesY(), contentWidth(), layout.atLeastOne(LAYER_HEIGHT), layout.scale(),
+                Component.literal(Lang.get("preview.pose")),
+                PreviewPose.segments(), PreviewPose::index, PreviewPose::select));
         SkinCache.request(skinName);
         requestedName = skinName;
         updateStates(true);
@@ -108,6 +114,9 @@ public final class PreviewWindow {
         layers.setX(contentX());
         layers.setY(layerY());
         layers.setWidth(contentWidth());
+        poses.setX(contentX());
+        poses.setY(posesY());
+        poses.setWidth(contentWidth());
     }
 
     private void setSkinName(String name) {
@@ -135,6 +144,7 @@ public final class PreviewWindow {
     }
 
     public void open(PreviewSetting preview) {
+        if (this.preview != preview) yaw.snap(preview instanceof CapePreview ? 160f : DEFAULT_YAW);
         this.preview = preview;
         open = true;
         reveal.set(1f);
@@ -160,10 +170,16 @@ public final class PreviewWindow {
         nameInput.visible = reveal.value() > 0f;
         layers.active = ready && shaded();
         layers.visible = reveal.value() > 0f && shaded();
+        poses.active = ready && posed();
+        poses.visible = reveal.value() > 0f && posed();
     }
 
     private boolean shaded() {
         return preview instanceof EspPreview esp && esp.shade(0) != null;
+    }
+
+    private boolean posed() {
+        return preview instanceof EspPreview || preview instanceof CapePreview;
     }
 
     private boolean onRight() {
@@ -211,12 +227,18 @@ public final class PreviewWindow {
         return width() - 2 * layout.padding();
     }
 
-    private int layerY() {
+    private int posesY() {
         return y() + height() - layout.padding() - layout.atLeastOne(LAYER_HEIGHT);
     }
 
+    private int layerY() {
+        return posed() ? posesY() - layout.scaled(PanelLayout.GAP) - layout.atLeastOne(LAYER_HEIGHT) : posesY();
+    }
+
     private int contentHeight() {
-        int bottom = shaded() ? layerY() - layout.scaled(PanelLayout.GAP) : y() + height() - layout.padding();
+        int bottom = y() + height() - layout.padding();
+        if (posed()) bottom = posesY() - layout.scaled(PanelLayout.GAP);
+        if (shaded()) bottom = layerY() - layout.scaled(PanelLayout.GAP);
         return bottom - contentY();
     }
 
@@ -252,6 +274,7 @@ public final class PreviewWindow {
                     6.5f * layout.scale(), Theme.MUTED);
         }
         if (shaded()) layers.extractRenderState(graphics, mouseX, mouseY, delta);
+        if (posed()) poses.extractRenderState(graphics, mouseX, mouseY, delta);
         if (!open) return;
         var clip = new ScreenRectangle(contentX(), contentY(), contentWidth(), contentHeight());
         Scissor.clip(clip, () -> drawModel(graphics));
@@ -262,12 +285,27 @@ public final class PreviewWindow {
         int y0 = contentY();
         int x1 = x0 + contentWidth();
         int y1 = y0 + contentHeight();
+        if (preview instanceof CapePreview capePreview) {
+            drawCape(graphics, capePreview, x0, y0, x1, y1);
+            return;
+        }
         if (preview instanceof BacktrackPreview backtrack) {
             drawBacktrack(graphics, backtrack, x0, y0, x1, y1);
             return;
         }
         if (!(preview instanceof EspPreview esp)) return;
         drawEsp(graphics, esp, x0, y0, x1, y1);
+    }
+
+    private void drawCape(GuiGraphicsExtractor graphics, CapePreview preview, int x0, int y0, int x1, int y1) {
+        Cape cape = preview.cape();
+        cape.update();
+        EntityPreview.drawPlayer(graphics, x0, y0, x1, y1, yaw.value(), currentSkin(), state -> {
+            PreviewPose.apply(state);
+            if (!(state instanceof AvatarRenderState avatar)) return;
+            avatar.skin = cape.apply(avatar.skin);
+            avatar.showCape = true;
+        });
     }
 
     private void drawBacktrack(GuiGraphicsExtractor graphics, BacktrackPreview backtrack, int x0, int y0, int x1, int y1) {
@@ -281,7 +319,7 @@ public final class PreviewWindow {
         AABB bounds = EntityPreview.playerLocalBounds();
         if (projector == null || bounds == null) return;
         if (!EntityPreview.drawWalkingPlayer(graphics, x0, y0, x1, y1, yaw.value() + facing.value(), currentSkin(),
-                modelX, now * WALK_ANIMATION_RATE, WALK_ANIMATION_SPEED)) {
+                modelX, now * PreviewPose.WALK_RATE, PreviewPose.WALK_SPEED)) {
             return;
         }
         float pixel = 1f / Math.max(1, Minecraft.getInstance().getWindow().getGuiScale());
@@ -311,10 +349,14 @@ public final class PreviewWindow {
         if (projector == null || bounds == null) return;
         EspPreview.Shade shade = preview.shade(layer);
         if (shade != null) {
-            EntityPreview.drawPlayer(graphics, x0, y0, x1, y1, angle, currentSkin(), fill(shade, projector, bounds, y1), preview.outline());
+            EntityPreview.drawPlayer(graphics, x0, y0, x1, y1, angle, currentSkin(), fill(shade, projector, bounds, y1),
+                    preview.outline(), PreviewPose::apply);
             return;
         }
-        if (!EntityPreview.drawPlayer(graphics, x0, y0, x1, y1, angle, currentSkin(), null, preview.outline())) return;
+        if (!EntityPreview.drawPlayer(graphics, x0, y0, x1, y1, angle, currentSkin(), null, preview.outline(),
+                PreviewPose::apply)) {
+            return;
+        }
         bounds = preview.fit(bounds);
         float pixel = 1f / Math.max(1, Minecraft.getInstance().getWindow().getGuiScale());
         Point[] corners = Boxes.project(projector, bounds);
@@ -361,7 +403,8 @@ public final class PreviewWindow {
             gui.dropFocus();
         }
         return !back.isMouseOver(event.x(), event.y()) && !nameInput.isMouseOver(event.x(), event.y())
-                && !(layers.visible && layers.isMouseOver(event.x(), event.y()));
+                && !(layers.visible && layers.isMouseOver(event.x(), event.y()))
+                && !(poses.visible && poses.isMouseOver(event.x(), event.y()));
     }
 
     public boolean mouseDragged(MouseButtonEvent event) {

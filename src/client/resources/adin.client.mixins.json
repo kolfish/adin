@@ -29,6 +29,7 @@
 		"network.ConnectionMixin",
 		"network.MultiPlayerGameModeMixin",
 		"network.ServerboundUseItemPacketMixin",
+		"render.CapeLayerMixin",
 		"render.EntityRendererMixin",
 		"render.GameRendererMixin",
 		"render.EntityRenderStateMixin",

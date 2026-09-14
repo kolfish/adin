@@ -5,8 +5,13 @@ public final class Transition {
     public interface Easing {
         Easing EASE_OUT_CUBIC = t -> 1f - (1f - t) * (1f - t) * (1f - t);
         Easing SMOOTHSTEP = t -> t * t * (3f - 2f * t);
+        Easing EASE_OUT_BACK = t -> 1f + 2.70158f * (t - 1f) * (t - 1f) * (t - 1f) + 1.70158f * (t - 1f) * (t - 1f);
 
         float apply(float t);
+
+        default float at(float t) {
+            return apply(Math.clamp(t, 0f, 1f));
+        }
     }
 
     private final long durationNanos;

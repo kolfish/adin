@@ -9,6 +9,7 @@ import dev.koifih.client.render.Text;
 import dev.koifih.client.render.Transform;
 import dev.koifih.client.setting.BlockSetting;
 import dev.koifih.client.setting.BoolSetting;
+import dev.koifih.client.setting.CapeSetting;
 import dev.koifih.client.setting.ColorSetting;
 import dev.koifih.client.setting.EntitySetting;
 import dev.koifih.client.setting.EnumSetting;
@@ -290,6 +291,8 @@ public final class ModulesPage implements Page {
                         windowed(new CatalogPicker(x, 0, width, fieldHeight, scale, label, Catalog.BLOCKS, blocks::get));
                 case PreviewSetting preview ->
                         Button.icon(right - previewSize, 0, previewSize, scale, PREVIEW_ICON, label, () -> gui.openPreview(preview));
+                case CapeSetting cape ->
+                        Button.icon(right - previewSize, 0, previewSize, scale, PREVIEW_ICON, label, () -> gui.openCapeCatalog(cape));
                 case HotbarSetting hotbar -> {
                     int pickerWidth = HotbarPicker.preferredWidth(bindHeight, scale);
                     yield new HotbarPicker(right - pickerWidth, 0, pickerWidth, bindHeight, scale, label, hotbar::has, hotbar::toggle);

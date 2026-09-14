@@ -97,8 +97,18 @@ public final class EntityPreview {
 
     public static boolean drawPlayer(GuiGraphicsExtractor graphics, int x0, int y0, int x1, int y1, float sceneYawDegrees,
                                      PlayerSkin skin, EntityFill fill, EntityOutline outline) {
+        return drawPlayer(graphics, x0, y0, x1, y1, sceneYawDegrees, skin, fill, outline, null);
+    }
+
+    public static boolean drawPlayer(GuiGraphicsExtractor graphics, int x0, int y0, int x1, int y1, float sceneYawDegrees,
+                                     PlayerSkin skin, Consumer<EntityRenderState> adjust) {
+        return drawPlayer(graphics, x0, y0, x1, y1, sceneYawDegrees, skin, null, null, adjust);
+    }
+
+    public static boolean drawPlayer(GuiGraphicsExtractor graphics, int x0, int y0, int x1, int y1, float sceneYawDegrees,
+                                     PlayerSkin skin, EntityFill fill, EntityOutline outline, Consumer<EntityRenderState> adjust) {
         var player = player();
-        return player != null && render(graphics, player, x0, y0, x1, y1, sceneYawDegrees, skin, fill, outline);
+        return player != null && render(graphics, player, x0, y0, x1, y1, sceneYawDegrees, skin, fill, outline, 0f, adjust);
     }
 
     public static boolean drawWalkingPlayer(GuiGraphicsExtractor graphics, int x0, int y0, int x1, int y1, float sceneYawDegrees,

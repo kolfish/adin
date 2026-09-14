@@ -23,6 +23,7 @@ import dev.koifih.client.module.impl.player.AutoTotem;
 import dev.koifih.client.module.impl.player.KeyPearl;
 import dev.koifih.client.module.impl.player.Refill;
 import dev.koifih.client.module.impl.render.BlockEsp;
+import dev.koifih.client.module.impl.render.Capes;
 import dev.koifih.client.module.impl.render.Nametags;
 import dev.koifih.client.module.impl.render.esp.Esp;
 import dev.koifih.client.setting.Setting;
@@ -60,7 +61,8 @@ public final class ModuleManager {
         register(Category.RENDER,
                 new Esp(),
                 new Nametags(),
-                new BlockEsp());
+                new BlockEsp(),
+                new Capes());
         register(Category.HUD,
                 new Notifications(),
                 new ModuleList(),

@@ -5,8 +5,11 @@ import lombok.NoArgsConstructor;
 import com.mojang.blaze3d.platform.NativeImage;
 import dev.koifih.Adin;
 import dev.koifih.client.AdinClient;
+import dev.koifih.client.setting.CapeSetting;
+import dev.koifih.client.setting.Setting;
 import dev.koifih.client.ui.clickgui.ClickGui;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
+import net.minecraft.client.CameraType;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.Screenshot;
 import net.minecraft.client.gui.screens.TitleScreen;
@@ -17,9 +20,9 @@ import java.nio.file.Path;
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public final class Probe {
     private static final Path TRIGGER = Path.of("adin-probe.json");
-    private static final String[] ENABLED = {"arraylist", "watermark", "keybinds", "notifications", "sprint", "esp", "nametags"};
+    private static final String[] ENABLED = {"arraylist", "watermark", "keybinds", "notifications", "sprint", "esp", "nametags", "capes"};
 
-    private enum Stage { TITLE, LOADING, SETTLE, HUD, GUI, DONE }
+    private enum Stage { TITLE, LOADING, SETTLE, HUD, GUI, CATALOG, DONE }
 
     private static Stage stage = Stage.TITLE;
     private static long stageStart = System.currentTimeMillis();
@@ -44,10 +47,12 @@ public final class Probe {
             case SETTLE -> {
                 if (elapsed < 4000) return;
                 client.options.pauseOnLostFocus = false;
+                client.options.setCameraType(CameraType.THIRD_PERSON_BACK);
                 for (String id : ENABLED) AdinClient.MODULES.get(id).setEnabled(true);
                 enter(Stage.HUD);
             }
             case HUD -> {
+                if (client.gui.screen() != null) client.gui.setScreen(null);
                 if (elapsed < 2000) return;
                 shoot(client, "adin-probe-hud.png");
                 client.gui.setScreen(new ClickGui());
@@ -56,6 +61,16 @@ public final class Probe {
             case GUI -> {
                 if (elapsed < 1500) return;
                 shoot(client, "adin-probe-gui.png");
+                if (client.gui.screen() instanceof ClickGui gui) {
+                    for (Setting<?> setting : AdinClient.MODULES.get("capes").settings()) {
+                        if (setting instanceof CapeSetting cape) gui.openCapeCatalog(cape);
+                    }
+                }
+                enter(Stage.CATALOG);
+            }
+            case CATALOG -> {
+                if (elapsed < 1200) return;
+                shoot(client, "adin-probe-catalog.png");
                 finish(client);
             }
             case DONE -> {
