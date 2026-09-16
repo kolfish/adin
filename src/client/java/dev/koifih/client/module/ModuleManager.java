@@ -2,40 +2,27 @@ package dev.koifih.client.module;
 
 import com.google.gson.JsonElement;
 import com.mojang.blaze3d.platform.InputConstants;
+import dev.koifih.Adin;
 import dev.koifih.client.config.State;
-import dev.koifih.client.module.impl.combat.AimAssist;
-import dev.koifih.client.module.impl.combat.AutoAnchor;
-import dev.koifih.client.module.impl.combat.AutoCart;
-import dev.koifih.client.module.impl.combat.AutoCrystal;
-import dev.koifih.client.module.impl.combat.AutoHitCrystal;
-import dev.koifih.client.module.impl.combat.Backtrack;
-import dev.koifih.client.module.impl.combat.ShieldBreaker;
-import dev.koifih.client.module.impl.combat.Triggerbot;
-import dev.koifih.client.module.impl.hud.KeybindList;
-import dev.koifih.client.module.impl.hud.ModuleList;
-import dev.koifih.client.module.impl.hud.Notifications;
-import dev.koifih.client.module.impl.hud.Watermark;
-import dev.koifih.client.module.impl.misc.Friends;
-import dev.koifih.client.module.impl.movement.JumpReset;
-import dev.koifih.client.module.impl.movement.MoveFix;
-import dev.koifih.client.module.impl.movement.Sprint;
-import dev.koifih.client.module.impl.player.AutoTotem;
-import dev.koifih.client.module.impl.player.KeyPearl;
-import dev.koifih.client.module.impl.player.Refill;
-import dev.koifih.client.module.impl.render.BlockEsp;
-import dev.koifih.client.module.impl.render.Capes;
-import dev.koifih.client.module.impl.render.Nametags;
-import dev.koifih.client.module.impl.render.esp.Esp;
 import dev.koifih.client.setting.Setting;
+import net.fabricmc.loader.api.FabricLoader;
+import net.fabricmc.loader.api.ModContainer;
 import net.minecraft.client.Minecraft;
+import java.io.IOException;
+import java.lang.reflect.Modifier;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.Collections;
 import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Locale;
 import java.util.Optional;
+import java.util.stream.Stream;
 
 public final class ModuleManager {
     private final List<Module> modules = new ArrayList<>();
@@ -43,48 +30,81 @@ public final class ModuleManager {
     private final Map<String, Module> byId = new HashMap<>();
     private final Map<Class<? extends Module>, Module> byType = new HashMap<>();
 
+    private static final String IMPL = "dev/koifih/client/module/impl";
+    private static final List<String> ORDER = List.of(
+            "AimAssist", "Triggerbot", "ShieldBreaker", "AutoHitCrystal", "AutoCrystal", "AutoAnchor", "AutoCart", "Backtrack",
+            "Sprint", "MoveFix", "JumpReset",
+            "Esp", "Nametags", "BlockEsp", "Capes",
+            "Notifications", "ModuleList", "Watermark", "KeybindList",
+            "KeyPearl", "AutoTotem", "Refill",
+            "Friends");
+
     public ModuleManager() {
         for (Category category : Category.values()) byCategory.put(category, new ArrayList<>());
-        register(Category.COMBAT,
-                new AimAssist(),
-                new Triggerbot(),
-                new ShieldBreaker(),
-                new AutoHitCrystal(),
-                new AutoCrystal(),
-                new AutoAnchor(),
-                new AutoCart(),
-                new Backtrack());
-        register(Category.MOVEMENT,
-                new Sprint(),
-                new MoveFix(),
-                new JumpReset());
-        register(Category.RENDER,
-                new Esp(),
-                new Nametags(),
-                new BlockEsp(),
-                new Capes());
-        register(Category.HUD,
-                new Notifications(),
-                new ModuleList(),
-                new Watermark(),
-                new KeybindList());
-        register(Category.PLAYER,
-                new KeyPearl(),
-                new AutoTotem(),
-                new Refill());
-        register(Category.MISC,
-                new Friends());
+        List<Class<? extends Module>> types = discover();
+        types.sort(Comparator.comparingInt(ModuleManager::rank).thenComparing(Class::getSimpleName));
+        for (Class<? extends Module> type : types) register(type);
     }
 
-    private void register(Category category, Module... group) {
-        for (Module module : group) {
-            if (byId.containsKey(module.id())) throw new IllegalArgumentException("Duplicate module id: " + module.id());
-            module.category = category;
-            modules.add(module);
-            byCategory.get(category).add(module);
-            byId.put(module.id(), module);
-            byType.put(module.getClass(), module);
+    private static int rank(Class<? extends Module> type) {
+        int index = ORDER.indexOf(type.getSimpleName());
+        return index < 0 ? ORDER.size() : index;
+    }
+
+    static List<Class<? extends Module>> discover() {
+        ModContainer container = FabricLoader.getInstance().getModContainer(Adin.MOD_ID)
+                .orElseThrow(() -> new IllegalStateException("Missing mod container: " + Adin.MOD_ID));
+        List<Class<? extends Module>> types = new ArrayList<>();
+        for (Path root : container.getRootPaths()) collect(root, types);
+        if (types.isEmpty()) throw new IllegalStateException("No modules found under " + IMPL);
+        return types;
+    }
+
+    static void collect(Path root, List<Class<? extends Module>> types) {
+        Path base = root.resolve(IMPL);
+        if (!Files.isDirectory(base)) return;
+        try (Stream<Path> stream = Files.walk(base)) {
+            for (Path path : stream.toList()) {
+                String name = className(root, path);
+                if (name == null) continue;
+                Class<?> type = Class.forName(name, false, ModuleManager.class.getClassLoader());
+                if (!Module.class.isAssignableFrom(type) || Modifier.isAbstract(type.getModifiers())) continue;
+                types.add(type.asSubclass(Module.class));
+            }
+        } catch (IOException | ClassNotFoundException exception) {
+            throw new IllegalStateException("Cannot scan modules in " + root, exception);
         }
+    }
+
+    static String className(Path root, Path path) {
+        String file = path.getFileName().toString();
+        if (!file.endsWith(".class") || file.indexOf('$') >= 0) return null;
+        String relative = root.relativize(path).toString();
+        return relative.substring(0, relative.length() - ".class".length())
+                .replace(root.getFileSystem().getSeparator(), ".");
+    }
+
+    static Category categoryOf(Class<?> type) {
+        String prefix = IMPL.replace('/', '.') + ".";
+        String rest = type.getPackageName().substring(prefix.length());
+        int dot = rest.indexOf('.');
+        String name = dot < 0 ? rest : rest.substring(0, dot);
+        return Category.valueOf(name.toUpperCase(Locale.ROOT));
+    }
+
+    private void register(Class<? extends Module> type) {
+        Module module;
+        try {
+            module = type.getDeclaredConstructor().newInstance();
+        } catch (ReflectiveOperationException exception) {
+            throw new IllegalStateException("Cannot create module " + type.getName(), exception);
+        }
+        if (byId.containsKey(module.id())) throw new IllegalArgumentException("Duplicate module id: " + module.id());
+        module.category = categoryOf(type);
+        modules.add(module);
+        byCategory.get(module.category).add(module);
+        byId.put(module.id(), module);
+        byType.put(type, module);
     }
 
     public List<Module> all() {
