@@ -17,7 +17,6 @@ import dev.koifih.client.ui.component.Dropdown;
 import dev.koifih.client.ui.component.Keybind;
 import dev.koifih.client.ui.component.Popup;
 import dev.koifih.client.ui.component.Segmented;
-import dev.koifih.client.render.cape.ClothCape;
 import dev.koifih.client.util.Clicks;
 import dev.koifih.client.util.Lang;
 import lombok.RequiredArgsConstructor;
@@ -29,12 +28,12 @@ import java.util.List;
 
 @RequiredArgsConstructor
 public final class SettingsMenu {
-    private static final int REVEAL_MILLIS = 150;
-    private static final int WIDTH = 150;
+    private static final int REVEAL_MILLIS = 180;
+    private static final int WIDTH = 164;
     private static final int PADDING = 10;
     private static final int TITLE_HEIGHT = 18;
     private static final int ROW_STRIDE = 22;
-    private static final int ROW_COUNT = 9;
+    private static final int ROW_COUNT = 8;
     private static final int TOGGLE_WIDTH = 24;
     private static final int TOGGLE_HEIGHT = 12;
     private static final int TOOLTIPS_ICON = 0xe88e;
@@ -47,12 +46,14 @@ public final class SettingsMenu {
     private static final int LANGUAGE_ICON = 0xe894;
     private static final int SIZE_ICON = 0xe8ff;
     private static final int UNITS_ICON = 0xe41c;
-    private static final int BIND_WIDTH = 42;
+    private static final int BIND_WIDTH = 56;
+    private static final int FIELD_LABEL_INSET = 23;
+    private static final int LEFT_INSET = 2;
     private static final int BIND_HEIGHT = 16;
     private static final Theme.Mode[] MODES = {Theme.Mode.LIGHT, Theme.Mode.DARK};
 
     private final ClickGui gui;
-    private final Transition reveal = new Transition(0f, REVEAL_MILLIS);
+    private final Transition reveal = new Transition(0f, REVEAL_MILLIS, 110, Transition.Easing.EASE_OUT_SETTLE, Transition.Easing.EASE_IN_CUBIC);
     private final List<Control> controls = new ArrayList<>();
     private PanelLayout layout;
     private boolean open;
@@ -142,11 +143,7 @@ public final class SettingsMenu {
                 toggleWidth, toggleHeight, scale, Component.literal(Lang.get("click_simulation")),
                 () -> Clicks.simulate, value -> Clicks.simulate = value));
 
-        Bool cloth = gui.add(new Bool(right() - inner - toggleWidth, rowY(8) + (rowHeight - toggleHeight) / 2,
-                toggleWidth, toggleHeight, scale, Component.literal(Lang.get("cloth")),
-                () -> ClothCape.enabled, value -> ClothCape.enabled = value));
-
-        controls.addAll(List.of(close, theme, language, size, units, tooltips, accent, bind, clicks, cloth));
+        controls.addAll(List.of(close, theme, language, size, units, tooltips, accent, bind, clicks));
     }
 
     public void relayout(PanelLayout layout) {
@@ -158,11 +155,15 @@ public final class SettingsMenu {
     }
 
     public int height() {
-        return layout.scaled(2 * PADDING + TITLE_HEIGHT + ROW_COUNT * ROW_STRIDE);
+        return 2 * layout.scaled(PADDING) + layout.scaled(TITLE_HEIGHT) + ROW_COUNT * layout.atLeastOne(ROW_STRIDE);
     }
 
     public int x() {
-        return layout.x() + layout.sidebarInset();
+        return layout.x() + layout.atLeastOne(LEFT_INSET);
+    }
+
+    private float labelX() {
+        return x() + layout.scaled(PADDING) + FIELD_LABEL_INSET * layout.scale();
     }
 
     public int right() {
@@ -174,7 +175,7 @@ public final class SettingsMenu {
     }
 
     private int rowY(int row) {
-        return y() + layout.scaled(PADDING + TITLE_HEIGHT) + layout.scaled(row * ROW_STRIDE);
+        return y() + layout.scaled(PADDING) + layout.scaled(TITLE_HEIGHT) + row * layout.atLeastOne(ROW_STRIDE);
     }
 
     public boolean contains(double pointX, double pointY) {
@@ -235,13 +236,13 @@ public final class SettingsMenu {
         float scale = layout.scale();
         int radius = layout.atLeastOne(RADIUS);
         Draw.bordered(graphics, x(), y(), width(), height(), radius, Theme.OVERLAY, Theme.POPUP_BORDER);
-        float textX = x() + PADDING * scale;
-        Text.drawCentered(graphics, Lang.get("settings"), textX,
+        float titleX = x() + PADDING * scale;
+        float textX = labelX();
+        Text.drawCentered(graphics, Lang.get("settings"), titleX,
                 y() + (PADDING + TITLE_HEIGHT * 0.5f) * scale, 8 * scale, Theme.TEXT);
-        Text.drawCentered(graphics, Lang.get("accent"), textX, rowY(5) + ROW_STRIDE * 0.5f * scale, 7 * scale, Theme.TEXT);
-        Text.drawCentered(graphics, Lang.get("clickgui_bind"), textX, rowY(6) + ROW_STRIDE * 0.5f * scale, 7 * scale, Theme.TEXT);
-        Text.drawCentered(graphics, Lang.get("click_simulation"), textX, rowY(7) + ROW_STRIDE * 0.5f * scale, 7 * scale, Theme.TEXT);
-        Text.drawCentered(graphics, Lang.get("cloth"), textX, rowY(8) + ROW_STRIDE * 0.5f * scale, 7 * scale, Theme.TEXT);
+        Text.drawCentered(graphics, Lang.get("accent"), textX, rowY(5) + layout.atLeastOne(ROW_STRIDE) * 0.5f, 7 * scale, Theme.TEXT);
+        Text.drawCentered(graphics, Lang.get("clickgui_bind"), textX, rowY(6) + layout.atLeastOne(ROW_STRIDE) * 0.5f, 7 * scale, Theme.TEXT);
+        Text.drawCentered(graphics, Lang.get("click_simulation"), textX, rowY(7) + layout.atLeastOne(ROW_STRIDE) * 0.5f, 7 * scale, Theme.TEXT);
         for (Control control : controls) control.extractRenderState(graphics, mouseX, mouseY, delta);
         language.renderPopup(graphics, mouseX, mouseY);
         size.renderPopup(graphics, mouseX, mouseY);

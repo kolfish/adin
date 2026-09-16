@@ -3,6 +3,7 @@ package dev.koifih.client.ui.component;
 import dev.koifih.client.render.Draw;
 import dev.koifih.client.render.Opacity;
 import dev.koifih.client.render.Scissor;
+import dev.koifih.client.render.Text;
 import dev.koifih.client.render.Transform;
 import dev.koifih.client.ui.Theme;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
@@ -42,13 +43,16 @@ abstract class RowPopup extends Popup {
             Draw.icon(graphics, icon, getX() + px(8), centerY() - size / 2, size, Theme.DIM);
             labelX += px(13);
         }
-        text(graphics, getMessage().getString(), labelX, centerY(), px(7), Theme.TEXT);
+        String label = getMessage().getString();
+        text(graphics, label, labelX, centerY(), px(7), Theme.TEXT);
+        float labelEnd = labelX + Text.width(label, px(7));
         float iconSize = px(9);
         float iconCenterX = getRight() - px(8) - iconSize / 2;
         Transform.rotatedAbout(graphics, (float) Math.PI * shown, iconCenterX, centerY(), () ->
                 Draw.icon(graphics, CHEVRON_ICON, iconCenterX - iconSize / 2, centerY() - iconSize / 2, iconSize, Theme.DIM));
         rect(graphics, getRight() - px(24), centerY() - px(5), Math.max(0.5f, scale), px(10), 0, Theme.CONTROL);
-        drawRowValue(graphics, getRight() - px(30), getWidth() / 2f - px(30));
+        float valueRight = getRight() - px(30);
+        drawRowValue(graphics, valueRight, Math.max(px(12), valueRight - labelEnd - px(4)));
     }
 
     @Override

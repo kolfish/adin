@@ -23,6 +23,7 @@ final class HsvWindow {
     private static final int COPY_ICON = 0xe14d;
     private static final int PASTE_ICON = 0xe14f;
     private static final float SWATCH_GAP = 3f;
+    private static final float HEX_SIZE = 6.5f;
     private static final int SWATCH_MILLIS = 150;
     static final float HEIGHT = MARGIN + SQUARE_HEIGHT + MARGIN + HUE_HEIGHT + MARGIN + BUTTON_HEIGHT + MARGIN;
 
@@ -156,7 +157,11 @@ final class HsvWindow {
         float copyX = pasteX - px(BUTTON_GAP + BUTTON_WIDTH);
         button(graphics, copyX, buttonY, COPY_ICON);
         button(graphics, pasteX, buttonY, PASTE_ICON);
-        if (!isGradient()) return;
+        if (!isGradient()) {
+            owner.text(graphics, Colors.hex(current()), x + px(MARGIN), buttonY + px(BUTTON_HEIGHT) / 2f,
+                    px(HEX_SIZE), Theme.DIM);
+            return;
+        }
         float size = px(BUTTON_HEIGHT);
         float ringX = swatchX(x, selection.value());
         owner.rect(graphics, ringX - px(1), buttonY - px(1), size + px(2), size + px(2), px(4), Theme.ACCENT);

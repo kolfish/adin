@@ -22,6 +22,8 @@ public final class Slider extends Control {
     private final Transition[] positions;
     @Setter
     private IntFunction<String> format = Integer::toString;
+    @Setter
+    private float valueColumn;
     private int knob;
     private boolean dragging;
 
@@ -59,12 +61,16 @@ public final class Slider extends Control {
         return ranged() ? format.apply(value(0)) + separator + format.apply(value(1)) : format.apply(value(0));
     }
 
-    private float valueWidth() {
+    public float naturalValueWidth() {
         float size = px(7);
         float widest = ranged()
                 ? Text.width(format.apply(max) + "-" + format.apply(max), size)
                 : Math.max(Text.width(format.apply(min), size), Text.width(format.apply(max), size));
         return Math.max(px(18), widest + px(8));
+    }
+
+    private float valueWidth() {
+        return valueColumn > 0 ? valueColumn : naturalValueWidth();
     }
 
     private float knobWidth() {

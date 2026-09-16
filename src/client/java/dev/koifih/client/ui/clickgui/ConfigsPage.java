@@ -30,6 +30,10 @@ public final class ConfigsPage implements Page {
             return Math.round(units * scale);
         }
 
+        int atLeastOne(float units) {
+            return Math.max(1, scaled(units));
+        }
+
         int rowX() {
             return x + padding;
         }
@@ -51,7 +55,7 @@ public final class ConfigsPage implements Page {
     private static final int ADD_HEIGHT = 22;
 
     private final ClickGui gui;
-    private final Transition dialogReveal = new Transition(0f, 150);
+    private final Transition dialogReveal = new Transition(0f, 180, 110, Transition.Easing.EASE_OUT_SETTLE, Transition.Easing.EASE_IN_CUBIC);
     private final Transition listReveal = new Transition(0f, 200);
     private final List<Control> cardControls = new ArrayList<>();
     private final List<Control> createControls = new ArrayList<>();
@@ -151,7 +155,7 @@ public final class ConfigsPage implements Page {
     }
 
     private int cardY(int index) {
-        return area.y() + area.padding() + area.scaled(index * CARD_STRIDE);
+        return area.y() + area.padding() + index * area.atLeastOne(CARD_STRIDE);
     }
 
     private int createDialogX() {
@@ -163,7 +167,7 @@ public final class ConfigsPage implements Page {
     }
 
     private int createDialogHeight() {
-        return area.scaled(2 * DIALOG_PADDING + DIALOG_TITLE + 4 * DIALOG_ROW);
+        return 2 * area.scaled(DIALOG_PADDING) + area.scaled(DIALOG_TITLE) + 4 * area.atLeastOne(DIALOG_ROW);
     }
 
     private int createDialogY() {
@@ -171,7 +175,7 @@ public final class ConfigsPage implements Page {
     }
 
     private int dialogRowY(int dialogY, int row) {
-        return dialogY + area.scaled(DIALOG_PADDING + DIALOG_TITLE) + area.scaled(row * DIALOG_ROW);
+        return dialogY + area.scaled(DIALOG_PADDING) + area.scaled(DIALOG_TITLE) + row * area.atLeastOne(DIALOG_ROW);
     }
 
     private boolean insideDialog(double pointX, double pointY) {
@@ -335,7 +339,7 @@ public final class ConfigsPage implements Page {
             String[] labels = {Lang.get("configs.name"), Lang.get("configs.description"), Lang.get("configs.include")};
             for (int row = 0; row < labels.length; row++) {
                 Text.drawCentered(graphics, labels[row], textX,
-                        dialogRowY(y, row) + DIALOG_ROW * 0.5f * scale, 7 * scale, Theme.TEXT);
+                        dialogRowY(y, row) + area.atLeastOne(DIALOG_ROW) * 0.5f, 7 * scale, Theme.TEXT);
             }
             for (Control control : createControls) control.extractRenderState(graphics, mouseX, mouseY, delta);
         });

@@ -31,8 +31,8 @@ public final class ClickGui extends Screen {
 
     private static Sidebar.Tab selectedTab = Sidebar.TABS.get(0);
 
-    private final Transition panelReveal = new Transition(0f, PANEL_REVEAL_MILLIS);
-    private final Transition pageReveal = new Transition(1f, PAGE_REVEAL_MILLIS);
+    private final Transition panelReveal = new Transition(0f, PANEL_REVEAL_MILLIS, 130, Transition.Easing.EASE_OUT_SETTLE, Transition.Easing.EASE_IN_CUBIC);
+    private final Transition pageReveal = new Transition(1f, PAGE_REVEAL_MILLIS, Transition.Easing.EASE_OUT_EXPO);
     private final Sidebar sidebar = new Sidebar(this, this::selectTab, this::openMenu);
     private final SettingsMenu menu = new SettingsMenu(this);
     private final PreviewWindow preview = new PreviewWindow(this);
@@ -199,10 +199,7 @@ public final class ClickGui extends Screen {
         int radius = layout.atLeastOne(PanelLayout.RADIUS);
         Draw.rect(graphics, layout.x(), layout.y(), layout.width(), layout.height(), radius, Theme.SIDEBAR);
         Draw.rect(graphics, layout.contentX(), layout.contentY(), layout.contentWidth(), layout.contentHeight(),
-                radius, Theme.MAIN);
-        int join = Math.min(radius + 1, Math.min(layout.contentWidth(), layout.contentHeight()));
-        Draw.rect(graphics, layout.right() - join, layout.contentY(), join, join, 0, Theme.MAIN);
-        Draw.rect(graphics, layout.contentX(), layout.bottom() - join, join, join, 0, Theme.MAIN);
+                radius, Draw.TILED | Draw.TOP_LEFT | Draw.BOTTOM_RIGHT, Theme.MAIN);
     }
 
     private void drawContent(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float delta) {

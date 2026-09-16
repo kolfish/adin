@@ -24,7 +24,8 @@ public final class Sidebar {
     private static final int BUTTON_HEIGHT = 22;
     private static final int BUTTON_STRIDE = 26;
     private static final int PILL_RADIUS = 6;
-    private static final int PILL_MILLIS = 150;
+    private static final int PILL_MILLIS = 210;
+    private static final float PILL_STRETCH = 0.16f;
     private static final int GEAR_SIZE = 16;
     private static final int SETTINGS_ICON = 0xe8b8;
     private static final int CONFIGS_ICON = 0xe2c7;
@@ -35,8 +36,8 @@ public final class Sidebar {
     private final Consumer<Tab> onSelect;
     private final Runnable onSettings;
     private final List<TabButton> buttons = new ArrayList<>();
-    private final Transition pillY = new Transition(0f, PILL_MILLIS);
-    private final Transition pillWidth = new Transition(0f, PILL_MILLIS);
+    private final Transition pillY = new Transition(0f, PILL_MILLIS, Transition.Easing.EASE_OUT_EXPO);
+    private final Transition pillWidth = new Transition(0f, PILL_MILLIS, Transition.Easing.EASE_OUT_EXPO);
     private boolean pillPlaced;
     private Button settingsButton;
 
@@ -58,7 +59,7 @@ public final class Sidebar {
         int height = layout.atLeastOne(BUTTON_HEIGHT);
         int index = 0;
         for (Tab tab : TABS) {
-            int y = layout.contentY() + layout.scaled(PanelLayout.PADDING + index++ * BUTTON_STRIDE);
+            int y = layout.contentY() + layout.padding() + index++ * layout.atLeastOne(BUTTON_STRIDE);
             buttons.add(gui.add(new TabButton(x, y, width, height, scale, tab,
                     () -> selected.get() == tab, () -> onSelect.accept(tab))));
         }
@@ -106,7 +107,8 @@ public final class Sidebar {
         pillY.set(target.getY());
         pillWidth.set(target.getWidth());
         float y = pillY.value();
-        Draw.rect(graphics, target.getX(), y, pillWidth.value(), target.getHeight(),
+        float height = target.getHeight() * (1f + PILL_STRETCH * pillY.flight());
+        Draw.rect(graphics, target.getX(), y - (height - target.getHeight()) * 0.5f, pillWidth.value(), Math.round(height),
                 Math.max(1, Math.round(PILL_RADIUS * layout.scale())), Theme.ACCENT);
         for (TabButton button : buttons) {
             float center = button.getY() + button.getHeight() * 0.5f;

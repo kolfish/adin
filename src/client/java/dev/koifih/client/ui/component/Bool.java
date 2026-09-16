@@ -11,6 +11,8 @@ import java.util.function.BooleanSupplier;
 import java.util.function.Consumer;
 
 public final class Bool extends Control {
+    private static final float STRETCH = 0.28f;
+
     private final Component label;
     private final BooleanSupplier get;
     private final Transition thumb;
@@ -20,13 +22,15 @@ public final class Bool extends Control {
         super(x, y, width, height, scale, label, () -> set.accept(!get.getAsBoolean()));
         this.label = label;
         this.get = get;
-        this.thumb = new Transition(get.getAsBoolean() ? 1f : 0f, 150, Transition.Easing.SMOOTHSTEP);
+        this.thumb = new Transition(get.getAsBoolean() ? 1f : 0f, 170, 170,
+                Transition.Easing.EASE_OUT_SETTLE, Transition.Easing.EASE_OUT_CUBIC);
     }
 
     @Override
     protected void extractWidgetRenderState(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float delta) {
         thumb.set(get.getAsBoolean() ? 1f : 0f);
-        float on = thumb.value();
+        float raw = thumb.value();
+        float on = Math.clamp(raw, 0f, 1f);
         int radius = getHeight() / 2;
         Draw.rect(graphics, getX(), getY(), getWidth(), getHeight(), radius,
                 Colors.lerp(Theme.TOGGLE_OFF_BORDER, Theme.ACCENT, on));
@@ -34,9 +38,14 @@ public final class Bool extends Control {
                 Math.max(0, radius - 1), Colors.lerp(Theme.TOGGLE_OFF, Theme.ACCENT, on));
         int inset = Math.max(1, Math.round(getHeight() / 6f));
         int size = Math.max(1, getHeight() - 2 * inset);
-        float thumbX = getX() + inset + (getWidth() - 2 * inset - size) * on;
-        Draw.rect(graphics, thumbX, getY() + inset, size, size, size / 2,
-                Colors.lerp(Theme.THUMB_OFF, Theme.ON_ACCENT, on));
+        float stretch = 1f + STRETCH * thumb.flight();
+        int wide = Math.max(1, Math.round(size * stretch));
+        int tall = Math.max(1, Math.round(size / stretch));
+        float travel = getWidth() - 2 * inset - size;
+        float thumbX = getX() + inset + travel * on - (wide - size) * 0.5f;
+        float limit = getX() + getWidth() - inset - wide;
+        Draw.rect(graphics, Math.clamp(thumbX, getX() + inset, limit), getY() + inset + (size - tall) * 0.5f,
+                wide, tall, tall / 2, Colors.lerp(Theme.THUMB_OFF, Theme.ON_ACCENT, on));
     }
 
     @Override

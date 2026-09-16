@@ -60,7 +60,7 @@ public final class ModuleList extends HudModule {
         float gap = GAP * scale;
         List<Row> rows = new ArrayList<>();
         for (Module module : AdinClient.MODULES.all()) {
-            Transition reveal = reveals.computeIfAbsent(module, key -> new Transition(key.isEnabled() ? 1f : 0f, REVEAL_MILLIS));
+            Transition reveal = reveals.computeIfAbsent(module, key -> new Transition(key.isEnabled() ? 1f : 0f, REVEAL_MILLIS, Transition.Easing.EASE_OUT_EXPO));
             reveal.set(module.isEnabled() ? 1f : 0f);
             float shown = reveal.value();
             if (shown <= 0f) continue;

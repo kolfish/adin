@@ -70,11 +70,13 @@ public final class ModulesPage implements Page {
     private static final int OVERLAY_INSET = 14;
     private static final int OVERLAY_PADDING = 6;
     private static final int OVERLAY_RADIUS = 6;
-    private static final int OVERLAY_REVEAL_MILLIS = 150;
+    private static final int OVERLAY_REVEAL_MILLIS = 180;
     private static final int SETTING_REVEAL_MILLIS = 180;
     private static final float SETTING_MIN_ZOOM = 0.9f;
     private static final int SETTING_ROW_HEIGHT = 22;
     private static final int SETTING_ROW_STRIDE = 24;
+    private static final int LABEL_INSET = 10;
+    private static final int ROW_STAGGER_MILLIS = 22;
     private static final int BIND_WIDTH = 42;
     private static final int BIND_HEIGHT = 16;
     private static final int BIND_MODE_WIDTH = 36;
@@ -87,7 +89,7 @@ public final class ModulesPage implements Page {
 
     private final ClickGui gui;
     private final Supplier<Category> category;
-    private final Transition overlayReveal = new Transition(0f, OVERLAY_REVEAL_MILLIS);
+    private final Transition overlayReveal = new Transition(0f, OVERLAY_REVEAL_MILLIS, 110, Transition.Easing.EASE_OUT_SETTLE, Transition.Easing.EASE_IN_CUBIC);
     private final Transition rowScrollShown = new Transition(0f, SCROLL_MILLIS);
     private final Transition settingScrollShown = new Transition(0f, SCROLL_MILLIS);
     private final List<Module> modules = new ArrayList<>();
@@ -183,7 +185,7 @@ public final class ModulesPage implements Page {
 
     private int rowsSpan() {
         if (modules.isEmpty()) return 0;
-        return 2 * layout.padding() + layout.scaled((modules.size() - 1) * ROW_STRIDE) + rowHeight();
+        return 2 * layout.padding() + (modules.size() - 1) * layout.atLeastOne(ROW_STRIDE) + rowHeight();
     }
 
     private float maxRowScroll() {
@@ -215,7 +217,7 @@ public final class ModulesPage implements Page {
             return true;
         }
         if (!layout.inContent(x, y) || maxRowScroll() <= 0f) return false;
-        rowScroll = Math.clamp((float) (rowScroll - dy * ROW_STRIDE * layout.scale()), 0f, maxRowScroll());
+        rowScroll = Math.clamp((float) (rowScroll - dy * layout.atLeastOne(ROW_STRIDE)), 0f, maxRowScroll());
         rowScrollShown.set(rowScroll);
         return true;
     }
@@ -304,8 +306,28 @@ public final class ModulesPage implements Page {
             Transition reveal = new Transition(setting.isVisible() ? 1f : 0f, SETTING_REVEAL_MILLIS);
             settingRows.add(new SettingRow(setting, gui.add(control), rowLabel, reveal));
         }
+        alignValueColumn();
         layoutRows();
         relayout(layout);
+    }
+
+    private void alignValueColumn() {
+        float column = 0f;
+        for (SettingRow row : settingRows) {
+            if (row.control() instanceof Slider slider) column = Math.max(column, slider.naturalValueWidth());
+        }
+        for (SettingRow row : settingRows) {
+            if (row.control() instanceof Slider slider) slider.setValueColumn(column);
+        }
+    }
+
+    private void staggerRows() {
+        int index = 0;
+        for (SettingRow row : settingRows) {
+            row.reveal().snap(0f);
+            if (!row.setting().isVisible()) continue;
+            row.reveal().set(1f, index++ * ROW_STAGGER_MILLIS);
+        }
     }
 
     private void animateRows() {
@@ -361,7 +383,7 @@ public final class ModulesPage implements Page {
     }
 
     private int rowY(int row) {
-        return layout.contentY() + layout.padding() + layout.scaled(row * ROW_STRIDE) - Math.round(rowScrollShown.value());
+        return layout.contentY() + layout.padding() + row * layout.atLeastOne(ROW_STRIDE) - Math.round(rowScrollShown.value());
     }
 
     private int overlayX() {
@@ -414,6 +436,7 @@ public final class ModulesPage implements Page {
         settingScroll = 0f;
         settingScrollShown.snap(0f);
         buildSettings(module);
+        staggerRows();
         setOverlayOpen(true);
     }
 
@@ -557,7 +580,8 @@ public final class ModulesPage implements Page {
         int radius = layout.atLeastOne(OVERLAY_RADIUS);
         Draw.bordered(graphics, overlayX(), overlayY(), overlayWidth(), overlayHeight(), radius, Theme.OVERLAY, Theme.POPUP_BORDER);
         Scissor.clip(overlayArea(), () -> {
-            Text.drawCentered(graphics, Lang.get("keybind"), settingX(), settingRowY(0f) + settingRowHeight() * 0.5f, 8 * scale, Theme.TEXT);
+            Text.drawCentered(graphics, Lang.get("keybind"), settingX() + LABEL_INSET * scale,
+                    settingRowY(0f) + settingRowHeight() * 0.5f, 8 * scale, Theme.TEXT);
             for (Control control : settingControls) control.extractRenderState(graphics, mouseX, mouseY, delta);
             float offset = 1f;
             for (SettingRow row : settingRows) {
@@ -581,7 +605,9 @@ public final class ModulesPage implements Page {
         float centerY = settingRowY(offset) + settingRowHeight() * 0.5f;
         float centerX = settingX() + settingWidth() * 0.5f;
         Transform.popIn(graphics, centerX, centerY, rowShown, SETTING_MIN_ZOOM, () -> {
-            if (row.label() != null) Text.drawCentered(graphics, row.label(), settingX(), centerY, 8 * scale, Theme.TEXT);
+            if (row.label() != null) {
+                Text.drawCentered(graphics, row.label(), settingX() + LABEL_INSET * scale, centerY, 8 * scale, Theme.TEXT);
+            }
             row.control().extractRenderState(graphics, mouseX, mouseY, delta);
         });
     }

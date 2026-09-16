@@ -33,6 +33,8 @@ public final class Segmented extends Control {
     private static final float ICON_GAP = 3f;
     private static final float SEGMENT_PADDING = 12f;
 
+    private static final float STRETCH = 0.18f;
+
     private final Segment[] segments;
     private final IntSupplier get;
     private final IntConsumer set;
@@ -44,7 +46,7 @@ public final class Segmented extends Control {
         this.segments = segments;
         this.get = get;
         this.set = set;
-        this.highlight = new Transition(get.getAsInt(), 150);
+        this.highlight = new Transition(get.getAsInt(), 190, Transition.Easing.EASE_OUT_EXPO);
     }
 
     public static int preferredWidth(Segment[] segments, float scale) {
@@ -71,7 +73,10 @@ public final class Segmented extends Control {
         highlight.set(selected);
         float segment = segmentWidth();
         rect(graphics, getX(), getY(), getWidth(), getHeight(), px(4), Theme.CONTROL);
-        rect(graphics, getX() + segment * highlight.value(), getY(), segment, getHeight(), px(4), Theme.CONTROL_ACTIVE);
+        float index = Math.clamp(highlight.value(), 0f, segments.length - 1f);
+        float wide = segment * (1f + STRETCH * highlight.flight());
+        float slot = Math.clamp(getX() + segment * index - (wide - segment) * 0.5f, getX(), getX() + getWidth() - wide);
+        rect(graphics, slot, getY(), wide, getHeight(), px(4), Theme.CONTROL_ACTIVE);
         for (int i = 0; i < segments.length; i++) {
             Segment item = segments[i];
             int color = selected == i ? Theme.TEXT : Theme.DIM;

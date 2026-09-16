@@ -155,12 +155,12 @@ public final class FriendsPage implements Page {
     }
 
     private int cardY(int index) {
-        return listTop() + layout.scaled(index * CARD_STRIDE) - Math.round(scrollShown.value());
+        return listTop() + index * layout.atLeastOne(CARD_STRIDE) - Math.round(scrollShown.value());
     }
 
     private int listSpan() {
         if (visible.isEmpty()) return 0;
-        return layout.scaled((visible.size() - 1) * CARD_STRIDE) + cardHeight() + layout.padding();
+        return (visible.size() - 1) * layout.atLeastOne(CARD_STRIDE) + cardHeight() + layout.padding();
     }
 
     private float maxScroll() {
@@ -206,7 +206,7 @@ public final class FriendsPage implements Page {
     @Override
     public boolean mouseScrolled(double x, double y, double dx, double dy) {
         if (!shown || !interactive || !layout.inContent(x, y) || maxScroll() <= 0f) return false;
-        scroll = Math.clamp((float) (scroll - dy * CARD_STRIDE * layout.scale()), 0f, maxScroll());
+        scroll = Math.clamp((float) (scroll - dy * layout.atLeastOne(CARD_STRIDE)), 0f, maxScroll());
         scrollShown.set(scroll);
         return true;
     }

@@ -10,7 +10,7 @@ import org.lwjgl.glfw.GLFW;
 
 public abstract class Popup extends Control {
     private boolean open;
-    private final Transition reveal = new Transition(0f, 150);
+    private final Transition reveal = new Transition(0f, 175, 110, Transition.Easing.EASE_OUT_SETTLE, Transition.Easing.EASE_IN_CUBIC);
     @Setter
     private int bottomLimit = Integer.MAX_VALUE;
 

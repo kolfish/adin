@@ -287,7 +287,8 @@ public final class CapeCatalogPage implements Page {
             int miniWidth = miniHeight * 10 / 16;
             int miniX = card.x() + (card.width() - miniWidth) / 2;
             int miniY = card.y() + layout.scaled(8);
-            Draw.rect(graphics, miniX, miniY, miniWidth, miniHeight, layout.atLeastOne(MINI_RADIUS), MINI_BACKGROUND);
+            Draw.rect(graphics, miniX, miniY, miniWidth, miniHeight, layout.atLeastOne(MINI_RADIUS),
+                    Draw.TILED | Draw.ALL_CORNERS, MINI_BACKGROUND);
             cape.update();
             if (cape.broken()) {
                 float icon = 16 * scale;

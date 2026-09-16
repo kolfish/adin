@@ -68,7 +68,7 @@ public final class PreviewWindow {
     private static final long FETCH_DELAY_MILLIS = 600L;
     private static String skinName = DEFAULT_SKIN;
     private final ClickGui gui;
-    private final Transition reveal = new Transition(0f, REVEAL_MILLIS);
+    private final Transition reveal = new Transition(0f, REVEAL_MILLIS, 110, Transition.Easing.EASE_OUT_SETTLE, Transition.Easing.EASE_IN_CUBIC);
     private final Transition yaw = new Transition(DEFAULT_YAW, 200);
     private final Transition facing = new Transition(0f, FACING_MILLIS);
     private PanelLayout layout;
