@@ -1,16 +1,20 @@
 package dev.koifih.client.ui.component;
 
+import dev.koifih.client.render.AdinIcon;
 import dev.koifih.client.render.Draw;
 import dev.koifih.client.render.Text;
 import dev.koifih.client.ui.Theme;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.network.chat.Component;
+import java.util.function.IntSupplier;
 
 public final class Button extends Control {
     private enum Style { FILLED, TILE, ICON }
 
     private final Style style;
     private final int icon;
+    private AdinIcon adinIcon;
+    private IntSupplier backdrop;
 
     public Button(int x, int y, int width, int height, float scale, Component label, Runnable action) {
         this(x, y, width, height, scale, label, Style.FILLED, -1, action);
@@ -30,6 +34,14 @@ public final class Button extends Control {
         return new Button(x, y, size, size, scale, label, Style.ICON, icon, action);
     }
 
+    public static Button icon(int x, int y, int size, float scale, AdinIcon icon, IntSupplier backdrop,
+                              Component label, Runnable action) {
+        Button button = new Button(x, y, size, size, scale, label, Style.ICON, -1, action);
+        button.adinIcon = icon;
+        button.backdrop = backdrop;
+        return button;
+    }
+
     public static int preferredWidth(String label, float scale) {
         return (int) Math.ceil(Text.width(label, 7 * scale) + 24 * scale);
     }
@@ -39,7 +51,13 @@ public final class Button extends Control {
         switch (style) {
             case ICON -> {
                 float iconSize = getWidth() * 0.7f;
-                Draw.icon(graphics, icon, getX() + (getWidth() - iconSize) / 2, getY() + (getHeight() - iconSize) / 2, iconSize, Theme.DIM);
+                float iconX = getX() + (getWidth() - iconSize) / 2;
+                float iconY = getY() + (getHeight() - iconSize) / 2;
+                if (adinIcon != null) {
+                    Draw.icon(graphics, adinIcon, iconX, iconY, iconSize, Theme.DIM, Theme.ACCENT, Theme.TEXT, backdrop.getAsInt());
+                } else {
+                    Draw.icon(graphics, icon, iconX, iconY, iconSize, Theme.DIM);
+                }
             }
             case TILE -> {
                 rect(graphics, getX(), getY(), getWidth(), getHeight(), px(5), Theme.ROW);

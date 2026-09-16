@@ -5,6 +5,7 @@ import dev.koifih.client.AdinClient;
 import dev.koifih.client.event.events.HudRenderEvent;
 import dev.koifih.client.module.HudModule;
 import dev.koifih.client.module.Module;
+import dev.koifih.client.render.AdinIcon;
 import dev.koifih.client.render.Draw;
 import dev.koifih.client.render.Text;
 import dev.koifih.client.setting.Measure;
@@ -21,9 +22,6 @@ import java.util.Comparator;
 import java.util.List;
 
 public final class KeybindList extends HudModule {
-    private static final int KEYBOARD_ICON = 0xe312;
-    private static final int TOGGLE_ICON = 0xea18;
-    private static final int HOLD_ICON = 0xe913;
     private static final float MARGIN = 4f;
     private static final float DEFAULT_TOP = 22f;
     private static final float HEADER = 15f;
@@ -83,7 +81,8 @@ public final class KeybindList extends HudModule {
         Draw.rect(graphics, x, y, boxWidth, height, Math.round(RADIUS * scale), Colors.withAlpha(Theme.MAIN, ALPHA));
         Text.drawCentered(graphics, title, x + padding, y + header * 0.5f, textSize, Theme.TEXT);
         float headerIcon = HEADER_ICON_WIDTH * scale;
-        Draw.icon(graphics, KEYBOARD_ICON, right - padding - headerIcon, y + (header - headerIcon) * 0.5f, headerIcon, Theme.TEXT);
+        Draw.icon(graphics, AdinIcon.KEYBINDS, right - padding - headerIcon, y + (header - headerIcon) * 0.5f, headerIcon,
+                Theme.DIM, Theme.ACCENT, Theme.TEXT, Theme.MAIN);
         Draw.rect(graphics, x, y + header, boxWidth, Math.max(1, Math.round(DIVIDER * scale)), 0, Theme.UNCHECKED);
         float rowY = y + header + Math.round(DIVIDER * scale);
         for (Module module : bound) {
@@ -92,7 +91,8 @@ public final class KeybindList extends HudModule {
             float keyX = right - padding - Text.width(key, textSize);
             Text.drawCentered(graphics, module.name(), x + padding, centerY, textSize, module.isEnabled() ? Theme.TEXT : Theme.DIM);
             if (!module.activatable()) {
-                Draw.icon(graphics, module.hold() ? HOLD_ICON : TOGGLE_ICON, keyX - gap - icon, centerY - icon * 0.5f, icon, Theme.MUTED);
+                Draw.icon(graphics, module.hold() ? AdinIcon.HOLD : AdinIcon.TOGGLE, keyX - gap - icon, centerY - icon * 0.5f, icon,
+                        Theme.DIM, Theme.ACCENT, Theme.TEXT, Theme.MAIN);
             }
             Text.drawCentered(graphics, key, keyX, centerY, textSize, Theme.MUTED);
             rowY += row;

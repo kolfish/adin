@@ -1,5 +1,6 @@
 package dev.koifih.client.ui.component;
 
+import dev.koifih.client.render.AdinIcon;
 import dev.koifih.client.render.Draw;
 import dev.koifih.client.render.Opacity;
 import dev.koifih.client.render.Scissor;
@@ -13,14 +14,14 @@ import net.minecraft.network.chat.Component;
 abstract class RowPopup extends Popup {
     private static final int CHEVRON_ICON = 0xe5cf;
 
-    private int icon = -1;
+    private AdinIcon icon;
 
     protected RowPopup(int x, int y, int width, int height, float scale, Component label) {
         super(x, y, width, height, scale, label);
     }
 
-    public void setIcon(int codepoint) {
-        icon = codepoint;
+    public void setIcon(AdinIcon icon) {
+        this.icon = icon;
     }
 
     protected abstract void drawRowValue(GuiGraphicsExtractor graphics, float rightLimit, float available);
@@ -38,9 +39,9 @@ abstract class RowPopup extends Popup {
 
     private void drawRow(GuiGraphicsExtractor graphics, float shown) {
         float labelX = getX() + px(10);
-        if (icon >= 0) {
+        if (icon != null) {
             float size = px(9);
-            Draw.icon(graphics, icon, getX() + px(8), centerY() - size / 2, size, Theme.DIM);
+            Draw.icon(graphics, icon, getX() + px(8), centerY() - size / 2, size, Theme.DIM, Theme.ACCENT, Theme.TEXT, Theme.ROW);
             labelX += px(13);
         }
         String label = getMessage().getString();

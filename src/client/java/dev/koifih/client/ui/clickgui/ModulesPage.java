@@ -3,6 +3,7 @@ package dev.koifih.client.ui.clickgui;
 import dev.koifih.client.AdinClient;
 import dev.koifih.client.module.Category;
 import dev.koifih.client.module.Module;
+import dev.koifih.client.render.AdinIcon;
 import dev.koifih.client.render.Draw;
 import dev.koifih.client.render.Scissor;
 import dev.koifih.client.render.Text;
@@ -63,10 +64,6 @@ public final class ModulesPage implements Page {
     private static final int TOGGLE_HEIGHT = 12;
     private static final int GEAR_SIZE = 16;
     private static final int GEAR_ICON_SIZE = 11;
-    private static final int SETTINGS_ICON = 0xe8b8;
-    private static final int TOGGLE_ICON = 0xea18;
-    private static final int HOLD_ICON = 0xe913;
-    private static final int PREVIEW_ICON = 0xe89e;
     private static final int OVERLAY_INSET = 14;
     private static final int OVERLAY_PADDING = 6;
     private static final int OVERLAY_RADIUS = 6;
@@ -159,7 +156,7 @@ public final class ModulesPage implements Page {
             int gearInset = (rowHeight - gearSize) / 2;
             boolean gear = !module.settings().isEmpty();
             if (gear) {
-                rowControls.add(new RowControl(gui.add(Button.icon(gearX, rowY + gearInset, gearSize, scale, SETTINGS_ICON,
+                rowControls.add(new RowControl(gui.add(Button.icon(gearX, rowY + gearInset, gearSize, scale, AdinIcon.SETTINGS, () -> Theme.ROW,
                         Component.literal(module.name() + " settings"), () -> openOverlay(module))), row, gearInset));
             }
             List<Videos.Clip> clips = Tooltips.current() == Tooltips.VIDEO ? Videos.of(module.id()) : List.<Videos.Clip>of();
@@ -250,7 +247,7 @@ public final class ModulesPage implements Page {
         if (!module.activatable()) {
             settingControls.add(gui.add(new Segmented(modeX, settingY(0, bindHeight), modeWidth, bindHeight, scale,
                     Component.literal("Bind mode"),
-                    new Segmented.Segment[] {Segmented.Segment.of(TOGGLE_ICON), Segmented.Segment.of(HOLD_ICON)},
+                    new Segmented.Segment[] {Segmented.Segment.of(AdinIcon.TOGGLE), Segmented.Segment.of(AdinIcon.HOLD)},
                     () -> module.hold() ? 1 : 0, index -> module.setHold(index == 1))));
             int helpSize = layout.atLeastOne(HELP_SIZE);
             settingControls.add(gui.add(new HelpDot(bindControl.getX() - layout.scaled(PanelLayout.GAP) - helpSize,
@@ -292,9 +289,9 @@ public final class ModulesPage implements Page {
                 case BlockSetting blocks ->
                         windowed(new CatalogPicker(x, 0, width, fieldHeight, scale, label, Catalog.BLOCKS, blocks::get));
                 case PreviewSetting preview ->
-                        Button.icon(right - previewSize, 0, previewSize, scale, PREVIEW_ICON, label, () -> gui.openPreview(preview));
+                        Button.icon(right - previewSize, 0, previewSize, scale, AdinIcon.PREVIEW, () -> Theme.OVERLAY, label, () -> gui.openPreview(preview));
                 case CapeSetting cape ->
-                        Button.icon(right - previewSize, 0, previewSize, scale, PREVIEW_ICON, label, () -> gui.openCapeCatalog(cape));
+                        Button.icon(right - previewSize, 0, previewSize, scale, AdinIcon.PREVIEW, () -> Theme.OVERLAY, label, () -> gui.openCapeCatalog(cape));
                 case HotbarSetting hotbar -> {
                     int pickerWidth = HotbarPicker.preferredWidth(bindHeight, scale);
                     yield new HotbarPicker(right - pickerWidth, 0, pickerWidth, bindHeight, scale, label, hotbar::has, hotbar::toggle);

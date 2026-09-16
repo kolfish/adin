@@ -1,6 +1,7 @@
 package dev.koifih.client.ui.clickgui;
 
 import dev.koifih.client.module.Category;
+import dev.koifih.client.render.AdinIcon;
 import dev.koifih.client.render.Draw;
 import dev.koifih.client.render.Text;
 import dev.koifih.client.ui.Theme;
@@ -18,7 +19,7 @@ import java.util.function.Supplier;
 
 @RequiredArgsConstructor
 public final class Sidebar {
-    public record Tab(String id, int icon, Supplier<String> label, Category category) {}
+    public record Tab(String id, AdinIcon icon, Supplier<String> label, Category category) {}
 
     public static final List<Tab> TABS = tabs();
     private static final int BUTTON_HEIGHT = 22;
@@ -27,9 +28,6 @@ public final class Sidebar {
     private static final int PILL_MILLIS = 210;
     private static final float PILL_STRETCH = 0.16f;
     private static final int GEAR_SIZE = 16;
-    private static final int SETTINGS_ICON = 0xe8b8;
-    private static final int CONFIGS_ICON = 0xe2c7;
-    private static final int FRIENDS_ICON = 0xe7ef;
     private static final String BRAND_TEXT = "adin.lol";
 
     private final ClickGui gui;
@@ -44,8 +42,8 @@ public final class Sidebar {
     private static List<Tab> tabs() {
         List<Tab> tabs = new ArrayList<>();
         for (Category category : Category.values()) tabs.add(new Tab(category.id(), category.icon(), category::label, category));
-        tabs.add(new Tab("friends", FRIENDS_ICON, () -> Lang.get("category.friends"), null));
-        tabs.add(new Tab("configs", CONFIGS_ICON, () -> Lang.get("category.configs"), null));
+        tabs.add(new Tab("friends", AdinIcon.FRIENDS, () -> Lang.get("category.friends"), null));
+        tabs.add(new Tab("configs", AdinIcon.CONFIGS, () -> Lang.get("category.configs"), null));
         return List.copyOf(tabs);
     }
 
@@ -65,7 +63,7 @@ public final class Sidebar {
         }
         int gearSize = layout.atLeastOne(GEAR_SIZE);
         settingsButton = gui.add(Button.icon(layout.x() + layout.sidebarInset(),
-                layout.bottom() - layout.sidebarInset() - gearSize, gearSize, scale, SETTINGS_ICON,
+                layout.bottom() - layout.sidebarInset() - gearSize, gearSize, scale, AdinIcon.SETTINGS, () -> Theme.SIDEBAR,
                 Component.literal("Client settings"), onSettings));
     }
 

@@ -37,6 +37,7 @@ import java.util.function.Predicate;
 public final class Probe {
     private static final Path TRIGGER = Path.of("adin-probe.json");
     private static final String DIRECTORY = "align";
+    private static final int DEMO_MILLIS = 120_000;
     private static final String[] ENABLED = {"arraylist", "watermark", "keybinds", "notifications", "sprint", "esp", "nametags", "capes"};
     private static final List<String> COMMANDS = List.of("time set noon", "weather clear",
             "gamerule doDaylightCycle false", "gamerule doWeatherCycle false");
@@ -50,9 +51,14 @@ public final class Probe {
     private static List<Step> steps = List.of();
     private static int index;
     private static boolean acted;
+    private static boolean demo;
 
     public static void init() {
         if (!Files.exists(TRIGGER)) return;
+        try {
+            demo = Files.readString(TRIGGER).contains("demo");
+        } catch (IOException ignored) {
+        }
         ClientTickEvents.END_CLIENT_TICK.register(Probe::tick);
     }
 
@@ -71,6 +77,11 @@ public final class Probe {
             case SETTLE -> {
                 if (elapsed < 4000) return;
                 client.options.pauseOnLostFocus = false;
+                if (demo) {
+                    steps = List.of(new Step(null, DEMO_MILLIS, Probe::openGui));
+                    enter(Stage.RUN);
+                    return;
+                }
                 client.options.setCameraType(CameraType.THIRD_PERSON_BACK);
                 daylight(client);
                 for (String id : ENABLED) AdinClient.MODULES.get(id).setEnabled(true);

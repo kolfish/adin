@@ -1,5 +1,6 @@
 package dev.koifih.client.ui.component;
 
+import dev.koifih.client.render.AdinIcon;
 import dev.koifih.client.render.Draw;
 import dev.koifih.client.render.Text;
 import dev.koifih.client.render.Transform;
@@ -17,7 +18,6 @@ import net.minecraft.network.chat.Component;
 import java.util.List;
 
 public final class VideoPopup extends Popup {
-    private static final int PLAY_ICON = 0xe039;
     private static final float WIDTH = 200f;
     private static final float PADDING = 4f;
     private static final float TABS_HEIGHT = 14f;
@@ -98,8 +98,9 @@ public final class VideoPopup extends Popup {
     @Override
     protected void drawValue(GuiGraphicsExtractor graphics) {
         float iconSize = getWidth() * 0.8f;
-        Draw.icon(graphics, PLAY_ICON, getX() + (getWidth() - iconSize) / 2, getY() + (getHeight() - iconSize) / 2, iconSize,
-                isOpen() ? Theme.ACCENT : Theme.DIM);
+        boolean open = isOpen();
+        Draw.icon(graphics, AdinIcon.PLAY, getX() + (getWidth() - iconSize) / 2, getY() + (getHeight() - iconSize) / 2, iconSize,
+                open ? Theme.ACCENT : Theme.DIM, Theme.ACCENT, open ? Theme.ACCENT : Theme.TEXT, Theme.ROW);
     }
 
     @Override

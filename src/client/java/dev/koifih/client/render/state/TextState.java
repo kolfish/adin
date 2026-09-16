@@ -18,8 +18,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public record TextState(Matrix3x2fc pose, TextureSetup textureSetup, List<Quad> quads,
-                              ScreenRectangle bounds, ScreenRectangle scissorArea) implements GuiElementRenderState {
+public record TextState(Matrix3x2fc pose, TextureSetup textureSetup, List<Quad> quads, RenderPipeline pipeline,
+                        int backdrop, ScreenRectangle bounds, ScreenRectangle scissorArea) implements GuiElementRenderState {
     private static final Map<AbstractTexture, TextureSetup> SETUPS = new HashMap<>();
 
     public record Quad(float left, float top, float right, float bottom,
@@ -31,6 +31,15 @@ public record TextState(Matrix3x2fc pose, TextureSetup textureSetup, List<Quad> 
     }
 
     public static TextState of(GuiGraphicsExtractor graphics, Identifier atlas, List<Quad> quads) {
+        return of(graphics, atlas, quads, Pipelines.TEXT, 0);
+    }
+
+    public static TextState icon(GuiGraphicsExtractor graphics, Identifier atlas, List<Quad> quads, int backdrop) {
+        return of(graphics, atlas, quads, Pipelines.ICON, backdrop);
+    }
+
+    private static TextState of(GuiGraphicsExtractor graphics, Identifier atlas, List<Quad> quads,
+                                RenderPipeline pipeline, int backdrop) {
         float left = Float.POSITIVE_INFINITY, top = Float.POSITIVE_INFINITY;
         float right = Float.NEGATIVE_INFINITY, bottom = Float.NEGATIVE_INFINITY;
         for (Quad quad : quads) {
@@ -45,7 +54,7 @@ public record TextState(Matrix3x2fc pose, TextureSetup textureSetup, List<Quad> 
                 (int) Math.ceil(bottom) - (int) Math.floor(top)).transformMaxBounds(pose);
         var textureSetup = SETUPS.computeIfAbsent(Minecraft.getInstance().getTextureManager().getTexture(atlas), texture ->
                 TextureSetup.singleTexture(texture.getTextureView(), RenderSystem.getSamplerCache().getClampToEdge(FilterMode.LINEAR)));
-        return new TextState(pose, textureSetup, List.copyOf(quads), bounds, Scissor.current());
+        return new TextState(pose, textureSetup, List.copyOf(quads), pipeline, backdrop, bounds, Scissor.current());
     }
 
     @Override
@@ -59,11 +68,7 @@ public record TextState(Matrix3x2fc pose, TextureSetup textureSetup, List<Quad> 
     }
 
     private void vertex(VertexConsumer vertices, float x, float y, float u, float v, int color) {
-        vertices.addVertexWith2DPose(pose, x, y).setUv(u, v).setColor(color);
-    }
-
-    @Override
-    public RenderPipeline pipeline() {
-        return Pipelines.TEXT;
+        vertices.addVertexWith2DPose(pose, x, y).setUv(u, v).setColor(color)
+                .setUv1(backdrop >> 16 & 0xFF, backdrop >> 8 & 0xFF).setUv2(backdrop & 0xFF, 0);
     }
 }

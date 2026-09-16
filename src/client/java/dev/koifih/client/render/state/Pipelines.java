@@ -42,6 +42,15 @@ public final class Pipelines {
             .withVertexBinding(0, DefaultVertexFormat.POSITION_TEX_COLOR)
             .build();
 
+    public static final RenderPipeline ICON = builder("gui/icon", "gui/icon", "gui/icon")
+            .withShaderDefine("MSDF_RANGE", Fonts.DISTANCE_RANGE)
+            .withBindGroupLayout(BindGroupLayouts.DYNAMIC_TRANSFORMS)
+            .withBindGroupLayout(BindGroupLayouts.PROJECTION)
+            .withBindGroupLayout(BindGroupLayouts.SAMPLER0)
+            .withVertexBinding(0, SHAPE_FORMAT)
+            .withColorTargetState(new ColorTargetState(BlendFunction.TRANSLUCENT_PREMULTIPLIED_ALPHA))
+            .build();
+
     public static final RenderPipeline QUAD = RenderPipeline.builder(RenderPipelines.GUI_SNIPPET)
             .withLocation(Adin.id("pipeline/quad"))
             .withCull(false)

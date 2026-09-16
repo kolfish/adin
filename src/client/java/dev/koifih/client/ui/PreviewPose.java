@@ -1,5 +1,6 @@
 package dev.koifih.client.ui;
 
+import dev.koifih.client.render.AdinIcon;
 import dev.koifih.client.ui.component.Segmented;
 import dev.koifih.client.util.Time;
 import net.minecraft.client.renderer.entity.state.AvatarRenderState;
@@ -9,11 +10,11 @@ import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Pose;
 
 public enum PreviewPose {
-    IDLE(0xe84e),
-    WALK(0xe536),
-    SNEAK(0xe258),
-    SWIM(0xeb48),
-    FLY(0xe539);
+    IDLE(AdinIcon.IDLE),
+    WALK(AdinIcon.WALK),
+    SNEAK(AdinIcon.SNEAK),
+    SWIM(AdinIcon.SWIM),
+    FLY(AdinIcon.FLY);
 
     public static final float WALK_RATE = 10f;
     public static final float WALK_SPEED = 0.8f;
@@ -21,9 +22,9 @@ public enum PreviewPose {
     private static final PreviewPose[] ALL = values();
     private static PreviewPose selected = IDLE;
 
-    private final int icon;
+    private final AdinIcon icon;
 
-    PreviewPose(int icon) {
+    PreviewPose(AdinIcon icon) {
         this.icon = icon;
     }
 

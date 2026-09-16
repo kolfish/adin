@@ -1,5 +1,6 @@
 package dev.koifih.client.ui.component;
 
+import dev.koifih.client.render.AdinIcon;
 import dev.koifih.client.render.Draw;
 import dev.koifih.client.render.Text;
 import dev.koifih.client.ui.Theme;
@@ -14,16 +15,16 @@ import java.util.function.IntConsumer;
 import java.util.function.IntSupplier;
 
 public final class Segmented extends Control {
-    public record Segment(int icon, String label) {
+    public record Segment(AdinIcon icon, String label) {
         public static Segment of(String label) {
-            return new Segment(-1, label);
+            return new Segment(null, label);
         }
 
-        public static Segment of(int icon) {
+        public static Segment of(AdinIcon icon) {
             return new Segment(icon, null);
         }
 
-        public static Segment of(int icon, String label) {
+        public static Segment of(AdinIcon icon, String label) {
             return new Segment(icon, label);
         }
     }
@@ -57,8 +58,8 @@ public final class Segmented extends Control {
 
     private static float contentWidth(Segment segment, String label, float scale) {
         float width = 0;
-        if (segment.icon() >= 0) width += ICON_SIZE * scale;
-        if (segment.icon() >= 0 && label != null) width += ICON_GAP * scale;
+        if (segment.icon() != null) width += ICON_SIZE * scale;
+        if (segment.icon() != null && label != null) width += ICON_GAP * scale;
         if (label != null) width += Text.width(label, TEXT_SIZE * scale);
         return width;
     }
@@ -80,11 +81,14 @@ public final class Segmented extends Control {
         for (int i = 0; i < segments.length; i++) {
             Segment item = segments[i];
             int color = selected == i ? Theme.TEXT : Theme.DIM;
-            float iconSpan = item.icon() >= 0 ? px(ICON_SIZE + ICON_GAP) : 0f;
+            float iconSpan = item.icon() != null ? px(ICON_SIZE + ICON_GAP) : 0f;
             String label = item.label() == null ? null : fit(item.label(), segment - px(6) - iconSpan, px(TEXT_SIZE));
             float x = getX() + segment * i + (segment - contentWidth(item, label, scale)) / 2;
-            if (item.icon() >= 0) {
-                Draw.icon(graphics, item.icon(), x, centerY() - px(ICON_SIZE) / 2, px(ICON_SIZE), color);
+            if (item.icon() != null) {
+                float center = getX() + segment * (i + 0.5f);
+                int backdrop = center >= slot && center <= slot + wide ? Theme.CONTROL_ACTIVE : Theme.CONTROL;
+                Draw.icon(graphics, item.icon(), x, centerY() - px(ICON_SIZE) / 2, px(ICON_SIZE),
+                        Theme.DIM, Theme.ACCENT, Theme.TEXT, backdrop);
                 x += iconSpan;
             }
             if (label != null) text(graphics, label, x, centerY(), px(TEXT_SIZE), color);

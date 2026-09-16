@@ -21,6 +21,7 @@ public final class TabButton extends Control {
     private static final float TEXT_INSET = 22f;
     private static final float TEXT_SIZE = 8.5f;
     private static final float TEXT_RIGHT_PADDING = 5f;
+    private static final float ICON_BOX = 13f;
 
     @Getter
     private final Sidebar.Tab tab;
@@ -50,9 +51,12 @@ public final class TabButton extends Control {
     @Override
     protected void extractWidgetRenderState(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float delta) {
         float covered = onPill.value();
-        float iconSize = ICON_SIZE * scale;
-        Draw.icon(graphics, tab.icon(), getX() + ICON_INSET * scale,
-                getY() + (getHeight() - iconSize) * 0.5f, iconSize, Colors.lerp(Theme.DIM, 0xFF000000, covered));
+        int box = Math.round(ICON_BOX * scale);
+        int iconX = Math.round(getX() + (ICON_INSET + ICON_SIZE / 2f) * scale - box / 2f);
+        int iconY = getY() + (getHeight() - box) / 2;
+        Draw.icon(graphics, tab.icon(), iconX, iconY, box, Colors.lerp(Theme.DIM, 0xFF000000, covered),
+                Colors.lerp(Theme.ACCENT, 0xFF000000, covered), Colors.lerp(Theme.TEXT, 0xFF000000, covered),
+                Colors.lerp(Theme.SIDEBAR, Theme.ACCENT, covered));
         String label = getMessage().getString();
         float textX = getX() + TEXT_INSET * scale;
         float textSize = TEXT_SIZE * scale;

@@ -1,0 +1,29 @@
+package dev.koifih.client.render;
+
+public enum AdinIcon {
+    COMBAT,
+    MOVEMENT,
+    RENDER,
+    HUD,
+    PLAYER,
+    MISC,
+    FRIENDS,
+    CONFIGS,
+    SETTINGS,
+    LANGUAGE,
+    SIZE,
+    UNITS,
+    TOOLTIPS,
+    PREVIEW,
+    KEYBINDS,
+    LIGHT,
+    DARK,
+    PLAY,
+    TOGGLE,
+    HOLD,
+    IDLE,
+    WALK,
+    SNEAK,
+    SWIM,
+    FLY
+}

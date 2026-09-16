@@ -1,5 +1,6 @@
 package dev.koifih.client.ui.clickgui;
 
+import dev.koifih.client.render.AdinIcon;
 import dev.koifih.client.render.Draw;
 import dev.koifih.client.render.Opacity;
 import dev.koifih.client.render.Scissor;
@@ -39,7 +40,6 @@ public final class CapeCatalogPage implements Page {
     private static final int MINI_RADIUS = 4;
     private static final int MINI_BACKGROUND = 0xFF0F0F0F;
     private static final int BACK_ICON = 0xe5c4;
-    private static final int PLAY_ICON = 0xe039;
     private static final int ADD_ICON = 0xe145;
     private static final int BROKEN_ICON = 0xe5cd;
     private static final int EDIT_ICON = 0xe3c9;
@@ -303,7 +303,8 @@ public final class CapeCatalogPage implements Page {
             }
             if (cape.animated()) {
                 float badge = 10 * scale;
-                Draw.icon(graphics, PLAY_ICON, miniX + miniWidth - badge - 3 * scale, miniY + 3 * scale, badge, Theme.TEXT);
+                Draw.icon(graphics, AdinIcon.PLAY, miniX + miniWidth - badge - 3 * scale, miniY + 3 * scale, badge,
+                        Theme.TEXT, Theme.ACCENT, Theme.TEXT);
             }
             if (cape instanceof FileCape file && (anim.hover.value() > 0.01f || renaming == file)) {
                 Opacity.with(renaming == file ? 1f : anim.hover.value(), () -> {

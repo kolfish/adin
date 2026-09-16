@@ -1,6 +1,7 @@
 package dev.koifih.client.ui.clickgui;
 
 import dev.koifih.client.input.Keybinds;
+import dev.koifih.client.render.AdinIcon;
 import dev.koifih.client.render.Draw;
 import dev.koifih.client.render.Text;
 import dev.koifih.client.render.Transform;
@@ -36,16 +37,10 @@ public final class SettingsMenu {
     private static final int ROW_COUNT = 8;
     private static final int TOGGLE_WIDTH = 24;
     private static final int TOGGLE_HEIGHT = 12;
-    private static final int TOOLTIPS_ICON = 0xe88e;
     private static final int GEAR_GAP = 6;
     private static final int GEAR_SIZE = 16;
     private static final int RADIUS = 6;
     private static final int CLOSE_ICON = 0xe5cd;
-    private static final int LIGHT_ICON = 0xe518;
-    private static final int DARK_ICON = 0xe51c;
-    private static final int LANGUAGE_ICON = 0xe894;
-    private static final int SIZE_ICON = 0xe8ff;
-    private static final int UNITS_ICON = 0xe41c;
     private static final int BIND_WIDTH = 56;
     private static final int FIELD_LABEL_INSET = 23;
     private static final int LEFT_INSET = 2;
@@ -80,8 +75,8 @@ public final class SettingsMenu {
         Segmented theme = gui.add(new Segmented(x() + inner, rowY(0) + (rowHeight - switchHeight) / 2,
                 width() - 2 * inner, switchHeight, scale, Component.literal("Theme"),
                 new Segmented.Segment[] {
-                        Segmented.Segment.of(LIGHT_ICON, Lang.get("theme.light")),
-                        Segmented.Segment.of(DARK_ICON, Lang.get("theme.dark"))},
+                        Segmented.Segment.of(AdinIcon.LIGHT, Lang.get("theme.light")),
+                        Segmented.Segment.of(AdinIcon.DARK, Lang.get("theme.dark"))},
                 () -> Theme.mode() == Theme.Mode.LIGHT ? 0 : 1, index -> Theme.setMode(MODES[index])));
 
         String[] languages = new String[Lang.Language.ALL.length];
@@ -93,7 +88,7 @@ public final class SettingsMenu {
                     Lang.set(Lang.Language.ALL[index]);
                     gui.requestRebuild();
                 }));
-        language.setIcon(LANGUAGE_ICON);
+        language.setIcon(AdinIcon.LANGUAGE);
         language.setBottomLimit(layout.bottom());
 
         String[] sizes = new String[UiScale.ALL.length];
@@ -101,7 +96,7 @@ public final class SettingsMenu {
         size = gui.add(Dropdown.single(x() + inner, rowY(2) + (rowHeight - dropdownHeight) / 2,
                 width() - 2 * inner, dropdownHeight, scale, Component.literal(Lang.get("size")), sizes,
                 () -> UiScale.current().ordinal(), index -> UiScale.set(UiScale.ALL[index])));
-        size.setIcon(SIZE_ICON);
+        size.setIcon(AdinIcon.SIZE);
         size.setBottomLimit(layout.bottom());
 
         String[] unitNames = new String[Units.ALL.length];
@@ -109,7 +104,7 @@ public final class SettingsMenu {
         units = gui.add(Dropdown.single(x() + inner, rowY(3) + (rowHeight - dropdownHeight) / 2,
                 width() - 2 * inner, dropdownHeight, scale, Component.literal(Lang.get("units")), unitNames,
                 () -> Units.current().ordinal(), index -> Units.set(Units.ALL[index])));
-        units.setIcon(UNITS_ICON);
+        units.setIcon(AdinIcon.UNITS);
         units.setBottomLimit(layout.bottom());
 
         int accentHeight = layout.atLeastOne(14);
@@ -129,7 +124,7 @@ public final class SettingsMenu {
                     Tooltips.set(Tooltips.ALL[index]);
                     gui.requestRebuild();
                 }));
-        tooltips.setIcon(TOOLTIPS_ICON);
+        tooltips.setIcon(AdinIcon.TOOLTIPS);
         tooltips.setBottomLimit(layout.bottom());
 
         bind = gui.add(new Keybind(right() - inner - bindWidth, rowY(6) + (rowHeight - bindHeight) / 2,

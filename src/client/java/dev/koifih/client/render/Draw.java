@@ -26,12 +26,13 @@ public final class Draw {
     public static final int TILED = 32;
 
     private static final int FILLET = 16;
-    private static final float SMALL_LOGO_PIXELS = 40f;
+    private static final float SMALL_ATLAS_PIXELS = 40f;
     private static final int LOGO_STAR = 1;
     private static final int LOGO_BAND_BACK = 2;
     private static final int LOGO_BAND_FRONT = 3;
     private static final int LOGO_BACK_COLOR = 0xFFA3A3A3;
     private static final int LOGO_FRONT_COLOR = 0xFFEAEAEA;
+    private static final int ICON_LAYERS = 3;
 
     public static void rect(GuiGraphicsExtractor graphics, int x, int y, int width, int height, int radius, int color) {
         rect(graphics, x, y, width, height, radius, ALL_CORNERS, color, Pipelines.RECT);
@@ -101,18 +102,45 @@ public final class Draw {
     }
 
     public static void logo(GuiGraphicsExtractor graphics, float x, float y, float size, int starColor) {
-        if (size <= 0 || !Float.isFinite(size)) return;
-        Font font = size * Minecraft.getInstance().getWindow().getGuiScale() <= SMALL_LOGO_PIXELS
-                ? Fonts.LOGO_SMALL : Fonts.LOGO;
-        List<TextState.Quad> quads = new ArrayList<>();
-        logoLayer(quads, font, LOGO_BAND_BACK, x, y, size, LOGO_BACK_COLOR);
-        logoLayer(quads, font, LOGO_STAR, x, y, size, starColor);
-        logoLayer(quads, font, LOGO_BAND_FRONT, x, y, size, LOGO_FRONT_COLOR);
-        Submit.submit(graphics, TextState.of(graphics, font.texture(), quads));
+        Font font = atlas(size, Fonts.LOGO_SMALL, Fonts.LOGO);
+        List<TextState.Quad> quads = layers(font, new int[] {LOGO_BAND_BACK, LOGO_STAR, LOGO_BAND_FRONT},
+                new int[] {LOGO_BACK_COLOR, starColor, LOGO_FRONT_COLOR}, x, y, size);
+        if (!quads.isEmpty()) Submit.submit(graphics, TextState.of(graphics, font.texture(), quads));
     }
 
-    private static void logoLayer(List<TextState.Quad> quads, Font font, int codepoint, float x, float y,
-                                  float size, int color) {
+    public static void icon(GuiGraphicsExtractor graphics, AdinIcon icon, float x, float y, float size,
+                            int back, int hero, int front, int backdrop) {
+        Font font = atlas(size, Fonts.ADIN_ICONS_SMALL, Fonts.ADIN_ICONS);
+        List<TextState.Quad> quads = iconLayers(font, icon, x, y, size, back, hero, front);
+        if (!quads.isEmpty()) Submit.submit(graphics, TextState.icon(graphics, font.texture(), quads, backdrop));
+    }
+
+    public static void icon(GuiGraphicsExtractor graphics, AdinIcon icon, float x, float y, float size,
+                            int back, int hero, int front) {
+        Font font = atlas(size, Fonts.ADIN_ICONS_SMALL, Fonts.ADIN_ICONS);
+        List<TextState.Quad> quads = iconLayers(font, icon, x, y, size, back, hero, front);
+        if (!quads.isEmpty()) Submit.submit(graphics, TextState.of(graphics, font.texture(), quads));
+    }
+
+    private static List<TextState.Quad> iconLayers(Font font, AdinIcon icon, float x, float y, float size,
+                                                   int back, int hero, int front) {
+        int first = icon.ordinal() * ICON_LAYERS + 1;
+        return layers(font, new int[] {first, first + 1, first + 2}, new int[] {back, hero, front}, x, y, size);
+    }
+
+    private static Font atlas(float size, Font small, Font large) {
+        return size * Minecraft.getInstance().getWindow().getGuiScale() <= SMALL_ATLAS_PIXELS ? small : large;
+    }
+
+    private static List<TextState.Quad> layers(Font font, int[] codepoints, int[] colors, float x, float y, float size) {
+        List<TextState.Quad> quads = new ArrayList<>();
+        if (size <= 0 || !Float.isFinite(size)) return quads;
+        for (int i = 0; i < codepoints.length; i++) layer(quads, font, codepoints[i], x, y, size, colors[i]);
+        return quads;
+    }
+
+    private static void layer(List<TextState.Quad> quads, Font font, int codepoint, float x, float y,
+                              float size, int color) {
         color = Opacity.apply(color);
         if (Colors.transparent(color)) return;
         Font.Glyph glyph = font.glyph(codepoint);
