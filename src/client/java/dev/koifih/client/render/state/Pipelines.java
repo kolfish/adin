@@ -42,6 +42,21 @@ public final class Pipelines {
             .withVertexBinding(0, DefaultVertexFormat.POSITION_TEX_COLOR)
             .build();
 
+    public static final VertexFormat STAIRS_FORMAT = VertexFormat.builder(0)
+            .addAttribute("Position", GpuFormat.RGB32_FLOAT)
+            .addAttribute("Color", GpuFormat.RGBA8_UNORM)
+            .addAttribute("UV0", GpuFormat.RG32_FLOAT)
+            .addAttribute("UV1", GpuFormat.RG16_SINT)
+            .addAttribute("UV2", GpuFormat.RG16_SINT)
+            .addAttribute("LineWidth", GpuFormat.R32_FLOAT)
+            .build();
+
+    public static final RenderPipeline STAIRS = builder("gui/stairs", "gui/stairs", "gui/stairs")
+            .withBindGroupLayout(BindGroupLayouts.DYNAMIC_TRANSFORMS)
+            .withBindGroupLayout(BindGroupLayouts.PROJECTION)
+            .withVertexBinding(0, STAIRS_FORMAT)
+            .build();
+
     public static final RenderPipeline ICON = builder("gui/icon", "gui/icon", "gui/icon")
             .withShaderDefine("MSDF_RANGE", Fonts.DISTANCE_RANGE)
             .withBindGroupLayout(BindGroupLayouts.DYNAMIC_TRANSFORMS)

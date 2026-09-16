@@ -17,7 +17,7 @@ public final class Transform {
         }
     }
 
-    private static void scaledAbout(GuiGraphicsExtractor graphics, float centerX, float centerY, float zoom, Runnable draw) {
+    public static void scaledAbout(GuiGraphicsExtractor graphics, float centerX, float centerY, float zoom, Runnable draw) {
         graphics.pose().pushMatrix();
         try {
             graphics.pose().translate(centerX, centerY).scale(zoom, zoom).translate(-centerX, -centerY);

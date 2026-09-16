@@ -6,6 +6,7 @@ import dev.koifih.client.module.HudModule;
 import dev.koifih.client.module.Module;
 import dev.koifih.client.render.Draw;
 import dev.koifih.client.render.Text;
+import dev.koifih.client.render.state.StairsState;
 import dev.koifih.client.setting.BoolSetting;
 import dev.koifih.client.setting.Measure;
 import dev.koifih.client.setting.PositionSetting.Anchor;
@@ -25,13 +26,14 @@ import java.util.HashMap;
 import java.util.Map;
 
 public final class ModuleList extends HudModule {
+    private static final float MARGIN = 4f;
     private static final float HEIGHT = 12f;
-    private static final float PADDING = 4f;
+    private static final float PADDING = 5f;
     private static final float EDGE_PADDING = 2f;
     private static final float GAP = 3f;
     private static final float RADIUS = 4f;
     private static final float TEXT_SIZE = 8f;
-    private static final float ALPHA = 0.8f;
+    private static final float ALPHA = 0.9f;
     private static final int REVEAL_MILLIS = 200;
 
     private record Row(String name, String info, float width, float shown) {}
@@ -42,7 +44,7 @@ public final class ModuleList extends HudModule {
     private final Map<Module, Transition> reveals = new HashMap<>();
 
     public ModuleList() {
-        super("arraylist", Anchor.END, Anchor.START, 0f, 0f);
+        super("arraylist", Anchor.END, Anchor.START, MARGIN, MARGIN);
     }
 
     @Override
@@ -97,34 +99,36 @@ public final class ModuleList extends HudModule {
         boolean flushTop = y <= 0;
         int background = Colors.withAlpha(Theme.MAIN, ALPHA);
         Text.ColorAt color = colors.colorAt(scale);
+        int[] slides = new int[widths.length];
+        for (int i = 0; i < widths.length; i++) slides[i] = Math.round((1f - rows.get(i).shown()) * widths[i]);
+        int edges = (flushSide ? StairsState.FLUSH_INNER : 0) | (flushTop ? StairsState.FLUSH_TOP : 0);
         for (int i = 0; i < widths.length; i++) {
+            if (heights[i] <= 0) continue;
+            int above = neighbour(widths, heights, slides, i, -1);
+            int below = neighbour(widths, heights, slides, i, 1);
+            int innerX = rightAligned ? edge + slides[i] : edge - slides[i];
+            StairsState.Row shape = new StairsState.Row(innerX, y + tops[i], widths[i], heights[i], above, below, radius,
+                    edges, rightAligned, above == StairsState.NONE, below == StairsState.NONE);
             Row row = rows.get(i);
-            int rowWidth = widths[i];
-            int rowHeight = heights[i];
-            if (rowHeight <= 0) continue;
-            int slide = Math.round((1f - row.shown()) * rowWidth);
-            int rowX = rightAligned ? edge - rowWidth + slide : edge - slide;
-            int rowY = y + tops[i];
-            int step = i + 1 < widths.length ? Math.min(radius, (rowWidth - widths[i + 1]) / 2) : radius;
-            int corners = Draw.TILED | (rightAligned ? Draw.BOTTOM_LEFT : Draw.BOTTOM_RIGHT);
-            if (i == 0 && !flushTop) corners |= rightAligned ? Draw.TOP_LEFT : Draw.TOP_RIGHT;
-            if (i == 0 && !flushTop && !flushSide) corners |= rightAligned ? Draw.TOP_RIGHT : Draw.TOP_LEFT;
-            if (i == widths.length - 1 && !flushSide) corners |= rightAligned ? Draw.BOTTOM_RIGHT : Draw.BOTTOM_LEFT;
-            int rowCorners = corners;
-            int fillet = i > 0 ? Math.min(Math.min(radius, (widths[i - 1] - rowWidth) / 2), rowHeight) : 0;
+            int rowX = rightAligned ? innerX - widths[i] : innerX;
             Opacity.with(row.shown(), () -> {
-                Draw.rect(graphics, rowX, rowY, rowWidth, rowHeight, Math.min(step, rowHeight / 2), rowCorners, background);
-                if (fillet > 0) {
-                    if (rightAligned) Draw.fillet(graphics, rowX - fillet, rowY, fillet, fillet, fillet, Draw.TILED | Draw.BOTTOM_LEFT, background);
-                    else Draw.fillet(graphics, rowX + rowWidth, rowY, fillet, fillet, fillet, Draw.TILED | Draw.BOTTOM_RIGHT, background);
-                }
+                Draw.stairs(graphics, shape, background);
                 float textX = rowX + (rightAligned ? padding : edgePadding);
-                float centerY = rowY + rowHeight * 0.5f;
+                float centerY = shape.y() + shape.height() * 0.5f;
                 Text.drawCentered(graphics, row.name(), textX, centerY, textSize, color);
                 if (!row.info().isEmpty()) {
-                    Text.drawCentered(graphics, row.info(), textX + Text.width(row.name(), textSize) + gap, centerY, textSize, Theme.MUTED);
+                    Text.drawCentered(graphics, row.info(), textX + Text.width(row.name(), textSize) + gap, centerY, textSize, Theme.DIM);
                 }
             });
         }
+    }
+
+    private static int neighbour(int[] widths, int[] heights, int[] slides, int index, int direction) {
+        for (int j = index + direction; j >= 0 && j < widths.length; j += direction) {
+            if (heights[j] <= 0) continue;
+            int extent = widths[j] + slides[index] - slides[j];
+            return extent > 0 ? extent : StairsState.NONE;
+        }
+        return StairsState.NONE;
     }
 }

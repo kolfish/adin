@@ -31,14 +31,13 @@ public final class Nametags extends Module {
     private static final int HEALTHY = 0xFFB8DDB0;
     private static final int HURT = 0xFFE3C35A;
     private static final int DYING = 0xFFE06B6B;
-    private static final float HEIGHT = 14f;
-    private static final float PADDING = 4f;
+    private static final float HEIGHT = 15f;
+    private static final float PADDING = 5f;
     private static final float GAP = 5f;
     private static final float RADIUS = 4f;
     private static final float TEXT_SIZE = 8f;
-    private static final float SMALL_SIZE = 6.5f;
+    private static final float SMALL_SIZE = 7f;
     private static final float LIFT = 0.45f;
-    private static final float ALPHA = 0.8f;
 
     private record Tag(LivingEntity entity, Point anchor, double distance) {}
 
@@ -104,7 +103,7 @@ public final class Nametags extends Module {
         float x = tag.anchor().x() - width / 2f;
         float y = tag.anchor().y() - height;
         float centerY = y + height / 2f;
-        Draw.rect(graphics, x, y, width, height, radius, Colors.withAlpha(Theme.MAIN, ALPHA));
+        Draw.rect(graphics, x, y, width, height, radius, Theme.SIDEBAR);
         float cursor = x + padding;
         Text.drawCentered(graphics, name, cursor, centerY, textSize, Theme.TEXT);
         cursor += Text.width(name, textSize);
@@ -115,7 +114,7 @@ public final class Nametags extends Module {
         }
         if (!away.isEmpty()) {
             cursor += gap;
-            Text.drawCentered(graphics, away, cursor, centerY, smallSize, Theme.MUTED);
+            Text.drawCentered(graphics, away, cursor, centerY, smallSize, Theme.DIM);
         }
     }
 

@@ -7,6 +7,7 @@ import dev.koifih.client.render.font.Font;
 import dev.koifih.client.render.font.Fonts;
 import dev.koifih.client.render.state.Pipelines;
 import dev.koifih.client.render.state.RectState;
+import dev.koifih.client.render.state.StairsState;
 import dev.koifih.client.render.state.Submit;
 import dev.koifih.client.render.state.TextState;
 import dev.koifih.client.util.Colors;
@@ -56,9 +57,10 @@ public final class Draw {
         }
     }
 
-    public static void fillet(GuiGraphicsExtractor graphics, int x, int y, int width, int height, int radius,
-                              int corner, int color) {
-        rect(graphics, x, y, width, height, radius, FILLET | corner, color, Pipelines.RECT);
+    public static void stairs(GuiGraphicsExtractor graphics, StairsState.Row row, int color) {
+        color = Opacity.apply(color);
+        if (row.width() <= 0 || row.height() <= 0 || Colors.transparent(color)) return;
+        Submit.submit(graphics, new StairsState(new Matrix3x2f(graphics.pose()), row, color));
     }
 
     public static void gradient(GuiGraphicsExtractor graphics, int x, int y, int width, int height, int radius,
@@ -126,6 +128,17 @@ public final class Draw {
                                                    int back, int hero, int front) {
         int first = icon.ordinal() * ICON_LAYERS + 1;
         return layers(font, new int[] {first, first + 1, first + 2}, new int[] {back, hero, front}, x, y, size);
+    }
+
+    public static void wordmark(GuiGraphicsExtractor graphics, float x, float y, float height,
+                                int back, int star, int front, int backdrop) {
+        Font font = atlas(height, Fonts.WORDMARK_SMALL, Fonts.WORDMARK);
+        List<TextState.Quad> quads = layers(font, new int[] {1, 2, 3}, new int[] {back, star, front}, x, y, height);
+        if (!quads.isEmpty()) Submit.submit(graphics, TextState.icon(graphics, font.texture(), quads, backdrop));
+    }
+
+    public static float wordmarkWidth(float height) {
+        return Fonts.WORDMARK.glyph(1).advance() * height;
     }
 
     private static Font atlas(float size, Font small, Font large) {

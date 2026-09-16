@@ -15,11 +15,13 @@ public final class Fonts {
     public static final Font ADIN_ICONS = Font.load("adin_icons", Adin.id("textures/font/adin_icons.png"), 1);
     public static final Font ADIN_ICONS_SMALL =
             Font.load("adin_icons_small", Adin.id("textures/font/adin_icons_small.png"), 1);
+    public static final Font WORDMARK = Font.load("wordmark", Adin.id("textures/font/wordmark.png"), 1);
+    public static final Font WORDMARK_SMALL = Font.load("wordmark_small", Adin.id("textures/font/wordmark_small.png"), 1);
 
     public static final float DISTANCE_RANGE = COMFORTAA_BOLD.distanceRange();
 
     static {
-        for (Font font : new Font[] {MATERIAL_ICONS, LOGO, LOGO_SMALL, ADIN_ICONS, ADIN_ICONS_SMALL}) {
+        for (Font font : new Font[] {MATERIAL_ICONS, LOGO, LOGO_SMALL, ADIN_ICONS, ADIN_ICONS_SMALL, WORDMARK, WORDMARK_SMALL}) {
             if (font.distanceRange() != DISTANCE_RANGE) {
                 throw new IllegalStateException("Every MSDF atlas must share the text pipeline's distance range");
             }
