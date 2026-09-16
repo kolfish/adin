@@ -179,7 +179,7 @@ public final class PreviewWindow {
     }
 
     private boolean posed() {
-        return preview instanceof EspPreview || preview instanceof CapePreview;
+        return preview instanceof CapePreview;
     }
 
     private boolean onRight() {
@@ -350,13 +350,10 @@ public final class PreviewWindow {
         EspPreview.Shade shade = preview.shade(layer);
         if (shade != null) {
             EntityPreview.drawPlayer(graphics, x0, y0, x1, y1, angle, currentSkin(), fill(shade, projector, bounds, y1),
-                    preview.outline(), PreviewPose::apply);
+                    preview.outline());
             return;
         }
-        if (!EntityPreview.drawPlayer(graphics, x0, y0, x1, y1, angle, currentSkin(), null, preview.outline(),
-                PreviewPose::apply)) {
-            return;
-        }
+        if (!EntityPreview.drawPlayer(graphics, x0, y0, x1, y1, angle, currentSkin(), null, preview.outline())) return;
         bounds = preview.fit(bounds);
         float pixel = 1f / Math.max(1, Minecraft.getInstance().getWindow().getGuiScale());
         Point[] corners = Boxes.project(projector, bounds);

@@ -22,8 +22,10 @@ import com.mojang.blaze3d.textures.GpuSampler;
 import com.mojang.blaze3d.textures.GpuTextureView;
 import dev.koifih.Adin;
 import dev.koifih.client.mixin.accessor.LevelRendererAccessor;
+import dev.koifih.client.render.post.KawaseBlur;
 import dev.koifih.client.util.Colors;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.navigation.ScreenRectangle;
 import net.minecraft.client.renderer.BindGroupLayouts;
 import net.minecraft.resources.Identifier;
 import org.joml.Vector4f;
@@ -38,14 +40,9 @@ public final class EntityOutlines {
     public static final EntityOutlines PREVIEW = new EntityOutlines("preview");
 
     private static final int CONFIG_SIZE = 48;
-    private static final int KAWASE_SIZE = 16;
-    private static final int BLUR_PASSES = 8;
     private static final Vector4fc CLEAR = new Vector4f();
     private static final BindGroupLayout CONFIG = BindGroupLayout.builder()
             .withUniform("OutlineConfig", UniformType.UNIFORM_BUFFER)
-            .build();
-    private static final BindGroupLayout KAWASE_CONFIG = BindGroupLayout.builder()
-            .withUniform("KawaseConfig", UniformType.UNIFORM_BUFFER)
             .build();
     private static final BindGroupLayout GLOW_SAMPLERS = BindGroupLayout.builder()
             .withSampler("InSampler")
@@ -53,7 +50,6 @@ public final class EntityOutlines {
             .build();
     private static final RenderPipeline SCAN = pipeline("outline_scan", ColorTargetState.DEFAULT, BindGroupLayouts.IN_SAMPLER, CONFIG);
     private static final RenderPipeline INK = pipeline("outline", new ColorTargetState(BlendFunction.TRANSLUCENT), BindGroupLayouts.IN_SAMPLER, CONFIG);
-    private static final RenderPipeline KAWASE = pipeline("kawase", ColorTargetState.DEFAULT, BindGroupLayouts.IN_SAMPLER, KAWASE_CONFIG);
     private static final BlendFunction SCREEN = new BlendFunction(BlendFactor.ONE, BlendFactor.ONE_MINUS_SRC_COLOR);
     private static final RenderPipeline GLOW = pipeline("glow", new ColorTargetState(SCREEN), GLOW_SAMPLERS, CONFIG);
 
@@ -74,6 +70,10 @@ public final class EntityOutlines {
             return new Area(x0 / 2, y0 / 2, (x1 + 1) / 2, (y1 + 1) / 2);
         }
 
+        ScreenRectangle rectangle() {
+            return new ScreenRectangle(x0, y0, x1 - x0, y1 - y0);
+        }
+
         boolean isEmpty() {
             return x1 <= x0 || y1 <= y0;
         }
@@ -83,14 +83,9 @@ public final class EntityOutlines {
 
     private final String name;
     private GpuBuffer config;
-    private final GpuBuffer[] kawase = new GpuBuffer[BLUR_PASSES + 1];
     private RenderTarget scratch;
-    private RenderTarget down;
-    private RenderTarget blurA;
-    private RenderTarget blurB;
+    private KawaseBlur blur;
     private EntityOutline uploaded;
-    private float uploadedRadius = Float.NaN;
-    private int blurPasses;
 
     public static boolean active() {
         return level != null;
@@ -148,24 +143,11 @@ public final class EntityOutlines {
 
     private void glow(CommandEncoder encoder, GpuTextureView mask, int width, int height, GpuTextureView target,
                       GpuTextureView depth, EntityOutline outline, Area inkArea, Area readArea) {
-        int halfWidth = (width + 1) / 2;
-        int halfHeight = (height + 1) / 2;
-        down = target(down, "down", halfWidth, halfHeight);
-        blurA = target(blurA, "blur a", halfWidth, halfHeight);
-        blurB = target(blurB, "blur b", halfWidth, halfHeight);
-        uploadKawase(encoder, outline.radius());
-        Area half = readArea == null ? null : readArea.half();
-        pass(encoder, "down", KAWASE, down.getColorTextureView(), null, true, half, kawase[0],
-                new Binding("InSampler", mask, linear()));
-        GpuTextureView from = down.getColorTextureView();
-        for (int i = 1; i <= blurPasses; i++) {
-            RenderTarget to = (i & 1) == 1 ? blurA : blurB;
-            pass(encoder, "blur " + i, KAWASE, to.getColorTextureView(), null, true, half, kawase[i],
-                    new Binding("InSampler", from, linear()));
-            from = to.getColorTextureView();
-        }
+        if (blur == null) blur = new KawaseBlur("outline " + name);
+        ScreenRectangle half = readArea == null ? null : readArea.half().rectangle();
+        GpuTextureView blurred = blur.blur(encoder, mask, width, height, outline.radius(), half);
         pass(encoder, "glow", GLOW, target, depth, false, inkArea, config,
-                new Binding("InSampler", from, linear()), new Binding("MaskSampler", down.getColorTextureView(), linear()));
+                new Binding("InSampler", blurred, linear()), new Binding("MaskSampler", blur.downsampled(), linear()));
     }
 
     private void pass(CommandEncoder encoder, String label, RenderPipeline pipeline, GpuTextureView color,
@@ -176,7 +158,7 @@ public final class EntityOutlines {
             if (area != null) pass.enableScissor(area.x0(), area.y0(), area.x1() - area.x0(), area.y1() - area.y0());
             RenderSystem.bindDefaultUniforms(pass);
             for (Binding texture : textures) pass.bindTexture(texture.name(), texture.view(), texture.sampler());
-            pass.setUniform(uniform == config ? "OutlineConfig" : "KawaseConfig", uniform.slice());
+            pass.setUniform("OutlineConfig", uniform.slice());
             pass.draw(3, 1, 0, 0);
         }
     }
@@ -195,21 +177,6 @@ public final class EntityOutlines {
                     .get());
         }
         uploaded = outline;
-    }
-
-    private void uploadKawase(CommandEncoder encoder, float radius) {
-        if (radius == uploadedRadius) return;
-        float half = radius * 0.5f;
-        blurPasses = Math.clamp((int) Math.ceil(Math.sqrt(2f * half)), 1, BLUR_PASSES);
-        for (int i = 0; i <= blurPasses; i++) {
-            if (kawase[i] == null) kawase[i] = buffer("kawase " + i, KAWASE_SIZE);
-            float offset = i == 0 ? 1f : i - 0.5f;
-            try (MemoryStack stack = MemoryStack.stackPush()) {
-                encoder.writeToBuffer(kawase[i].slice(), Std140Builder.onStack(stack, KAWASE_SIZE)
-                        .putVec2(offset, offset).putVec2(0f, 0f).get());
-            }
-        }
-        uploadedRadius = radius;
     }
 
     private GpuBuffer buffer(String label, int size) {

@@ -5,6 +5,7 @@ import lombok.NoArgsConstructor;
 import com.mojang.blaze3d.pipeline.RenderPipeline;
 import dev.koifih.client.render.font.Font;
 import dev.koifih.client.render.font.Fonts;
+import dev.koifih.client.render.glass.GlassRenderer;
 import dev.koifih.client.render.state.Pipelines;
 import dev.koifih.client.render.state.RectState;
 import dev.koifih.client.render.state.StairsState;
@@ -14,6 +15,7 @@ import dev.koifih.client.util.Colors;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import org.joml.Matrix3x2f;
+import org.joml.Vector2f;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -34,6 +36,8 @@ public final class Draw {
     private static final int LOGO_BACK_COLOR = 0xFFA3A3A3;
     private static final int LOGO_FRONT_COLOR = 0xFFEAEAEA;
     private static final int ICON_LAYERS = 3;
+    private static final float GLASS_LIGHT_X = -0.33f;
+    private static final float GLASS_LIGHT_Y = -0.94f;
 
     public static void rect(GuiGraphicsExtractor graphics, int x, int y, int width, int height, int radius, int color) {
         rect(graphics, x, y, width, height, radius, ALL_CORNERS, color, Pipelines.RECT);
@@ -139,6 +143,23 @@ public final class Draw {
 
     public static float wordmarkWidth(float height) {
         return Fonts.WORDMARK.glyph(1).advance() * height;
+    }
+
+    public static void glass(GuiGraphicsExtractor graphics, float x, float y, float width, float height, float radius,
+                             int variant) {
+        glass(graphics, x, y, width, height, radius, variant, 0, GLASS_LIGHT_X, GLASS_LIGHT_Y, 0f);
+    }
+
+    public static void glass(GuiGraphicsExtractor graphics, float x, float y, float width, float height, float radius,
+                             int variant, int tint, float lightX, float lightY, float energy) {
+        if (width <= 0f || height <= 0f) return;
+        Vector2f start = graphics.pose().transformPosition(x, y, new Vector2f());
+        Vector2f end = graphics.pose().transformPosition(x + width, y + height, new Vector2f());
+        float stretch = Math.abs(end.y - start.y) / height;
+        float opacity = Colors.alpha(Opacity.apply(0xFFFFFFFF)) / 255f;
+        GlassRenderer.submit(new GlassRenderer.Pane(Math.min(start.x, end.x), Math.min(start.y, end.y),
+                Math.abs(end.x - start.x), Math.abs(end.y - start.y), radius * stretch, variant, tint, lightX, lightY,
+                energy, opacity, Scissor.current()));
     }
 
     private static Font atlas(float size, Font small, Font large) {
