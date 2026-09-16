@@ -14,19 +14,23 @@ public final class ClothSimulation {
     private static final float CELL_HEIGHT = LENGTH / (ROWS - 1);
     private static final float STEP = 1f / 90f;
     static final float MAX_FRAME = 0.1f;
-    private static final int ITERATIONS = 4;
-    private static final float DAMPING = 0.985f;
-    private static final float GRAVITY = 16f;
+    private static final int ITERATIONS = 14;
+    private static final float DAMPING = 0.999f;
+    private static final float GRAVITY = 9.81f;
     private static final float FORWARD_DRAG = 4.5f;
     private static final float BACKWARD_SHARE = 0.5f;
-    private static final float LATERAL_DRAG = 3f;
+    private static final float LATERAL_DRAG = 1.2f;
     private static final float VERTICAL_DRAG = 3f;
-    private static final float SPIN_DRAG = 0.02f;
+    private static final float SPIN_DRAG = 0.008f;
     private static final float REST_PUSH = 0.55f;
     private static final float MARGIN = 0.025f;
     private static final float CROUCH_RATE = 6f;
+    private static final float CROUCH_PITCH = 0.5f;
     private static final float FRICTION = 0.97f;
     private static final float SWAY = 0.3f;
+    private static final float MAX_SPEED = 8f;
+    private static final float MAX_SPIN = 720f;
+    private static final float DIAGONAL = (float) Math.sqrt(CELL_WIDTH * CELL_WIDTH + CELL_HEIGHT * CELL_HEIGHT);
 
     private static final float PIN_Y = 0.02f;
     private static final float PIN_Y_CROUCH = 0.06f;
@@ -73,6 +77,8 @@ public final class ClothSimulation {
 
     public void reset() {
         accumulator = 0f;
+        time = 0f;
+        crouchAmount = 0f;
         for (int row = 0; row < ROWS; row++) {
             for (int column = 0; column < COLS; column++) {
                 int i = index(row, column);
@@ -127,17 +133,26 @@ public final class ClothSimulation {
 
     private void integrate(Motion motion) {
         float wind = 0.4f * Mth.sin(time * 1.7f) + 0.25f * Mth.sin(time * 2.9f);
-        float forward = motion.forward();
-        float accelX = motion.lateral() * LATERAL_DRAG - motion.spin() * SPIN_DRAG;
-        float accelY = GRAVITY + motion.vertical() * VERTICAL_DRAG;
-        float accelZ = Math.max(0f, forward) * FORWARD_DRAG - Math.min(0f, forward) * FORWARD_DRAG * BACKWARD_SHARE
-                + wind + REST_PUSH;
+        float forward = Math.clamp(motion.forward(), -MAX_SPEED, MAX_SPEED);
+        float lateral = Math.clamp(motion.lateral(), -MAX_SPEED, MAX_SPEED);
+        float vertical = Math.clamp(motion.vertical(), -MAX_SPEED, MAX_SPEED);
+        float spin = Math.clamp(motion.spin(), -MAX_SPIN, MAX_SPIN) * SPIN_DRAG;
+        float airZ = Math.max(0f, forward) - Math.min(0f, forward) * BACKWARD_SHARE;
+        float pitch = CROUCH_PITCH * crouchAmount;
+        float gravityY = GRAVITY * Mth.cos(pitch);
+        float gravityZ = GRAVITY * Mth.sin(pitch);
         float dtSquared = STEP * STEP;
         for (int i = COLS; i < ROWS * COLS; i++) {
             float sway = 1f + SWAY * Mth.sin(time * 2.3f + posX[i] * 5f);
+            float velX = (posX[i] - prevX[i]) / STEP;
+            float velY = (posY[i] - prevY[i]) / STEP;
+            float velZ = (posZ[i] - prevZ[i]) / STEP;
+            float accelX = (lateral - velX) * LATERAL_DRAG - spin;
+            float accelY = gravityY + (vertical - velY) * VERTICAL_DRAG;
+            float accelZ = (airZ - velZ) * FORWARD_DRAG + (wind + REST_PUSH) * sway - gravityZ;
             float nx = posX[i] + (posX[i] - prevX[i]) * DAMPING + accelX * dtSquared;
             float ny = posY[i] + (posY[i] - prevY[i]) * DAMPING + accelY * dtSquared;
-            float nz = posZ[i] + (posZ[i] - prevZ[i]) * DAMPING + accelZ * sway * dtSquared;
+            float nz = posZ[i] + (posZ[i] - prevZ[i]) * DAMPING + accelZ * dtSquared;
             prevX[i] = posX[i];
             prevY[i] = posY[i];
             prevZ[i] = posZ[i];
@@ -154,6 +169,12 @@ public final class ClothSimulation {
                     int i = index(row, column);
                     if (column + 1 < COLS) relax(i, index(row, column + 1), CELL_WIDTH);
                     if (row + 1 < ROWS) relax(i, index(row + 1, column), CELL_HEIGHT);
+                }
+            }
+            for (int row = 0; row + 1 < ROWS; row++) {
+                for (int column = 0; column + 1 < COLS; column++) {
+                    relax(index(row, column), index(row + 1, column + 1), DIAGONAL);
+                    relax(index(row, column + 1), index(row + 1, column), DIAGONAL);
                 }
             }
             pin();
