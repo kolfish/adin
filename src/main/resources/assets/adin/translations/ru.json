@@ -117,6 +117,7 @@
   "setting.autoTotem.mode": "Режим",
   "setting.autoTotem.openInventory": "Открывать инвентарь",
   "setting.autoTotem.slot": "Слот",
+  "setting.autoTotem.timing": "Тайминг",
   "module.refill": "Refill",
   "module.refill.description": "Переносит зелья, кровати или вагонетки с ТНТ под курсором в выбранные слоты",
   "setting.refill.mode": "Режим",

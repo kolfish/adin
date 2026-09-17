@@ -117,6 +117,7 @@
   "setting.autoTotem.mode": "Tryb",
   "setting.autoTotem.openInventory": "Otwórz ekwipunek",
   "setting.autoTotem.slot": "Slot",
+  "setting.autoTotem.timing": "Timing",
   "module.refill": "Refill",
   "module.refill.description": "Przenosi najechane mikstury, łóżka lub wagony z TNT do wybranych slotów",
   "setting.refill.mode": "Tryb",

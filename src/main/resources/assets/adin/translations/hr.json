@@ -117,6 +117,7 @@
   "setting.autoTotem.mode": "Način",
   "setting.autoTotem.openInventory": "Otvori inventar",
   "setting.autoTotem.slot": "Utor",
+  "setting.autoTotem.timing": "Tajming",
   "module.refill": "Refill",
   "module.refill.description": "Premješta potione, krevete ili TNT vagone ispod miša u odabrane utore",
   "setting.refill.mode": "Način",

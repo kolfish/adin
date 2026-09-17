@@ -8,7 +8,7 @@ public final class Time {
     private static final float NANOS_PER_SECOND = 1_000_000_000f;
     private static final long NANOS_PER_MILLI = 1_000_000L;
     private static final long ORIGIN = System.nanoTime();
-    private static final long TICK_MILLIS = 50L;
+    public static final long TICK_MILLIS = 50L;
     private static long ticks;
 
     public static float seconds() {

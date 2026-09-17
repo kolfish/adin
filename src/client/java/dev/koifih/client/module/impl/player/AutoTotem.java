@@ -9,6 +9,7 @@ import dev.koifih.client.setting.BoolSetting;
 import dev.koifih.client.setting.EnumSetting;
 import dev.koifih.client.setting.SliderSetting;
 import dev.koifih.client.util.Hotbar;
+import dev.koifih.client.util.Maths;
 import dev.koifih.client.util.Time;
 import net.minecraft.client.gui.screens.inventory.InventoryScreen;
 import net.minecraft.client.player.LocalPlayer;
@@ -22,14 +23,21 @@ import net.minecraft.world.item.Items;
 public final class AutoTotem extends Module {
     private static final String[] MODES = {"Auto", "Hover"};
     private static final int HOVER = 1;
+    private static final String[] TIMINGS = {"Normal", "Totem Guard"};
+    private static final int TOTEM_GUARD = 1;
     private static final long TIMEOUT = 2000;
+    private static final int MIN_SLOW = 2;
+    private static final int MAX_SLOW = 3;
 
     private final EnumSetting mode = add(new EnumSetting("mode", 0, MODES));
     private final BoolSetting openInventory = add(new BoolSetting("openInventory", true));
     private final SliderSetting slot = add(new SliderSetting("slot", 9, 1, 9));
     private final SliderSetting delay = add(new SliderSetting("delay", 50, 0, 500, Measure.MILLIS));
+    private final EnumSetting timing = add(new EnumSetting("timing", 0, TIMINGS));
     private final Time.Ticker sinceStep = new Time.Ticker();
     private Step step = Step.IDLE;
+    private long wait;
+    private boolean slow;
     private InteractionHand popped = InteractionHand.OFF_HAND;
 
     private enum Step { IDLE, POPPED, OPENED, HAND, HOTBAR }
@@ -67,8 +75,8 @@ public final class AutoTotem extends Module {
             step = Step.IDLE;
             return;
         }
+        if (step == Step.POPPED) open(player);
         switch (step) {
-            case POPPED -> open(player);
             case OPENED -> fill(player, handSource(player), handButton(player), -1, Step.HAND);
             case HAND -> fill(player, hotbarSource(player), slot.get() - 1, reserved(), Step.HOTBAR);
             case HOTBAR -> close();
@@ -92,7 +100,7 @@ public final class AutoTotem extends Module {
     }
 
     private void fill(LocalPlayer player, Slot source, int button, int skip, Step next) {
-        if (!screenOpen() || !sinceStep.elapsed(delay.get())) return;
+        if (!screenOpen() || !sinceStep.elapsed(wait)) return;
         if (source == null) {
             advance(next);
             return;
@@ -102,11 +110,12 @@ public final class AutoTotem extends Module {
             if (source == null) return;
         }
         mc.gameMode.handleContainerInput(player.inventoryMenu.containerId, source.index, button, ContainerInput.SWAP, player);
+        if (step == Step.OPENED) slow = !slow;
         advance(next);
     }
 
     private void close() {
-        if (!screenOpen() || !sinceStep.elapsed(delay.get())) return;
+        if (!screenOpen() || !sinceStep.elapsed(wait)) return;
         if (!manual() && mc.gui.screen() instanceof InventoryScreen screen) screen.onClose();
         step = Step.IDLE;
     }
@@ -131,6 +140,13 @@ public final class AutoTotem extends Module {
     private void advance(Step next) {
         step = next;
         sinceStep.mark();
+        boolean guarded = next == Step.OPENED && timing.get() == TOTEM_GUARD;
+        wait = guarded ? reaction() : delay.get();
+    }
+
+    private long reaction() {
+        int ticks = slow ? (int) Maths.random(MIN_SLOW, MAX_SLOW + 1) : 0;
+        return delay.get() + ticks * Time.TICK_MILLIS;
     }
 
     private int handButton(LocalPlayer player) {

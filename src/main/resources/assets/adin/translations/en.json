@@ -126,6 +126,7 @@
   "setting.autoTotem.mode": "Mode",
   "setting.autoTotem.openInventory": "Open inventory",
   "setting.autoTotem.slot": "Slot",
+  "setting.autoTotem.timing": "Timing",
   "module.refill": "Refill",
   "module.refill.description": "Moves pots, beds or TNT carts you hover over into your chosen hotbar slots",
   "setting.refill.mode": "Mode",

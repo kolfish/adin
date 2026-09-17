@@ -117,6 +117,7 @@
   "setting.autoTotem.mode": "Mode",
   "setting.autoTotem.openInventory": "Ouvrir l'inventaire",
   "setting.autoTotem.slot": "Emplacement",
+  "setting.autoTotem.timing": "Timing",
   "module.refill": "Refill",
   "module.refill.description": "Déplace les potions, lits ou wagonnets de TNT survolés vers tes emplacements choisis",
   "setting.refill.mode": "Mode",
