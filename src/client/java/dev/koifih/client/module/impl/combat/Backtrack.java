@@ -90,7 +90,7 @@ public final class Backtrack extends Module {
     private void onPacketsProcessed(PacketProcessEvent event) {
         Minecraft client = event.client();
         LocalPlayer player = client.player;
-        if (client.level == null || player == null) {
+        if (client.level == null || player == null || client.getConnection() == null) {
             Backtracker.drop();
             target = null;
             Backtracker.hold(false);
@@ -162,6 +162,8 @@ public final class Backtrack extends Module {
     }
 
     private void reset() {
+        if (mc.player == null) return;
+
         Backtracker.releaseAll();
         target = null;
     }
