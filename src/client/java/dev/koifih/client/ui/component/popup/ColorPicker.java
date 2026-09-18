@@ -1,4 +1,4 @@
-package dev.koifih.client.ui.component;
+package dev.koifih.client.ui.component.popup;
 
 import dev.koifih.client.render.Text;
 import dev.koifih.client.ui.Theme;

@@ -1,9 +1,10 @@
-package dev.koifih.client.ui.component;
+package dev.koifih.client.ui.component.popup;
 
 import dev.koifih.client.render.Draw;
 import dev.koifih.client.render.Transform;
 import dev.koifih.client.ui.Theme;
 import dev.koifih.client.ui.Transition;
+import dev.koifih.client.ui.component.Control;
 import dev.koifih.client.util.Colors;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphicsExtractor;

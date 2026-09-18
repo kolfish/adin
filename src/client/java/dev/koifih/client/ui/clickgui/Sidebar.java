@@ -7,7 +7,7 @@ import dev.koifih.client.render.Text;
 import dev.koifih.client.ui.Theme;
 import dev.koifih.client.ui.Transition;
 import dev.koifih.client.ui.component.Button;
-import dev.koifih.client.ui.component.TabButton;
+import dev.koifih.client.ui.clickgui.TabButton;
 import dev.koifih.client.util.Lang;
 import lombok.RequiredArgsConstructor;
 import net.minecraft.client.gui.GuiGraphicsExtractor;

@@ -11,9 +11,13 @@ import dev.koifih.client.setting.PreviewSetting;
 import dev.koifih.client.ui.Theme;
 import dev.koifih.client.ui.Transition;
 import dev.koifih.client.ui.UiScale;
+import dev.koifih.client.ui.clickgui.page.CapeCatalogPage;
+import dev.koifih.client.ui.clickgui.page.ConfigsPage;
+import dev.koifih.client.ui.clickgui.page.FriendsPage;
+import dev.koifih.client.ui.clickgui.page.ModulesPage;
 import dev.koifih.client.ui.component.Control;
-import dev.koifih.client.ui.component.Popup;
 import dev.koifih.client.ui.component.TextInput;
+import dev.koifih.client.ui.component.popup.Popup;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.navigation.ScreenRectangle;
@@ -57,27 +61,27 @@ public final class ClickGui extends Screen {
         panelReveal.set(1f);
     }
 
-    <T extends AbstractWidget> T add(T widget) {
+    public <T extends AbstractWidget> T add(T widget) {
         return addRenderableWidget(widget);
     }
 
-    void remove(AbstractWidget widget) {
+    public void remove(AbstractWidget widget) {
         removeWidget(widget);
     }
 
-    void requestRebuild() {
+    public void requestRebuild() {
         rebuildPending = true;
     }
 
-    void dropFocus() {
+    public void dropFocus() {
         clearFocus();
     }
 
-    void focusWidget(AbstractWidget widget) {
+    public void focusWidget(AbstractWidget widget) {
         setFocused(widget);
     }
 
-    void openPreview(PreviewSetting setting) {
+    public void openPreview(PreviewSetting setting) {
         preview.open(setting);
         updateStates();
     }
@@ -91,7 +95,7 @@ public final class ClickGui extends Screen {
         updateStates();
     }
 
-    void closeCapeCatalog() {
+    public void closeCapeCatalog() {
         if (overridePage == null) return;
         overridePage = null;
         pageReveal.snap(0f);

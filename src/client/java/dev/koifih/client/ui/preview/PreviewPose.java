@@ -1,4 +1,4 @@
-package dev.koifih.client.ui;
+package dev.koifih.client.ui.preview;
 
 import dev.koifih.client.render.AdinIcon;
 import dev.koifih.client.ui.component.Segmented;

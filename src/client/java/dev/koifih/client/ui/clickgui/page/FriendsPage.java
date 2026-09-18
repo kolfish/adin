@@ -1,14 +1,17 @@
-package dev.koifih.client.ui.clickgui;
+package dev.koifih.client.ui.clickgui.page;
 
 import dev.koifih.client.friends.FriendList;
 import dev.koifih.client.render.Draw;
 import dev.koifih.client.render.Scissor;
 import dev.koifih.client.render.Text;
-import dev.koifih.client.ui.SkinCache;
 import dev.koifih.client.ui.Theme;
 import dev.koifih.client.ui.Transition;
+import dev.koifih.client.ui.clickgui.ClickGui;
+import dev.koifih.client.ui.clickgui.Page;
+import dev.koifih.client.ui.clickgui.PanelLayout;
 import dev.koifih.client.ui.component.Bool;
 import dev.koifih.client.ui.component.TextInput;
+import dev.koifih.client.ui.preview.SkinCache;
 import dev.koifih.client.util.Colors;
 import dev.koifih.client.util.Lang;
 import lombok.RequiredArgsConstructor;

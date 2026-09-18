@@ -1,4 +1,4 @@
-package dev.koifih.client.ui;
+package dev.koifih.client.ui.preview;
 
 import dev.koifih.Adin;
 import dev.koifih.client.mixin.accessor.FallingBlockEntityAccessor;

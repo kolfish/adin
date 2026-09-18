@@ -1,6 +1,7 @@
-package dev.koifih.client.ui.component;
+package dev.koifih.client.ui.component.popup;
 
 import dev.koifih.client.ui.Transition;
+import dev.koifih.client.ui.component.Control;
 import lombok.Setter;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.input.KeyEvent;

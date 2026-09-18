@@ -1,4 +1,4 @@
-package dev.koifih.client.ui.clickgui;
+package dev.koifih.client.ui.clickgui.page;
 
 import dev.koifih.client.render.AdinIcon;
 import dev.koifih.client.render.Draw;
@@ -14,6 +14,9 @@ import dev.koifih.client.setting.CapePreview;
 import dev.koifih.client.setting.CapeSetting;
 import dev.koifih.client.ui.Theme;
 import dev.koifih.client.ui.Transition;
+import dev.koifih.client.ui.clickgui.ClickGui;
+import dev.koifih.client.ui.clickgui.Page;
+import dev.koifih.client.ui.clickgui.PanelLayout;
 import dev.koifih.client.ui.component.Button;
 import dev.koifih.client.ui.component.TextInput;
 import dev.koifih.client.util.Colors;
@@ -85,12 +88,12 @@ public final class CapeCatalogPage implements Page {
     private boolean interactive;
     private float scroll;
 
-    CapeCatalogPage(ClickGui gui) {
+    public CapeCatalogPage(ClickGui gui) {
         this.gui = gui;
         previewSetting.attach("capes");
     }
 
-    void open(CapeSetting setting) {
+    public void open(CapeSetting setting) {
         this.setting = setting;
         scroll = 0f;
         scrollShown.snap(0f);
@@ -98,7 +101,7 @@ public final class CapeCatalogPage implements Page {
         freshOpen = true;
     }
 
-    CapePreview previewSetting() {
+    public CapePreview previewSetting() {
         return previewSetting;
     }
 
@@ -120,7 +123,7 @@ public final class CapeCatalogPage implements Page {
         updateStates();
     }
 
-    boolean cancelRename() {
+    public boolean cancelRename() {
         if (renaming == null) return false;
         renaming = null;
         gui.dropFocus();

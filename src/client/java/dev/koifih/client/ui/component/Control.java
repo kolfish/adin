@@ -50,7 +50,7 @@ public abstract class Control extends AbstractWidget {
         return super.keyPressed(event);
     }
 
-    float px(float units) {
+    public float px(float units) {
         return units * scale;
     }
 
@@ -58,11 +58,11 @@ public abstract class Control extends AbstractWidget {
         return getY() + getHeight() * 0.5f;
     }
 
-    void rect(GuiGraphicsExtractor graphics, float x, float y, float width, float height, float radius, int color) {
+    public void rect(GuiGraphicsExtractor graphics, float x, float y, float width, float height, float radius, int color) {
         Draw.rect(graphics, x, y, width, Math.max(1, Math.round(height)), Math.max(0, Math.round(radius)), color);
     }
 
-    protected void text(GuiGraphicsExtractor graphics, String text, float x, float centerY, float size, int color) {
+    public void text(GuiGraphicsExtractor graphics, String text, float x, float centerY, float size, int color) {
         Text.drawCentered(graphics, text, x, centerY, size, color);
     }
 

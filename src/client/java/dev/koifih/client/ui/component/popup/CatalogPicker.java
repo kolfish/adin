@@ -1,11 +1,11 @@
-package dev.koifih.client.ui.component;
+package dev.koifih.client.ui.component.popup;
 
 import dev.koifih.client.render.Draw;
 import dev.koifih.client.render.Opacity;
 import dev.koifih.client.render.Scissor;
 import dev.koifih.client.render.Text;
 import dev.koifih.client.render.Transform;
-import dev.koifih.client.ui.Catalog;
+import dev.koifih.client.ui.preview.Catalog;
 import dev.koifih.client.ui.Theme;
 import dev.koifih.client.ui.Transition;
 import dev.koifih.client.util.Colors;

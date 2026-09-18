@@ -1,4 +1,4 @@
-package dev.koifih.client.ui;
+package dev.koifih.client.ui.preview;
 
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;

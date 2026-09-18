@@ -1,4 +1,4 @@
-package dev.koifih.client.ui;
+package dev.koifih.client.ui.preview;
 
 import dev.koifih.client.util.Lang;
 import net.minecraft.client.gui.GuiGraphicsExtractor;

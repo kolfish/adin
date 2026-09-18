@@ -1,4 +1,4 @@
-package dev.koifih.client.ui.clickgui;
+package dev.koifih.client.ui.clickgui.page;
 
 import dev.koifih.client.config.Config;
 import dev.koifih.client.config.ConfigStore;
@@ -8,6 +8,9 @@ import dev.koifih.client.render.Text;
 import dev.koifih.client.render.Transform;
 import dev.koifih.client.ui.Theme;
 import dev.koifih.client.ui.Transition;
+import dev.koifih.client.ui.clickgui.ClickGui;
+import dev.koifih.client.ui.clickgui.Page;
+import dev.koifih.client.ui.clickgui.PanelLayout;
 import dev.koifih.client.ui.component.Button;
 import dev.koifih.client.ui.component.Control;
 import dev.koifih.client.ui.component.Segmented;

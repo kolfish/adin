@@ -12,7 +12,7 @@ import dev.koifih.client.setting.EnumSetting;
 import dev.koifih.client.setting.Setting;
 import dev.koifih.client.ui.UiScale;
 import dev.koifih.client.ui.clickgui.ClickGui;
-import dev.koifih.client.ui.component.TabButton;
+import dev.koifih.client.ui.clickgui.TabButton;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.minecraft.client.CameraType;
 import net.minecraft.client.server.IntegratedServer;

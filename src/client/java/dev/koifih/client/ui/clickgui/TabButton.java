@@ -1,10 +1,11 @@
-package dev.koifih.client.ui.component;
+package dev.koifih.client.ui.clickgui;
 
 import dev.koifih.client.render.Draw;
 import dev.koifih.client.render.Text;
 import dev.koifih.client.ui.Theme;
 import dev.koifih.client.ui.Transition;
 import dev.koifih.client.ui.clickgui.Sidebar;
+import dev.koifih.client.ui.component.Control;
 import dev.koifih.client.util.Colors;
 import lombok.Getter;
 import lombok.experimental.Accessors;
