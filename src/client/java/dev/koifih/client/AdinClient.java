@@ -4,7 +4,6 @@ import dev.koifih.client.util.Clicks;
 import dev.koifih.client.util.Time;
 import dev.koifih.client.event.Priority;
 import dev.koifih.client.backtrack.Backtracker;
-import dev.koifih.client.bench.Probe;
 import dev.koifih.client.config.StateStore;
 import dev.koifih.client.event.EventBus;
 import dev.koifih.client.event.events.PreTickEvent;
@@ -43,7 +42,6 @@ public final class AdinClient implements ClientModInitializer {
         ClientTickEvents.START_CLIENT_TICK.register(client -> EVENTS.post(new PreTickEvent(client)));
         ClientTickEvents.END_CLIENT_TICK.register(client -> EVENTS.post(new TickEvent(client)));
         ClientPlayConnectionEvents.DISCONNECT.register((handler, client) -> EntityPreview.clear());
-        Probe.init();
         Clicks.init();
     }
 }

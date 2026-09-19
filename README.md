@@ -76,8 +76,6 @@ signed-distance rounded rectangles, `shape.{vsh,fsh}` draws anti-aliased screen-
 border rings for the 2D world overlay, `hue_bar.fsh` and `saturation_value.fsh` reuse the rect
 vertex shader for the color picker, and `text.{vsh,fsh}` draws text and icons. The shared
 rounded-rectangle coverage lives in `shaders/include/rect_coverage.glsl`.
-Font atlases and their regeneration scripts are documented in
-[tools/fonts/README.md](tools/fonts/README.md) and [tools/icons/README.md](tools/icons/README.md).
 
 ## ClickGUI
 
