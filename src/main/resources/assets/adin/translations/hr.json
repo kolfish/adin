@@ -201,5 +201,11 @@
   "preview.loading": "Učitavanje skina…",
   "preview.missing": "Skin nije pronađen",
   "module.friends": "Friends",
-  "module.friends.description": "Ne da borbenim modulima da diraju tvoje prijatelje"
+  "module.friends.description": "Ne da borbenim modulima da diraju tvoje prijatelje",
+  "module.antiBot": "Anti Bot",
+  "module.antiBot.description": "Sprječava borbene module da ciljaju lažne igrače sa servera",
+  "setting.antiBot.preset": "Predložak",
+  "setting.antiBot.advanced": "Napredno",
+  "setting.antiBot.checks": "Provjere",
+  "setting.antiBot.grace": "Odgoda"
 }

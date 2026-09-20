@@ -9,7 +9,8 @@ public enum Measure {
     PERCENT,
     DEGREES,
     FRACTION,
-    MILLIS;
+    MILLIS,
+    TICKS;
 
     public String format(int value) {
         return switch (this) {
@@ -18,6 +19,7 @@ public enum Measure {
             case DEGREES -> value + "\u00b0";
             case FRACTION -> String.format(Locale.ROOT, "%.2f", value / 100.0);
             case MILLIS -> value + "ms";
+            case TICKS -> value + "t";
             case NONE -> Integer.toString(value);
         };
     }

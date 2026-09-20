@@ -1,6 +1,7 @@
 package dev.koifih.client.setting;
 
 import dev.koifih.client.friends.FriendList;
+import dev.koifih.client.module.impl.misc.AntiBot;
 import dev.koifih.client.util.Entities;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
@@ -26,6 +27,7 @@ public final class TargetSettings implements SettingGroup {
 
     public boolean accepts(Player self, LivingEntity entity) {
         if (entity == self || !entity.isAlive() || entity.isSpectator() || FriendList.protects(entity)) return false;
+        if (AntiBot.flags(entity)) return false;
         if (entity.isInvisible() && !targets.has(INVISIBLE)) return false;
         if (entity instanceof Player) return targets.has(PLAYERS);
         return targets.has(ENTITIES) && entities.get().contains(Entities.id(entity));

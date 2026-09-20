@@ -201,5 +201,11 @@
   "preview.loading": "Chargement du skin…",
   "preview.missing": "Aucun skin trouvé",
   "module.friends": "Friends",
-  "module.friends.description": "Empêche les modules de combat de toucher tes amis"
+  "module.friends.description": "Empêche les modules de combat de toucher tes amis",
+  "module.antiBot": "Anti Bot",
+  "module.antiBot.description": "Empêche les modules de combat de viser les faux joueurs du serveur",
+  "setting.antiBot.preset": "Préréglage",
+  "setting.antiBot.advanced": "Avancé",
+  "setting.antiBot.checks": "Vérifications",
+  "setting.antiBot.grace": "Délai de grâce"
 }

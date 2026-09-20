@@ -201,5 +201,11 @@
   "preview.loading": "Wczytywanie skina…",
   "preview.missing": "Nie znaleziono skina",
   "module.friends": "Friends",
-  "module.friends.description": "Nie pozwala modułom bojowym ruszać twoich znajomych"
+  "module.friends.description": "Nie pozwala modułom bojowym ruszać twoich znajomych",
+  "module.antiBot": "Anti Bot",
+  "module.antiBot.description": "Nie pozwala modułom walki atakować fałszywych graczy serwera",
+  "setting.antiBot.preset": "Ustawienie",
+  "setting.antiBot.advanced": "Zaawansowane",
+  "setting.antiBot.checks": "Sprawdzenia",
+  "setting.antiBot.grace": "Czas ochronny"
 }

@@ -37,7 +37,7 @@ public final class ModuleManager {
             "Esp", "Nametags", "BlockEsp", "Capes",
             "Notifications", "ModuleList", "Watermark", "KeybindList",
             "KeyPearl", "AutoTotem", "Refill",
-            "Friends");
+            "Friends", "AntiBot");
 
     public ModuleManager() {
         for (Category category : Category.values()) byCategory.put(category, new ArrayList<>());

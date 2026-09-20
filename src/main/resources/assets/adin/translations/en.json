@@ -201,5 +201,11 @@
   "preview.loading": "Loading skin…",
   "preview.missing": "No skin found",
   "module.friends": "Friends",
-  "module.friends.description": "Keeps combat modules off your friends"
+  "module.friends.description": "Keeps combat modules off your friends",
+  "module.antiBot": "Anti Bot",
+  "module.antiBot.description": "Keeps combat modules off server spawned fake players",
+  "setting.antiBot.preset": "Preset",
+  "setting.antiBot.advanced": "Advanced",
+  "setting.antiBot.checks": "Checks",
+  "setting.antiBot.grace": "Grace"
 }

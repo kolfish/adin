@@ -201,5 +201,11 @@
   "preview.loading": "Загрузка скина…",
   "preview.missing": "Скин не найден",
   "module.friends": "Friends",
-  "module.friends.description": "Не даёт боевым модулям трогать ваших друзей"
+  "module.friends.description": "Не даёт боевым модулям трогать ваших друзей",
+  "module.antiBot": "Anti Bot",
+  "module.antiBot.description": "Не даёт боевым модулям бить фейковых игроков, созданных сервером",
+  "setting.antiBot.preset": "Пресет",
+  "setting.antiBot.advanced": "Расширенно",
+  "setting.antiBot.checks": "Проверки",
+  "setting.antiBot.grace": "Отсрочка"
 }
