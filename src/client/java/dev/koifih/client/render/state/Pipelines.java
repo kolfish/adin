@@ -32,9 +32,9 @@ public final class Pipelines {
     public static final RenderPipeline RECT = rect("rect", MODE_SOLID);
     public static final RenderPipeline HUE_BAR = rect("hue_bar", MODE_HUE_BAR);
     public static final RenderPipeline SATURATION_VALUE = rect("saturation_value", MODE_SATURATION_VALUE);
-    public static final RenderPipeline SHAPE = shape("screen/shape", "screen/shape", "screen/shape").build();
+    public static final RenderPipeline SHAPE = shape("shape", "core/shape", "core/shape").build();
 
-    public static final RenderPipeline TEXT = builder("gui/text", "gui/text", "gui/text")
+    public static final RenderPipeline TEXT = builder("text", "core/text", "core/text")
             .withShaderDefine("MSDF_RANGE", Fonts.DISTANCE_RANGE)
             .withBindGroupLayout(BindGroupLayouts.DYNAMIC_TRANSFORMS)
             .withBindGroupLayout(BindGroupLayouts.PROJECTION)
@@ -51,13 +51,13 @@ public final class Pipelines {
             .addAttribute("LineWidth", GpuFormat.R32_FLOAT)
             .build();
 
-    public static final RenderPipeline STAIRS = builder("gui/stairs", "gui/stairs", "gui/stairs")
+    public static final RenderPipeline STAIRS = builder("stairs", "core/stairs", "core/stairs")
             .withBindGroupLayout(BindGroupLayouts.DYNAMIC_TRANSFORMS)
             .withBindGroupLayout(BindGroupLayouts.PROJECTION)
             .withVertexBinding(0, STAIRS_FORMAT)
             .build();
 
-    public static final RenderPipeline ICON = builder("gui/icon", "gui/icon", "gui/icon")
+    public static final RenderPipeline ICON = builder("icon", "core/icon", "core/icon")
             .withShaderDefine("MSDF_RANGE", Fonts.DISTANCE_RANGE)
             .withBindGroupLayout(BindGroupLayouts.DYNAMIC_TRANSFORMS)
             .withBindGroupLayout(BindGroupLayouts.PROJECTION)
@@ -72,7 +72,7 @@ public final class Pipelines {
             .build();
 
     private static RenderPipeline rect(String name, int mode) {
-        return shape("gui/" + name, "gui/rect", "gui/rect")
+        return shape(name, "core/rect", "core/rect")
                 .withShaderDefine("RECT_MODE", mode)
                 .build();
     }

@@ -73,9 +73,15 @@ dev.koifih
 
 Shaders live in `assets/adin/shaders/core/`: `rect.{vsh,fsh}` draws the
 signed-distance rounded rectangles, `shape.{vsh,fsh}` draws anti-aliased screen-space fills and
-border rings for the 2D world overlay, `hue_bar.fsh` and `saturation_value.fsh` reuse the rect
-vertex shader for the color picker, and `text.{vsh,fsh}` draws text and icons. The shared
-rounded-rectangle coverage lives in `shaders/include/rect_coverage.glsl`.
+border rings for the 2D world overlay, `text.{vsh,fsh}` draws text and icons, and `fill.{vsh,fsh}`
+draws the entity chams. The color picker reuses `rect` with a different `RECT_MODE` define.
+Screen-space effects live in `shaders/post/`. Shared GLSL goes in `shaders/include/`, which
+Minecraft requires: `#moj_import <adin:rect_coverage.glsl>` resolves to
+`shaders/include/rect_coverage.glsl`.
+
+MSDF atlases are a `.json` metrics file beside a `.png` of the same name, grouped into
+`assets/adin/fonts/`, `assets/adin/icons/` and `assets/adin/brand/`. `Font.load` takes one
+name, such as `icons/material`, and derives both paths from it.
 
 ## ClickGUI
 

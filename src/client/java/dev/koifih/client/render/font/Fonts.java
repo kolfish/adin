@@ -1,22 +1,18 @@
 package dev.koifih.client.render.font;
 
-import dev.koifih.Adin;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public final class Fonts {
-    public static final Font COMFORTAA_BOLD =
-            Font.load("comfortaa-bold", Adin.id("textures/font/comfortaa-bold.png"), '?');
-    public static final Font MATERIAL_ICONS =
-            Font.load("material/icons", Adin.id("textures/font/material-icons.png"), 0xe8b8);
-    public static final Font LOGO = Font.load("logo", Adin.id("textures/font/logo.png"), 1);
-    public static final Font LOGO_SMALL = Font.load("logo_small", Adin.id("textures/font/logo_small.png"), 1);
-    public static final Font ADIN_ICONS = Font.load("adin_icons", Adin.id("textures/font/adin_icons.png"), 1);
-    public static final Font ADIN_ICONS_SMALL =
-            Font.load("adin_icons_small", Adin.id("textures/font/adin_icons_small.png"), 1);
-    public static final Font WORDMARK = Font.load("wordmark", Adin.id("textures/font/wordmark.png"), 1);
-    public static final Font WORDMARK_SMALL = Font.load("wordmark_small", Adin.id("textures/font/wordmark_small.png"), 1);
+    public static final Font COMFORTAA_BOLD = Font.load("fonts/comfortaa-bold", '?');
+    public static final Font MATERIAL_ICONS = Font.load("icons/material", 0xe8b8);
+    public static final Font ADIN_ICONS = Font.load("icons/adin", 1);
+    public static final Font ADIN_ICONS_SMALL = Font.load("icons/adin_small", 1);
+    public static final Font LOGO = Font.load("brand/logo", 1);
+    public static final Font LOGO_SMALL = Font.load("brand/logo_small", 1);
+    public static final Font WORDMARK = Font.load("brand/wordmark", 1);
+    public static final Font WORDMARK_SMALL = Font.load("brand/wordmark_small", 1);
 
     public static final float DISTANCE_RANGE = COMFORTAA_BOLD.distanceRange();
 

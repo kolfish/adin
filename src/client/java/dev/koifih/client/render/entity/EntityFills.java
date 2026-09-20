@@ -114,9 +114,9 @@ public final class EntityFills {
 
     private static RenderPipeline pipeline(String name, int effect, ColorTargetState color, DepthStencilState depth, boolean hand) {
         return RenderPipeline.builder()
-                .withLocation(Adin.id("pipeline/entity/fill_" + name))
-                .withVertexShader(Adin.id("entity/fill"))
-                .withFragmentShader(Adin.id("entity/fill"))
+                .withLocation(Adin.id("pipeline/fill_" + name))
+                .withVertexShader(Adin.id("core/fill"))
+                .withFragmentShader(Adin.id("core/fill"))
                 .withShaderDefine("EFFECT", effect)
                 .withShaderDefine("HAND", hand ? 1 : 0)
                 .withBindGroupLayout(BindGroupLayouts.DYNAMIC_TRANSFORMS)

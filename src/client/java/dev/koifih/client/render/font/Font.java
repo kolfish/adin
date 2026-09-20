@@ -1,6 +1,7 @@
 package dev.koifih.client.render.font;
 
 import com.google.gson.Gson;
+import dev.koifih.Adin;
 import net.minecraft.resources.Identifier;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
@@ -8,7 +9,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 public final class Font {
-    private static final String METRICS_DIRECTORY = "/assets/adin/msdf/";
+    private static final String ASSET_ROOT = "/assets/adin/";
 
     private final Identifier texture;
     private final int fallbackCodepoint;
@@ -40,8 +41,9 @@ public final class Font {
         }
     }
 
-    public static Font load(String name, Identifier texture, int fallbackCodepoint) {
-        String path = METRICS_DIRECTORY + name + ".json";
+    public static Font load(String name, int fallbackCodepoint) {
+        String path = ASSET_ROOT + name + ".json";
+        Identifier texture = Adin.id(name + ".png");
         try (var stream = Font.class.getResourceAsStream(path)) {
             if (stream == null) throw new IllegalStateException("Missing font metrics: " + path);
             try (var reader = new InputStreamReader(stream, StandardCharsets.UTF_8)) {

@@ -153,6 +153,8 @@
   "setting.nametags.distance": "Distance",
   "setting.nametags.health": "Health",
   "setting.nametags.showDistance": "Show distance",
+  "setting.nametags.targets": "Targets",
+  "setting.nametags.entities": "Entities",
   "module.blockEsp": "Block ESP",
   "module.blockEsp.description": "Highlights chosen blocks through walls",
   "module.capes": "Capes",

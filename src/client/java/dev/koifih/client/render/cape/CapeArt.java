@@ -66,8 +66,8 @@ public final class CapeArt {
         int width = CapeLayout.faceWidth(SCALE);
         int height = CapeLayout.faceHeight(SCALE);
         if (face == null) {
-            logoAtlas = GlyphImage.atlas("/assets/adin/textures/font/logo.png");
-            textAtlas = GlyphImage.atlas("/assets/adin/textures/font/comfortaa-bold.png");
+            logoAtlas = GlyphImage.atlas("/assets/adin/brand/logo.png");
+            textAtlas = GlyphImage.atlas("/assets/adin/fonts/comfortaa-bold.png");
             face = new NativeImage(width, height, true);
         }
         for (int y = 0; y < height; y++) {

@@ -69,7 +69,7 @@ public final class BlockRenderer {
             .build();
     private static final RenderPipeline LINES = RenderPipeline.builder(RenderPipelines.LINES_SNIPPET)
             .withLocation(Adin.id("pipeline/blocks_lines"))
-            .withVertexShader(Adin.id("world/blocks_lines"))
+            .withVertexShader(Adin.id("core/blocks_lines"))
             .withVertexBinding(0, DefaultVertexFormat.POSITION_COLOR_NORMAL)
             .withBindGroupLayout(LINE_CONFIG)
             .withDepthStencilState(SEE_THROUGH)
