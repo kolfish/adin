@@ -16,7 +16,7 @@ import java.util.function.IntSupplier;
 
 public final class Slider extends Control {
     private final int min;
-    private final int max;
+    private final IntSupplier max;
     private final IntSupplier[] gets;
     private final IntConsumer[] sets;
     private final Transition[] positions;
@@ -29,10 +29,10 @@ public final class Slider extends Control {
 
     public Slider(int x, int y, int width, int height, float scale, Component label, int min, int max,
                   IntSupplier get, IntConsumer set) {
-        this(x, y, width, height, scale, label, min, max, new IntSupplier[] {get}, new IntConsumer[] {set});
+        this(x, y, width, height, scale, label, min, () -> max, new IntSupplier[] {get}, new IntConsumer[] {set});
     }
 
-    private Slider(int x, int y, int width, int height, float scale, Component label, int min, int max,
+    private Slider(int x, int y, int width, int height, float scale, Component label, int min, IntSupplier max,
                    IntSupplier[] gets, IntConsumer[] sets) {
         super(x, y, width, height, scale, label);
         this.min = min;
@@ -43,10 +43,14 @@ public final class Slider extends Control {
         for (int i = 0; i < gets.length; i++) positions[i] = new Transition(gets[i].getAsInt(), 120);
     }
 
-    public static Slider range(int x, int y, int width, int height, float scale, Component label, int min, int max,
+    public static Slider range(int x, int y, int width, int height, float scale, Component label, int min, IntSupplier max,
                                IntSupplier lowGet, IntConsumer lowSet, IntSupplier highGet, IntConsumer highSet) {
         return new Slider(x, y, width, height, scale, label, min, max,
                 new IntSupplier[] {lowGet, highGet}, new IntConsumer[] {lowSet, highSet});
+    }
+
+    private int max() {
+        return max.getAsInt();
     }
 
     private boolean ranged() {
@@ -64,8 +68,8 @@ public final class Slider extends Control {
     public float naturalValueWidth() {
         float size = px(7);
         float widest = ranged()
-                ? Text.width(format.apply(max) + "-" + format.apply(max), size)
-                : Math.max(Text.width(format.apply(min), size), Text.width(format.apply(max), size));
+                ? Text.width(format.apply(max()) + "-" + format.apply(max()), size)
+                : Math.max(Text.width(format.apply(min), size), Text.width(format.apply(max()), size));
         return Math.max(px(18), widest + px(8));
     }
 
@@ -82,7 +86,7 @@ public final class Slider extends Control {
     }
 
     private float knobX(float value) {
-        return getX() + travel() * (value - min) / (max - min);
+        return getX() + travel() * (value - min) / (max() - min);
     }
 
     @Override
@@ -106,11 +110,11 @@ public final class Slider extends Control {
 
     private int valueAt(double mouseX) {
         float fraction = (float) ((mouseX - getX() - knobWidth() / 2) / travel());
-        return Math.clamp(Math.round(min + fraction * (max - min)), min, max);
+        return Math.clamp(Math.round(min + fraction * (max() - min)), min, max());
     }
 
     private void move(int value) {
-        value = Math.clamp(value, min, max);
+        value = Math.clamp(value, min, max());
         if (!ranged()) {
             sets[0].accept(value);
             return;

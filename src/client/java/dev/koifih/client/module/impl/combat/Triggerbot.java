@@ -17,23 +17,35 @@ import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.phys.EntityHitResult;
+import net.minecraft.world.phys.Vec3;
 
 public final class Triggerbot extends Module {
     private static final float NEXT_TICK = 1.5f;
     private static final double GRAVITY = 0.08;
     private static final double DRAG = 0.98;
+    private static final int FULL_CHARGE = 100;
+    private static final int EXTRA_CHARGE = 125;
+    private static final float HUNDREDTHS = 100f;
 
-    private final RangeSetting cooldown = add(new RangeSetting("cooldown", 60, 100, 0, 100, Measure.FRACTION));
+    private final RangeSetting cooldown = add(new RangeSetting("cooldown", 60, 100, 0, EXTRA_CHARGE, Measure.FRACTION));
+    private final BoolSetting extraDelay = add(new BoolSetting("extraDelay", false));
+    private final BoolSetting range = add(new BoolSetting("range", false));
+    private final RangeSetting blocks = add(new RangeSetting("blocks", 300, 300, 100, 300, Measure.FRACTION));
     private final BoolSetting weaponsOnly = add(new BoolSetting("weaponsOnly", true));
     private final TargetSettings targets = add(new TargetSettings());
     private final BoolSetting crits = add(new BoolSetting("crits", true));
 
     private float threshold;
+    private float reach;
+    private int overcharge;
     private boolean holdingSprint;
     private LivingEntity current;
 
     public Triggerbot() {
         super("triggerbot");
+        cooldown.maxWhen(() -> extraDelay.get() ? EXTRA_CHARGE : FULL_CHARGE);
+        extraDelay.describe();
+        blocks.visibleWhen(range::get);
     }
 
     @Override
@@ -51,7 +63,7 @@ public final class Triggerbot extends Module {
 
     @Override
     protected void onEnable() {
-        threshold = roll();
+        rearm();
         listen(PreTickEvent.class, this::onTick);
     }
 
@@ -66,6 +78,7 @@ public final class Triggerbot extends Module {
         LocalPlayer player = client.player;
         LivingEntity target = armed(client, player) ? crosshairTarget(client, player) : null;
         current = target;
+        overcharge = player.getAttackStrengthScale(0f) >= 1f ? overcharge + 1 : 0;
         if (target == null) {
             holdingSprint = false;
             return;
@@ -76,7 +89,7 @@ public final class Triggerbot extends Module {
         if (!Clicks.left(client, target)) client.gameMode.attack(player, target);
         player.swing(InteractionHand.MAIN_HAND);
         holdingSprint = false;
-        threshold = roll();
+        rearm();
     }
 
     private boolean critReady(Minecraft client, LocalPlayer player) {
@@ -101,11 +114,14 @@ public final class Triggerbot extends Module {
     }
 
     private boolean charged(LocalPlayer player, float ticksAhead) {
-        return player.getAttackStrengthScale(ticksAhead) >= threshold;
+        if (player.getAttackStrengthScale(ticksAhead) < Math.min(threshold, 1f)) return false;
+        return overcharge >= Math.max(0f, threshold - 1f) * player.getCurrentItemAttackStrengthDelay();
     }
 
-    private float roll() {
-        return Maths.random(cooldown.low() / 100f, cooldown.high() / 100f);
+    private void rearm() {
+        threshold = Maths.random(cooldown.low() / HUNDREDTHS, cooldown.high() / HUNDREDTHS);
+        reach = Maths.random(blocks.low() / HUNDREDTHS, blocks.high() / HUNDREDTHS);
+        overcharge = 0;
     }
 
     private boolean armed(Minecraft client, LocalPlayer player) {
@@ -120,6 +136,10 @@ public final class Triggerbot extends Module {
 
     private LivingEntity crosshairTarget(Minecraft client, LocalPlayer player) {
         if (!(client.hitResult instanceof EntityHitResult hit) || !(hit.getEntity() instanceof LivingEntity entity)) return null;
-        return targets.accepts(player, entity) ? entity : null;
+        return targets.accepts(player, entity) && withinReach(player, hit.getLocation()) ? entity : null;
+    }
+
+    private boolean withinReach(LocalPlayer player, Vec3 hit) {
+        return !range.get() || hit.distanceToSqr(player.getEyePosition()) <= reach * reach;
     }
 }

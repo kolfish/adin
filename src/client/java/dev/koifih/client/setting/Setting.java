@@ -13,6 +13,7 @@ public abstract class Setting<T> {
     private final T defaultValue;
     private String moduleId = "";
     private BooleanSupplier visible = () -> true;
+    private boolean described;
     protected T value;
 
     protected Setting(String id, T defaultValue) {
@@ -31,6 +32,18 @@ public abstract class Setting<T> {
 
     public boolean isVisible() {
         return visible.getAsBoolean();
+    }
+
+    public void describe() {
+        described = true;
+    }
+
+    public boolean described() {
+        return described;
+    }
+
+    public String description() {
+        return Lang.getOrDefault("setting." + moduleId + "." + id + ".help", "");
     }
 
     public String name() {

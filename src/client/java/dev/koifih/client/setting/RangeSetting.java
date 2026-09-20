@@ -4,13 +4,13 @@ import lombok.Getter;
 import lombok.experimental.Accessors;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
+import java.util.function.IntSupplier;
 
 @Accessors(fluent = true)
 public final class RangeSetting extends Setting<int[]> {
     @Getter
     private final int min;
-    @Getter
-    private final int max;
+    private IntSupplier max;
     private final Measure measure;
 
     public RangeSetting(String id, int defaultLow, int defaultHigh, int min, int max) {
@@ -20,8 +20,16 @@ public final class RangeSetting extends Setting<int[]> {
     public RangeSetting(String id, int defaultLow, int defaultHigh, int min, int max, Measure measure) {
         super(id, new int[] {defaultLow, defaultHigh});
         this.min = min;
-        this.max = max;
+        this.max = () -> max;
         this.measure = measure;
+    }
+
+    public int max() {
+        return max.getAsInt();
+    }
+
+    public void maxWhen(IntSupplier supplier) {
+        max = supplier;
     }
 
     public String format(int value) {
@@ -29,19 +37,19 @@ public final class RangeSetting extends Setting<int[]> {
     }
 
     public int low() {
-        return value[0];
+        return Math.clamp(value[0], min, max());
     }
 
     public int high() {
-        return value[1];
+        return Math.clamp(value[1], min, max());
     }
 
     public void setLow(int low) {
-        value = new int[] {Math.clamp(low, min, value[1]), value[1]};
+        value = new int[] {Math.clamp(low, min, high()), value[1]};
     }
 
     public void setHigh(int high) {
-        value = new int[] {value[0], Math.clamp(high, value[0], max)};
+        value = new int[] {value[0], Math.clamp(high, low(), max())};
     }
 
     @Override
@@ -56,7 +64,7 @@ public final class RangeSetting extends Setting<int[]> {
     public void load(JsonElement json) {
         if (json == null || !json.isJsonArray() || json.getAsJsonArray().size() != 2) return;
         JsonArray array = json.getAsJsonArray();
-        value = new int[] {Math.clamp(array.get(0).getAsInt(), min, max), Math.clamp(array.get(1).getAsInt(), min, max)};
+        value = new int[] {Math.clamp(array.get(0).getAsInt(), min, max()), Math.clamp(array.get(1).getAsInt(), min, max())};
         if (value[0] > value[1]) value = new int[] {value[1], value[0]};
     }
 }

@@ -108,7 +108,7 @@ public final class ModulesPage implements Page {
 
     private record RowControl(AbstractWidget widget, int row, int inset) {}
 
-    private record SettingRow(Setting<?> setting, Control control, String label, Transition reveal) {
+    private record SettingRow(Setting<?> setting, Control control, String label, Transition reveal, HelpDot help) {
         float shown() {
             return reveal.value();
         }
@@ -224,7 +224,10 @@ public final class ModulesPage implements Page {
 
     private void buildSettings(Module module) {
         for (Control control : settingControls) gui.remove(control);
-        for (SettingRow row : settingRows) gui.remove(row.control());
+        for (SettingRow row : settingRows) {
+            gui.remove(row.control());
+            if (row.help() != null) gui.remove(row.help());
+        }
         settingControls.clear();
         settingRows.clear();
         windows.clear();
@@ -241,6 +244,7 @@ public final class ModulesPage implements Page {
         int toggleWidth = layout.atLeastOne(TOGGLE_WIDTH);
         int toggleHeight = layout.atLeastOne(TOGGLE_HEIGHT);
         int previewSize = layout.atLeastOne(PREVIEW_BUTTON_SIZE);
+        int helpSize = layout.atLeastOne(HELP_SIZE);
 
         int modeX = right - modeWidth;
         int bindX = module.activatable() ? right - bindWidth : modeX - layout.scaled(PanelLayout.GAP) - bindWidth;
@@ -252,10 +256,9 @@ public final class ModulesPage implements Page {
                     Component.literal("Bind mode"),
                     new Segmented.Segment[] {Segmented.Segment.of(AdinIcon.TOGGLE), Segmented.Segment.of(AdinIcon.HOLD)},
                     () -> module.hold() ? 1 : 0, index -> module.setHold(index == 1))));
-            int helpSize = layout.atLeastOne(HELP_SIZE);
-            settingControls.add(gui.add(new HelpDot(bindControl.getX() - layout.scaled(PanelLayout.GAP) - helpSize,
+            settingControls.add(gui.add(bounded(new HelpDot(bindControl.getX() - layout.scaled(PanelLayout.GAP) - helpSize,
                     settingY(0, helpSize), helpSize, scale,
-                    () -> Lang.get(module.hold() ? "bind.help.hold" : "bind.help.toggle"))));
+                    () -> Lang.get(module.hold() ? "bind.help.hold" : "bind.help.toggle")), x, right)));
         }
 
         for (Setting<?> setting : module.settings()) {
@@ -271,7 +274,7 @@ public final class ModulesPage implements Page {
                 }
                 case RangeSetting range -> {
                     Slider slider = Slider.range(halfX, 0, halfWidth, bindHeight, scale, label,
-                            range.min(), range.max(), range::low, range::setLow, range::high, range::setHigh);
+                            range.min(), range::max, range::low, range::setLow, range::high, range::setHigh);
                     slider.setFormat(range::format);
                     yield slider;
                 }
@@ -304,7 +307,12 @@ public final class ModulesPage implements Page {
             if (control == null) continue;
             String rowLabel = control instanceof Popup ? null : setting.name();
             Transition reveal = new Transition(setting.isVisible() ? 1f : 0f, SETTING_REVEAL_MILLIS);
-            settingRows.add(new SettingRow(setting, gui.add(control), rowLabel, reveal));
+            Control added = gui.add(control);
+            HelpDot help = setting.described()
+                    ? gui.add(bounded(new HelpDot(added.getX() - layout.scaled(PanelLayout.GAP) - helpSize, 0, helpSize, scale,
+                            setting::description), x, right))
+                    : null;
+            settingRows.add(new SettingRow(setting, added, rowLabel, reveal, help));
         }
         alignValueColumn();
         layoutRows();
@@ -345,6 +353,7 @@ public final class ModulesPage implements Page {
         for (SettingRow row : settingRows) {
             Control control = row.control();
             control.setY(settingY(offset, control.getHeight()));
+            if (row.help() != null) row.help().setY(settingY(offset, row.help().getHeight()));
             offset += row.shown();
         }
     }
@@ -353,6 +362,12 @@ public final class ModulesPage implements Page {
         float span = 1f;
         for (SettingRow row : settingRows) span += row.shown();
         return span;
+    }
+
+    private static HelpDot bounded(HelpDot help, int left, int right) {
+        help.setLeftLimit(left);
+        help.setRightLimit(right);
+        return help;
     }
 
     private <T extends Popup> T bounded(T popup) {
@@ -447,7 +462,10 @@ public final class ModulesPage implements Page {
     private void setOverlayOpen(boolean open) {
         dismissRows();
         for (Control control : settingControls) control.dismiss();
-        for (SettingRow row : settingRows) row.control().dismiss();
+        for (SettingRow row : settingRows) {
+            row.control().dismiss();
+            if (row.help() != null) row.help().dismiss();
+        }
         overlayOpen = open;
         overlayReveal.set(open ? 1f : 0f);
         gui.dropFocus();
@@ -479,6 +497,9 @@ public final class ModulesPage implements Page {
             float rowShown = row.shown();
             row.control().active = overlayReady && rowShown >= 1f && within(row.control(), overlay);
             row.control().visible = shown && reveal > 0f && rowShown > 0f;
+            if (row.help() == null) continue;
+            row.help().active = overlayReady && rowShown >= 1f && within(row.help(), overlay);
+            row.help().visible = row.control().visible;
         }
     }
 
@@ -596,6 +617,7 @@ public final class ModulesPage implements Page {
         }
         for (SettingRow row : settingRows) {
             if (row.control() instanceof Popup popup && row.shown() >= 1f) popup.renderPopup(graphics, mouseX, mouseY);
+            if (row.help() != null && row.shown() >= 1f) row.help().renderTooltip(graphics);
         }
     }
 
@@ -609,6 +631,7 @@ public final class ModulesPage implements Page {
                 Text.drawCentered(graphics, row.label(), settingX() + LABEL_INSET * scale, centerY, 8 * scale, Theme.TEXT);
             }
             row.control().extractRenderState(graphics, mouseX, mouseY, delta);
+            if (row.help() != null) row.help().extractRenderState(graphics, mouseX, mouseY, delta);
         });
     }
 }
