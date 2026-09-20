@@ -34,27 +34,10 @@ source.
 
 ## Build steps
 
-You need **JDK 25**. Everything else — Gradle 9.7.1, Minecraft 26.2, Fabric Loom — is pulled in
-by the wrapper, so there is nothing else to install.
-
 ```bash
 git clone https://github.com/kolfish/adin.git
 cd adin
 ./gradlew build
 ```
-
-On Windows use `gradlew.bat` instead of `./gradlew`.
-
-The build drops `adin-1.0.0.jar` into `build/libs/`. The `-sources` jar beside it is just the
-source and can be ignored.
-
-To play with it, put that jar in your `.minecraft/mods/` folder along with:
-
-- **Fabric Loader** 0.19.5 or newer
-- **Fabric API** 0.159.0+26.2
-
-To work on it instead, `./gradlew runClient` launches a dev client with the mod already loaded.
-Press **Right Shift** in game to open the ClickGUI, or rebind it under
-**Options → Controls → Key Binds → Adin**.
 
 Thank you, and please enjoy :3
