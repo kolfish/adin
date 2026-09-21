@@ -8,7 +8,6 @@ import dev.koifih.client.event.events.PacketProcessEvent;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents;
-import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientPacketListener;
 import net.minecraft.network.Connection;
 import net.minecraft.network.PacketListener;
@@ -30,8 +29,6 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public final class Backtracker {
-    public static Minecraft mc = Minecraft.getInstance();
-
     public static final class Held {
         private final Packet<?> packet;
         private final ClientPacketListener listener;
