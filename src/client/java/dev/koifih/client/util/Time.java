@@ -62,6 +62,10 @@ public final class Time {
             return (System.nanoTime() - startedAt) / NANOS_PER_MILLI;
         }
 
+        public float seconds() {
+            return (System.nanoTime() - startedAt) / NANOS_PER_SECOND;
+        }
+
         public boolean elapsed(long millis) {
             return elapsedMillis() >= millis;
         }

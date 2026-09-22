@@ -147,7 +147,7 @@
   "module.keybinds.description": "Prikazuje module s dodijeljenom tipkom",
   "keybinds": "Tipke",
   "module.watermark": "Watermark",
-  "module.watermark.description": "Prikazuje logo i ime klijenta",
+  "module.watermark.description": "Prikazuje dinamički otok s tvojim FPS-om, pingom i imenom",
   "setting.color": "Boja",
   "setting.textColor": "Boja teksta",
   "module.notifications": "Notifications",
@@ -214,5 +214,7 @@
   "setting.antiBot.grace": "Odgoda",
   "module.worldModifier": "World Modifier",
   "module.worldModifier.description": "Mijenja vrijeme i atmosferu tvog svijeta",
-  "setting.worldModifier.theme": "Tema"
+  "setting.worldModifier.theme": "Tema",
+  "notifications.enabled": "Uključeno",
+  "notifications.disabled": "Isključeno"
 }

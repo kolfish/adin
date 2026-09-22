@@ -16,6 +16,10 @@ public final class Transition {
             return apply(Math.clamp(t, 0f, 1f));
         }
 
+        default float over(float time, float delay, float duration) {
+            return at((time - delay) / duration);
+        }
+
         private static float back(float t, float amount) {
             float u = t - 1f;
             return 1f + (amount + 1f) * u * u * u + amount * u * u;

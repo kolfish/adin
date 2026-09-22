@@ -76,6 +76,12 @@ public final class Triggerbot extends Module {
     private void onTick(PreTickEvent event) {
         Minecraft client = event.client();
         LocalPlayer player = client.player;
+        if (player == null) {
+            current = null;
+            overcharge = 0;
+            holdingSprint = false;
+            return;
+        }
         LivingEntity target = armed(client, player) ? crosshairTarget(client, player) : null;
         current = target;
         overcharge = player.getAttackStrengthScale(0f) >= 1f ? overcharge + 1 : 0;

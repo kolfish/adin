@@ -147,7 +147,7 @@
   "module.keybinds.description": "Wyświetla moduły z przypisanym klawiszem",
   "keybinds": "Klawisze",
   "module.watermark": "Watermark",
-  "module.watermark.description": "Pokazuje logo i nazwę klienta",
+  "module.watermark.description": "Pokazuje dynamiczną wyspę z twoim FPS, pingiem i nickiem",
   "setting.color": "Kolor",
   "setting.textColor": "Kolor tekstu",
   "module.notifications": "Notifications",
@@ -214,5 +214,7 @@
   "setting.antiBot.grace": "Czas ochronny",
   "module.worldModifier": "World Modifier",
   "module.worldModifier.description": "Zmienia pogodę i klimat twojego świata",
-  "setting.worldModifier.theme": "Motyw"
+  "setting.worldModifier.theme": "Motyw",
+  "notifications.enabled": "Włączony",
+  "notifications.disabled": "Wyłączony"
 }

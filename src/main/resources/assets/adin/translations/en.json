@@ -147,7 +147,7 @@
   "module.keybinds.description": "Lists modules that have a key bound",
   "keybinds": "Keybinds",
   "module.watermark": "Watermark",
-  "module.watermark.description": "Shows the client logo and name",
+  "module.watermark.description": "Shows a dynamic island with your FPS, ping and name",
   "setting.color": "Color",
   "setting.textColor": "Text color",
   "module.notifications": "Notifications",
@@ -214,5 +214,7 @@
   "setting.antiBot.grace": "Grace",
   "module.worldModifier": "World Modifier",
   "module.worldModifier.description": "Changes your world's weather and atmosphere",
-  "setting.worldModifier.theme": "Theme"
+  "setting.worldModifier.theme": "Theme",
+  "notifications.enabled": "Enabled",
+  "notifications.disabled": "Disabled"
 }

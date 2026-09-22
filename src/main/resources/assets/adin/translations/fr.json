@@ -147,7 +147,7 @@
   "module.keybinds.description": "Liste les modules avec une touche assignée",
   "keybinds": "Touches",
   "module.watermark": "Watermark",
-  "module.watermark.description": "Affiche le logo et le nom du client",
+  "module.watermark.description": "Affiche une île dynamique avec tes FPS, ton ping et ton pseudo",
   "setting.color": "Couleur",
   "setting.textColor": "Couleur du texte",
   "module.notifications": "Notifications",
@@ -214,5 +214,7 @@
   "setting.antiBot.grace": "Délai de grâce",
   "module.worldModifier": "World Modifier",
   "module.worldModifier.description": "Change la météo et l'ambiance de ton monde",
-  "setting.worldModifier.theme": "Thème"
+  "setting.worldModifier.theme": "Thème",
+  "notifications.enabled": "Activé",
+  "notifications.disabled": "Désactivé"
 }

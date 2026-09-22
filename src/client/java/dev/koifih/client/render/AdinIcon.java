@@ -31,5 +31,7 @@ public enum AdinIcon {
     THUNDER,
     NETHER,
     END,
-    DEEP_DARK
+    DEEP_DARK,
+    FPS,
+    USER
 }

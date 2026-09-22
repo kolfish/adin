@@ -1,8 +1,10 @@
 package dev.koifih.client.module.impl.hud;
 
+import dev.koifih.client.AdinClient;
 import dev.koifih.client.event.events.HudRenderEvent;
 import dev.koifih.client.event.events.ModuleToggleEvent;
 import dev.koifih.client.module.Module;
+import dev.koifih.client.module.impl.hud.watermark.Watermark;
 import dev.koifih.client.render.AdinIcon;
 import dev.koifih.client.render.Draw;
 import dev.koifih.client.render.Opacity;
@@ -61,6 +63,11 @@ public final class Notifications extends Module {
     }
 
     private void push(Module module, boolean enabled) {
+        Watermark island = AdinClient.MODULES.get(Watermark.class);
+        if (island.isEnabled()) {
+            island.showToggle(module, enabled);
+            return;
+        }
         for (Toast toast : toasts) toast.depth().set(toast.depth().target() + 1f);
         Transition reveal = new Transition(0f, ENTER_MILLIS, EXIT_MILLIS,
                 Transition.Easing.EASE_OUT_CUBIC, Transition.Easing.EASE_IN_CUBIC);

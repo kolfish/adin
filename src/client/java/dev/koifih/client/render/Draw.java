@@ -127,9 +127,13 @@ public final class Draw {
     }
 
     public static void logo(GuiGraphicsExtractor graphics, float x, float y, float size, int starColor) {
+        logo(graphics, x, y, size, LOGO_BACK_COLOR, starColor, LOGO_FRONT_COLOR);
+    }
+
+    public static void logo(GuiGraphicsExtractor graphics, float x, float y, float size, int back, int star, int front) {
         Font font = atlas(size, Fonts.LOGO_SMALL, Fonts.LOGO);
         List<TextState.Quad> quads = layers(font, new int[] {LOGO_BAND_BACK, LOGO_STAR, LOGO_BAND_FRONT},
-                new int[] {LOGO_BACK_COLOR, starColor, LOGO_FRONT_COLOR}, x, y, size);
+                new int[] {back, star, front}, x, y, size);
         if (!quads.isEmpty()) Submit.submit(graphics, TextState.of(graphics, font.texture(), quads));
     }
 
