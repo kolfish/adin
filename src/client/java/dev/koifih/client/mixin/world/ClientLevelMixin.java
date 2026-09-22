@@ -1,6 +1,5 @@
 package dev.koifih.client.mixin.world;
 
-import dev.koifih.client.AdinClient;
 import dev.koifih.client.module.impl.render.world.Atmosphere;
 import dev.koifih.client.module.impl.render.world.WorldModifier;
 import net.minecraft.client.multiplayer.ClientLevel;
@@ -16,12 +15,12 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 public abstract class ClientLevelMixin {
     @Inject(method = "getPrecipitationAt", at = @At("RETURN"), cancellable = true)
     private void adin$precipitation(BlockPos pos, CallbackInfoReturnable<Biome.Precipitation> info) {
-        Atmosphere atmosphere = AdinClient.MODULES.get(WorldModifier.class).atmosphere();
+        Atmosphere atmosphere = WorldModifier.get().atmosphere();
         if (atmosphere != null && ((ClientLevel) (Object) this).hasChunkAt(pos)) info.setReturnValue(atmosphere.precipitation());
     }
 
     @Inject(method = "endFlashState", at = @At("RETURN"), cancellable = true)
     private void adin$endFlashState(CallbackInfoReturnable<EndFlashState> info) {
-        if (info.getReturnValue() == null) info.setReturnValue(AdinClient.MODULES.get(WorldModifier.class).flashes());
+        if (info.getReturnValue() == null) info.setReturnValue(WorldModifier.get().flashes());
     }
 }

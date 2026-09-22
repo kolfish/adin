@@ -34,10 +34,17 @@ public final class WorldModifier extends Module {
     private float weather;
     private float previousWeather;
     private int strikeDelay;
+    private static WorldModifier instance;
+
     private int nextBoltId = -1_000_000;
 
     public WorldModifier() {
         super("worldModifier");
+        instance = this;
+    }
+
+    public static WorldModifier get() {
+        return instance;
     }
 
     @Override

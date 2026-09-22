@@ -36,9 +36,11 @@ public abstract class Module {
     @Getter
     private boolean hold;
     private boolean keyWasDown;
+    private final Lang.Localized name = new Lang.Localized(() -> Lang.getOrDefault("module." + id(), Lang.capitalize(id())));
+    private final Lang.Localized description = new Lang.Localized(() -> Lang.getOrDefault("module." + id() + ".description", ""));
 
     public String name() {
-        return Lang.getOrDefault("module." + id, Lang.capitalize(id));
+        return name.get();
     }
 
     public String info() {
@@ -46,7 +48,7 @@ public abstract class Module {
     }
 
     public String description() {
-        return Lang.getOrDefault("module." + id + ".description", "");
+        return description.get();
     }
 
     protected <S extends Setting<?>> S add(S setting) {

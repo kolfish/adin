@@ -1,6 +1,5 @@
 package dev.koifih.client.mixin.world;
 
-import dev.koifih.client.AdinClient;
 import dev.koifih.client.module.impl.render.world.Atmosphere;
 import dev.koifih.client.module.impl.render.world.WorldModifier;
 import net.minecraft.client.Minecraft;
@@ -32,7 +31,7 @@ public abstract class EnvironmentAttributeSystemMixin {
     private void adin$apply(EnvironmentAttribute<Object> attribute, CallbackInfoReturnable<Object> info) {
         ClientLevel level = Minecraft.getInstance().level;
         if (level == null || level.environmentAttributes() != (Object) this) return;
-        Atmosphere atmosphere = AdinClient.MODULES.get(WorldModifier.class).atmosphere();
+        Atmosphere atmosphere = WorldModifier.get().atmosphere();
         if (atmosphere != null) info.setReturnValue(atmosphere.apply(attribute, info.getReturnValue()));
     }
 }

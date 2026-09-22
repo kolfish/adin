@@ -2,20 +2,20 @@ package dev.koifih.client.render.font;
 
 import com.google.gson.Gson;
 import dev.koifih.Adin;
+import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
+import it.unimi.dsi.fastutil.longs.Long2FloatOpenHashMap;
 import net.minecraft.resources.Identifier;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
-import java.util.HashMap;
-import java.util.Map;
 
 public final class Font {
     private static final String ASSET_ROOT = "/assets/adin/";
 
     private final Identifier texture;
-    private final int fallbackCodepoint;
     private final Atlas atlas;
-    private final Map<Integer, Glyph> glyphs = new HashMap<>();
-    private final Map<Long, Float> kerning = new HashMap<>();
+    private final Int2ObjectOpenHashMap<Glyph> glyphs = new Int2ObjectOpenHashMap<>();
+    private final Int2ObjectOpenHashMap<Bounds> uvs = new Int2ObjectOpenHashMap<>();
+    private final Long2FloatOpenHashMap kerning = new Long2FloatOpenHashMap();
 
     public record Bounds(float left, float top, float right, float bottom) {}
     public record Glyph(int unicode, float advance, Bounds planeBounds, Bounds atlasBounds) {}
@@ -25,15 +25,18 @@ public final class Font {
 
     private Font(Metrics metrics, Identifier texture, int fallbackCodepoint) {
         this.texture = texture;
-        this.fallbackCodepoint = fallbackCodepoint;
         this.atlas = metrics.atlas;
         if (!"msdf".equals(atlas.type) || !"top".equals(atlas.yOrigin)) {
             throw new IllegalStateException("Expected a top-origin MSDF font atlas for " + texture);
         }
-        for (Glyph glyph : metrics.glyphs) glyphs.put(glyph.unicode, glyph);
+        for (Glyph glyph : metrics.glyphs) {
+            glyphs.put(glyph.unicode, glyph);
+            if (glyph.atlasBounds != null) uvs.put(glyph.unicode, normalized(glyph.atlasBounds));
+        }
         if (!glyphs.containsKey(fallbackCodepoint)) {
             throw new IllegalStateException("Missing fallback glyph in " + texture);
         }
+        glyphs.defaultReturnValue(glyphs.get(fallbackCodepoint));
         if (metrics.kerning != null) {
             for (KerningPair pair : metrics.kerning) {
                 kerning.put(pairKey(pair.unicode1, pair.unicode2), pair.advance);
@@ -63,15 +66,18 @@ public final class Font {
     }
 
     public Glyph glyph(int codepoint) {
-        return glyphs.getOrDefault(codepoint, glyphs.get(fallbackCodepoint));
+        return glyphs.get(codepoint);
     }
 
     public float kerning(int previous, int current) {
-        return kerning.getOrDefault(pairKey(previous, current), 0f);
+        return kerning.isEmpty() ? 0f : kerning.get(pairKey(previous, current));
     }
 
     public Bounds uv(Glyph glyph) {
-        Bounds area = glyph.atlasBounds();
+        return uvs.get(glyph.unicode());
+    }
+
+    private Bounds normalized(Bounds area) {
         return new Bounds(area.left() / atlas.width, area.top() / atlas.height,
                 area.right() / atlas.width, area.bottom() / atlas.height);
     }

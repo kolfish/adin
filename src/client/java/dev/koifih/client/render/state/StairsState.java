@@ -8,7 +8,8 @@ import net.minecraft.client.gui.render.TextureSetup;
 import net.minecraft.client.renderer.state.gui.GuiElementRenderState;
 import org.joml.Matrix3x2fc;
 
-public record StairsState(Matrix3x2fc pose, Row row, int color, ScreenRectangle scissorArea) implements GuiElementRenderState {
+public record StairsState(Matrix3x2fc pose, Row row, int color, ScreenRectangle scissorArea,
+                          ScreenRectangle bounds) implements GuiElementRenderState {
     public static final int FLUSH_INNER = 1;
     public static final int FLUSH_TOP = 2;
     public static final int NONE = -1;
@@ -20,7 +21,14 @@ public record StairsState(Matrix3x2fc pose, Row row, int color, ScreenRectangle 
                       boolean mirrored, boolean first, boolean last) {}
 
     public StairsState(Matrix3x2fc pose, Row row, int color) {
-        this(pose, row, color, Scissor.current());
+        this(pose, row, color, Scissor.current(), area(pose, row));
+    }
+
+    private static ScreenRectangle area(Matrix3x2fc pose, Row row) {
+        int reach = Math.max(row.width(), Math.max(row.above(), row.below())) + row.radius() + ANTIALIAS_PADDING;
+        int x = row.mirrored() ? row.innerX() - reach : row.innerX() - ANTIALIAS_PADDING;
+        return new ScreenRectangle(x, row.y() - ANTIALIAS_PADDING, reach + ANTIALIAS_PADDING, row.height() + 2 * ANTIALIAS_PADDING)
+                .transformMaxBounds(pose);
     }
 
     @Override
@@ -53,13 +61,5 @@ public record StairsState(Matrix3x2fc pose, Row row, int color, ScreenRectangle 
     @Override
     public TextureSetup textureSetup() {
         return TextureSetup.noTexture();
-    }
-
-    @Override
-    public ScreenRectangle bounds() {
-        int reach = Math.max(row.width(), Math.max(row.above(), row.below())) + row.radius() + ANTIALIAS_PADDING;
-        int x = row.mirrored() ? row.innerX() - reach : row.innerX() - ANTIALIAS_PADDING;
-        return new ScreenRectangle(x, row.y() - ANTIALIAS_PADDING, reach + ANTIALIAS_PADDING, row.height() + 2 * ANTIALIAS_PADDING)
-                .transformMaxBounds(pose);
     }
 }

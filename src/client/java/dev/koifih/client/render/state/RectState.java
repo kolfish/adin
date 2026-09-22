@@ -9,12 +9,19 @@ import net.minecraft.client.renderer.state.gui.GuiElementRenderState;
 import org.joml.Matrix3x2fc;
 
 public record RectState(Matrix3x2fc pose, int x, int y, int width, int height, int radius, int shape, int color,
-                        int bottomColor, RenderPipeline pipeline, ScreenRectangle scissorArea) implements GuiElementRenderState {
+                        int bottomColor, RenderPipeline pipeline, ScreenRectangle scissorArea,
+                        ScreenRectangle bounds) implements GuiElementRenderState {
     private static final int ANTIALIAS_PADDING = 1;
 
     public RectState(Matrix3x2fc pose, int x, int y, int width, int height, int radius, int shape, int color,
                      int bottomColor, RenderPipeline pipeline) {
-        this(pose, x, y, width, height, radius, shape, color, bottomColor, pipeline, Scissor.current());
+        this(pose, x, y, width, height, radius, shape, color, bottomColor, pipeline, Scissor.current(),
+                area(pose, x, y, width, height));
+    }
+
+    private static ScreenRectangle area(Matrix3x2fc pose, int x, int y, int width, int height) {
+        return new ScreenRectangle(x - ANTIALIAS_PADDING, y - ANTIALIAS_PADDING,
+                width + 2 * ANTIALIAS_PADDING, height + 2 * ANTIALIAS_PADDING).transformMaxBounds(pose);
     }
 
     @Override
@@ -36,11 +43,5 @@ public record RectState(Matrix3x2fc pose, int x, int y, int width, int height, i
     @Override
     public TextureSetup textureSetup() {
         return TextureSetup.noTexture();
-    }
-
-    @Override
-    public ScreenRectangle bounds() {
-        return new ScreenRectangle(x - ANTIALIAS_PADDING, y - ANTIALIAS_PADDING,
-                width + 2 * ANTIALIAS_PADDING, height + 2 * ANTIALIAS_PADDING).transformMaxBounds(pose);
     }
 }

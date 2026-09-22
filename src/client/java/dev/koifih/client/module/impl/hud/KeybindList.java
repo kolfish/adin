@@ -20,8 +20,11 @@ import net.minecraft.client.gui.GuiGraphicsExtractor;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
+import java.util.HashMap;
+import java.util.Map;
 
 public final class KeybindList extends HudModule {
+    private static final Map<InputConstants.Key, String> KEY_NAMES = new HashMap<>();
     private static final float DEFAULT_TOP = 22f;
     private static final float TAB_HEIGHT = 17f;
     private static final float LINE = 15f;
@@ -150,8 +153,7 @@ public final class KeybindList extends HudModule {
     }
 
     private static String keyName(Module module) {
-        InputConstants.Key key = module.key();
-        if (key.getType() == InputConstants.Type.MOUSE) return "M" + (key.getValue() + 1);
-        return key.getDisplayName().getString();
+        return KEY_NAMES.computeIfAbsent(module.key(), key -> key.getType() == InputConstants.Type.MOUSE
+                ? "M" + (key.getValue() + 1) : key.getDisplayName().getString());
     }
 }

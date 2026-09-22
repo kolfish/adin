@@ -6,6 +6,7 @@ import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.util.Mth;
+import org.joml.Vector3f;
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public final class ClothMesh {
@@ -15,6 +16,8 @@ public final class ClothMesh {
     private static final float[] normalX = new float[ROWS * COLS];
     private static final float[] normalY = new float[ROWS * COLS];
     private static final float[] normalZ = new float[ROWS * COLS];
+    private static final Vector3f position = new Vector3f();
+    private static final Vector3f normal = new Vector3f();
 
     static void emit(ClothSimulation cloth, PoseStack.Pose entry, VertexConsumer consumer, int light) {
         computeNormals(cloth);
@@ -70,11 +73,13 @@ public final class ClothMesh {
 
     private static void vertex(ClothSimulation cloth, PoseStack.Pose entry, VertexConsumer consumer, int light,
                                int i, float u, float v) {
-        consumer.addVertex(entry, cloth.x(i), cloth.y(i), cloth.z(i))
+        entry.pose().transformPosition(cloth.x(i), cloth.y(i), cloth.z(i), position);
+        entry.transformNormal(normalX[i], normalY[i], normalZ[i], normal);
+        consumer.addVertex(position.x, position.y, position.z)
                 .setColor(-1)
                 .setUv(u, v)
                 .setOverlay(OverlayTexture.NO_OVERLAY)
                 .setLight(light)
-                .setNormal(entry, normalX[i], normalY[i], normalZ[i]);
+                .setNormal(normal.x, normal.y, normal.z);
     }
 }

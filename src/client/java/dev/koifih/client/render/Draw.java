@@ -22,9 +22,7 @@ import net.minecraft.client.renderer.texture.AbstractTexture;
 import net.minecraft.resources.Identifier;
 import org.joml.Matrix3x2f;
 import org.joml.Vector2f;
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
@@ -110,10 +108,10 @@ public final class Draw {
         float halfWidth = (plane.right() - plane.left()) * size * 0.5f;
         float halfHeight = (plane.bottom() - plane.top()) * size * 0.5f;
         Font.Bounds uv = font.uv(glyph);
-        var quad = new TextState.Quad(
-                centerX - halfWidth, centerY - halfHeight, centerX + halfWidth, centerY + halfHeight,
+        TextState.Glyphs glyphs = new TextState.Glyphs(1);
+        glyphs.add(centerX - halfWidth, centerY - halfHeight, centerX + halfWidth, centerY + halfHeight,
                 uv.left(), uv.top(), uv.right(), uv.bottom(), color);
-        Submit.submit(graphics, TextState.of(graphics, font.texture(), List.of(quad)));
+        Submit.submit(graphics, TextState.of(graphics, font.texture(), glyphs));
     }
 
     public static void fadedTexture(GuiGraphicsExtractor graphics, Identifier texture, float x, float y, float width,
@@ -132,36 +130,35 @@ public final class Draw {
 
     public static void logo(GuiGraphicsExtractor graphics, float x, float y, float size, int back, int star, int front) {
         Font font = atlas(size, Fonts.LOGO_SMALL, Fonts.LOGO);
-        List<TextState.Quad> quads = layers(font, new int[] {LOGO_BAND_BACK, LOGO_STAR, LOGO_BAND_FRONT},
-                new int[] {back, star, front}, x, y, size);
-        if (!quads.isEmpty()) Submit.submit(graphics, TextState.of(graphics, font.texture(), quads));
+        TextState.Glyphs glyphs = layers(font, LOGO_BAND_BACK, LOGO_STAR, LOGO_BAND_FRONT, back, star, front, x, y, size);
+        if (!glyphs.isEmpty()) Submit.submit(graphics, TextState.of(graphics, font.texture(), glyphs));
     }
 
     public static void icon(GuiGraphicsExtractor graphics, AdinIcon icon, float x, float y, float size,
                             int back, int hero, int front, int backdrop) {
         Font font = atlas(size, Fonts.ADIN_ICONS_SMALL, Fonts.ADIN_ICONS);
-        List<TextState.Quad> quads = iconLayers(font, icon, x, y, size, back, hero, front);
-        if (!quads.isEmpty()) Submit.submit(graphics, TextState.icon(graphics, font.texture(), quads, backdrop));
+        TextState.Glyphs glyphs = iconLayers(font, icon, x, y, size, back, hero, front);
+        if (!glyphs.isEmpty()) Submit.submit(graphics, TextState.icon(graphics, font.texture(), glyphs, backdrop));
     }
 
     public static void icon(GuiGraphicsExtractor graphics, AdinIcon icon, float x, float y, float size,
                             int back, int hero, int front) {
         Font font = atlas(size, Fonts.ADIN_ICONS_SMALL, Fonts.ADIN_ICONS);
-        List<TextState.Quad> quads = iconLayers(font, icon, x, y, size, back, hero, front);
-        if (!quads.isEmpty()) Submit.submit(graphics, TextState.of(graphics, font.texture(), quads));
+        TextState.Glyphs glyphs = iconLayers(font, icon, x, y, size, back, hero, front);
+        if (!glyphs.isEmpty()) Submit.submit(graphics, TextState.of(graphics, font.texture(), glyphs));
     }
 
-    private static List<TextState.Quad> iconLayers(Font font, AdinIcon icon, float x, float y, float size,
-                                                   int back, int hero, int front) {
+    private static TextState.Glyphs iconLayers(Font font, AdinIcon icon, float x, float y, float size,
+                                               int back, int hero, int front) {
         int first = icon.ordinal() * ICON_LAYERS + 1;
-        return layers(font, new int[] {first, first + 1, first + 2}, new int[] {back, hero, front}, x, y, size);
+        return layers(font, first, first + 1, first + 2, back, hero, front, x, y, size);
     }
 
     public static void wordmark(GuiGraphicsExtractor graphics, float x, float y, float height,
                                 int back, int star, int front, int backdrop) {
         Font font = atlas(height, Fonts.WORDMARK_SMALL, Fonts.WORDMARK);
-        List<TextState.Quad> quads = layers(font, new int[] {1, 2, 3}, new int[] {back, star, front}, x, y, height);
-        if (!quads.isEmpty()) Submit.submit(graphics, TextState.icon(graphics, font.texture(), quads, backdrop));
+        TextState.Glyphs glyphs = layers(font, 1, 2, 3, back, star, front, x, y, height);
+        if (!glyphs.isEmpty()) Submit.submit(graphics, TextState.icon(graphics, font.texture(), glyphs, backdrop));
     }
 
     public static float wordmarkWidth(float height) {
@@ -189,23 +186,25 @@ public final class Draw {
         return size * Minecraft.getInstance().getWindow().getGuiScale() <= SMALL_ATLAS_PIXELS ? small : large;
     }
 
-    private static List<TextState.Quad> layers(Font font, int[] codepoints, int[] colors, float x, float y, float size) {
-        List<TextState.Quad> quads = new ArrayList<>();
-        if (size <= 0 || !Float.isFinite(size)) return quads;
-        for (int i = 0; i < codepoints.length; i++) layer(quads, font, codepoints[i], x, y, size, colors[i]);
-        return quads;
+    private static TextState.Glyphs layers(Font font, int back, int middle, int front, int backColor, int middleColor,
+                                           int frontColor, float x, float y, float size) {
+        TextState.Glyphs glyphs = new TextState.Glyphs(ICON_LAYERS);
+        if (size <= 0 || !Float.isFinite(size)) return glyphs;
+        layer(glyphs, font, back, x, y, size, backColor);
+        layer(glyphs, font, middle, x, y, size, middleColor);
+        layer(glyphs, font, front, x, y, size, frontColor);
+        return glyphs;
     }
 
-    private static void layer(List<TextState.Quad> quads, Font font, int codepoint, float x, float y,
+    private static void layer(TextState.Glyphs glyphs, Font font, int codepoint, float x, float y,
                               float size, int color) {
         color = Opacity.apply(color);
         if (Colors.transparent(color)) return;
         Font.Glyph glyph = font.glyph(codepoint);
         Font.Bounds plane = glyph.planeBounds();
         Font.Bounds uv = font.uv(glyph);
-        quads.add(new TextState.Quad(x + plane.left() * size, y + plane.top() * size,
-                x + plane.right() * size, y + plane.bottom() * size,
-                uv.left(), uv.top(), uv.right(), uv.bottom(), color));
+        glyphs.add(x + plane.left() * size, y + plane.top() * size, x + plane.right() * size, y + plane.bottom() * size,
+                uv.left(), uv.top(), uv.right(), uv.bottom(), color);
     }
 
     private static void rect(GuiGraphicsExtractor graphics, int x, int y, int width, int height, int radius,

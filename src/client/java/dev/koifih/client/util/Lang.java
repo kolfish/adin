@@ -8,6 +8,7 @@ import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 import java.util.EnumMap;
 import java.util.Map;
+import java.util.function.Supplier;
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public final class Lang {
@@ -29,6 +30,28 @@ public final class Lang {
 
         public String displayName() {
             return displayName;
+        }
+    }
+
+    public static final class Localized {
+        private final Supplier<String> resolve;
+        private Language language;
+        private String value;
+
+        public Localized(Supplier<String> resolve) {
+            this.resolve = resolve;
+        }
+
+        public void invalidate() {
+            language = null;
+        }
+
+        public String get() {
+            if (language != current) {
+                value = resolve.get();
+                language = current;
+            }
+            return value;
         }
     }
 

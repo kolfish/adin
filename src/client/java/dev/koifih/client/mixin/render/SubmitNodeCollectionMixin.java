@@ -5,7 +5,6 @@ import com.mojang.blaze3d.vertex.QuadInstance;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import dev.koifih.client.render.entity.EntityFill;
 import dev.koifih.client.render.entity.EntityFills;
-import dev.koifih.client.render.entity.EntityOutline;
 import dev.koifih.client.render.entity.EntityOutlines;
 import dev.koifih.client.render.entity.HandBounds;
 import dev.koifih.client.render.entity.Filled;
@@ -26,7 +25,6 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import java.util.List;
-import java.util.function.Consumer;
 
 @Mixin(SubmitNodeCollection.class)
 public abstract class SubmitNodeCollectionMixin {
@@ -38,11 +36,12 @@ public abstract class SubmitNodeCollectionMixin {
         boolean hand = !(state instanceof Filled);
         SubmitNodeCollection collection = (SubmitNodeCollection) (Object) this;
         Identifier texture = EntityFills.texture(type);
-        if (hand && texture != null) adin$outlineHand(fill -> {
+        if (hand && texture != null && adin$outliningHand()) {
+            EntityFill fill = adin$handOutline();
             HandBounds.include(model, pose);
             collection.submitModel(model, state, pose, EntityFills.silhouette(texture), fill.light(), fill.visibleOverlay(),
                     fill.visible(), sprite, 0, crumbling);
-        });
+        }
         EntityFill fill = hand ? adin$hand(pose) : ((Filled) state).adin$fill();
         if (fill == null || texture == null) return;
         if (fill.occluded() != 0) {
@@ -61,11 +60,12 @@ public abstract class SubmitNodeCollectionMixin {
         Identifier texture = EntityFills.texture(quads.getFirst().materialInfo().itemRenderType());
         if (texture == null) return;
         SubmitNodeCollection collection = (SubmitNodeCollection) (Object) this;
-        adin$outlineHand(silhouette -> {
+        if (adin$outliningHand()) {
+            EntityFill silhouette = adin$handOutline();
             HandBounds.include(quads, pose);
             collection.submitCustomGeometry(pose, EntityFills.silhouette(texture),
                     (entry, consumer) -> adin$putQuads(entry, consumer, quads, silhouette));
-        });
+        }
         EntityFill fill = adin$hand(pose);
         if (fill == null) return;
         collection.submitCustomGeometry(pose, EntityFills.visibleHand(texture, fill.effect()),
@@ -83,10 +83,13 @@ public abstract class SubmitNodeCollectionMixin {
     }
 
     @Unique
-    private static void adin$outlineHand(Consumer<EntityFill> submit) {
-        EntityOutline outline = EntityOutlines.hand();
-        if (outline == null || !EntityFills.inHandPass()) return;
-        submit.accept(EntityFill.solid(outline.color(), 0));
+    private static boolean adin$outliningHand() {
+        return EntityOutlines.hand() != null && EntityFills.inHandPass();
+    }
+
+    @Unique
+    private static EntityFill adin$handOutline() {
+        return EntityFill.solid(EntityOutlines.hand().color(), 0);
     }
 
     @Unique

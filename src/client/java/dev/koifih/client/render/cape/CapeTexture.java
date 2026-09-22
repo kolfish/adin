@@ -20,6 +20,8 @@ public final class CapeTexture {
 
     private final DynamicTexture texture;
     private final ClientAsset.Texture asset;
+    private PlayerSkin bare;
+    private PlayerSkin worn;
     @Getter
     private final int width;
     @Getter
@@ -42,6 +44,10 @@ public final class CapeTexture {
     }
 
     public PlayerSkin wear(PlayerSkin skin) {
-        return new PlayerSkin(skin.body(), asset, skin.elytra(), skin.model(), skin.secure());
+        if (skin != bare) {
+            bare = skin;
+            worn = new PlayerSkin(skin.body(), asset, skin.elytra(), skin.model(), skin.secure());
+        }
+        return worn;
     }
 }

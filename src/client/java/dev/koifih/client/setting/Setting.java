@@ -14,6 +14,9 @@ public abstract class Setting<T> {
     private String moduleId = "";
     private BooleanSupplier visible = () -> true;
     private boolean described;
+    private final Lang.Localized name = new Lang.Localized(() -> Lang.getOrDefault("setting." + moduleId + "." + id(),
+            Lang.getOrDefault("setting." + id(), Lang.capitalize(id()))));
+    private final Lang.Localized description = new Lang.Localized(() -> Lang.getOrDefault("setting." + moduleId + "." + id() + ".help", ""));
     protected T value;
 
     protected Setting(String id, T defaultValue) {
@@ -24,6 +27,8 @@ public abstract class Setting<T> {
 
     public void attach(String moduleId) {
         this.moduleId = moduleId;
+        name.invalidate();
+        description.invalidate();
     }
 
     public void visibleWhen(BooleanSupplier condition) {
@@ -43,12 +48,11 @@ public abstract class Setting<T> {
     }
 
     public String description() {
-        return Lang.getOrDefault("setting." + moduleId + "." + id + ".help", "");
+        return description.get();
     }
 
     public String name() {
-        String fallback = Lang.getOrDefault("setting." + id, Lang.capitalize(id));
-        return Lang.getOrDefault("setting." + moduleId + "." + id, fallback);
+        return name.get();
     }
 
     public T get() {

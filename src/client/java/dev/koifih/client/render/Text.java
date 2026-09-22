@@ -10,11 +10,23 @@ import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public final class Text {
     private static final Font FONT = Fonts.COMFORTAA_BOLD;
+    private static final String ELLIPSIS = "...";
+    private static final int WRAP_CACHE = 64;
+    private static final Map<Wrap, List<String>> WRAPPED = new LinkedHashMap<>(WRAP_CACHE, 0.75f, true) {
+        @Override
+        protected boolean removeEldestEntry(Map.Entry<Wrap, List<String>> eldest) {
+            return size() > WRAP_CACHE;
+        }
+    };
+
+    private record Wrap(String text, float width, float size, int maxLines) {}
 
     public record Span(String text, int color) {}
 
@@ -32,7 +44,9 @@ public final class Text {
     public static float width(String text, float size) {
         float advance = 0;
         int previous = -1;
-        for (int codepoint : text.codePoints().toArray()) {
+        for (int i = 0; i < text.length(); ) {
+            int codepoint = text.codePointAt(i);
+            i += Character.charCount(codepoint);
             Font.Glyph glyph = FONT.glyph(codepoint);
             advance += FONT.kerning(previous, glyph.unicode()) + glyph.advance();
             previous = glyph.unicode();
@@ -45,7 +59,9 @@ public final class Text {
         int previous = -1;
         float left = Float.MAX_VALUE;
         float right = -Float.MAX_VALUE;
-        for (int codepoint : text.codePoints().toArray()) {
+        for (int i = 0; i < text.length(); ) {
+            int codepoint = text.codePointAt(i);
+            i += Character.charCount(codepoint);
             Font.Glyph glyph = FONT.glyph(codepoint);
             advance += FONT.kerning(previous, glyph.unicode());
             Font.Bounds plane = glyph.planeBounds();
@@ -66,7 +82,10 @@ public final class Text {
     }
 
     public static void draw(GuiGraphicsExtractor graphics, String text, float x, float baseline, float size, int color) {
-        draw(graphics, List.of(new Span(text, color)), x, baseline, size);
+        if (!Float.isFinite(size) || size <= 0) return;
+        TextState.Glyphs glyphs = new TextState.Glyphs(text.length());
+        append(glyphs, text, color, x, -1, baseline, size, null);
+        submit(graphics, glyphs);
     }
 
     public static void drawCentered(GuiGraphicsExtractor graphics, String text, float x, float centerY,
@@ -76,7 +95,7 @@ public final class Text {
 
     public static void drawCentered(GuiGraphicsExtractor graphics, String text, float x, float centerY,
                                     float size, ColorAt color) {
-        draw(graphics, List.of(new Span(text, 0xFFFFFFFF)), x, centeredBaseline(text, size, centerY), size, color);
+        drawColored(graphics, text, x, centeredBaseline(text, size, centerY), size, 0xFFFFFFFF, color);
     }
 
     public static void drawCenteredX(GuiGraphicsExtractor graphics, String text, float centerX, float centerY,
@@ -86,13 +105,28 @@ public final class Text {
 
     public static String fit(String text, float width, float size) {
         if (width(text, size) <= width) return text;
-        while (!text.isEmpty() && width(text + "...", size) > width) {
-            text = text.substring(0, text.offsetByCodePoints(text.length(), -1));
+        float room = width / size - width(ELLIPSIS, 1f);
+        float advance = 0;
+        int previous = -1;
+        int end = 0;
+        for (int i = 0; i < text.length(); ) {
+            int codepoint = text.codePointAt(i);
+            Font.Glyph glyph = FONT.glyph(codepoint);
+            advance += FONT.kerning(previous, glyph.unicode()) + glyph.advance();
+            if (advance > room) break;
+            previous = glyph.unicode();
+            i += Character.charCount(codepoint);
+            end = i;
         }
-        return text + "...";
+        return text.substring(0, end) + ELLIPSIS;
     }
 
     public static List<String> wrap(String text, float width, float size, int maxLines) {
+        return WRAPPED.computeIfAbsent(new Wrap(text, width, size, maxLines),
+                key -> List.copyOf(lines(key.text(), key.width(), key.size(), key.maxLines())));
+    }
+
+    private static List<String> lines(String text, float width, float size, int maxLines) {
         List<String> lines = new ArrayList<>();
         StringBuilder line = new StringBuilder();
         for (String word : text.split(" ")) {
@@ -121,43 +155,63 @@ public final class Text {
         float fadeWidth = opaqueX - transparentX;
         if (fadeWidth == 0f) fadeWidth = 0.001f;
         float width = fadeWidth;
-        draw(graphics, List.of(new Span(text, color)), x, baseline, size,
+        drawColored(graphics, text, x, baseline, size, color,
                 glyphX -> Colors.withAlpha(color, Math.clamp((glyphX - transparentX) / width, 0f, 1f)));
     }
 
     public static void draw(GuiGraphicsExtractor graphics, List<Span> spans, float x, float baseline, float size) {
-        draw(graphics, spans, x, baseline, size, null);
-    }
-
-    private static void draw(GuiGraphicsExtractor graphics, List<Span> spans, float x, float baseline, float size,
-                             ColorAt colorAt) {
         if (!Float.isFinite(size) || size <= 0) return;
-        List<TextState.Quad> quads = new ArrayList<>();
+        TextState.Glyphs glyphs = new TextState.Glyphs(length(spans));
         float cursor = x;
         int previous = -1;
         for (Span span : spans) {
-            int color = Opacity.apply(span.color());
-            for (int codepoint : span.text().codePoints().toArray()) {
-                Font.Glyph glyph = FONT.glyph(codepoint);
-                cursor += FONT.kerning(previous, glyph.unicode()) * size;
-                Font.Bounds plane = glyph.planeBounds();
-                if (plane != null && glyph.atlasBounds() != null && !Colors.transparent(color)) {
-                    Font.Bounds uv = FONT.uv(glyph);
-                    float left = cursor + plane.left() * size;
-                    float right = cursor + plane.right() * size;
-                    int leftColor = colorAt == null ? color : Opacity.apply(colorAt.at(left));
-                    int rightColor = colorAt == null ? color : Opacity.apply(colorAt.at(right));
-                    if (!Colors.transparent(leftColor) || !Colors.transparent(rightColor)) {
-                        quads.add(new TextState.Quad(
-                                left, baseline + plane.top() * size, right, baseline + plane.bottom() * size,
-                                uv.left(), uv.top(), uv.right(), uv.bottom(), leftColor, rightColor));
-                    }
-                }
-                cursor += glyph.advance() * size;
-                previous = glyph.unicode();
-            }
+            cursor = append(glyphs, span.text(), span.color(), cursor, previous, baseline, size, null);
+            if (!span.text().isEmpty()) previous = FONT.glyph(span.text().codePointBefore(span.text().length())).unicode();
         }
-        if (quads.isEmpty()) return;
-        Submit.submit(graphics, TextState.of(graphics, FONT.texture(), quads));
+        submit(graphics, glyphs);
+    }
+
+    private static void drawColored(GuiGraphicsExtractor graphics, String text, float x, float baseline, float size,
+                                    int color, ColorAt colorAt) {
+        if (!Float.isFinite(size) || size <= 0) return;
+        TextState.Glyphs glyphs = new TextState.Glyphs(text.length());
+        append(glyphs, text, color, x, -1, baseline, size, colorAt);
+        submit(graphics, glyphs);
+    }
+
+    private static float append(TextState.Glyphs glyphs, String text, int spanColor, float cursor, int previous,
+                                float baseline, float size, ColorAt colorAt) {
+        int color = Opacity.apply(spanColor);
+        for (int i = 0; i < text.length(); ) {
+            int codepoint = text.codePointAt(i);
+            i += Character.charCount(codepoint);
+            Font.Glyph glyph = FONT.glyph(codepoint);
+            cursor += FONT.kerning(previous, glyph.unicode()) * size;
+            Font.Bounds plane = glyph.planeBounds();
+            if (plane != null && glyph.atlasBounds() != null && !Colors.transparent(color)) {
+                Font.Bounds uv = FONT.uv(glyph);
+                float left = cursor + plane.left() * size;
+                float right = cursor + plane.right() * size;
+                int leftColor = colorAt == null ? color : Opacity.apply(colorAt.at(left));
+                int rightColor = colorAt == null ? color : Opacity.apply(colorAt.at(right));
+                if (!Colors.transparent(leftColor) || !Colors.transparent(rightColor)) {
+                    glyphs.add(left, baseline + plane.top() * size, right, baseline + plane.bottom() * size,
+                            uv.left(), uv.top(), uv.right(), uv.bottom(), leftColor, rightColor);
+                }
+            }
+            cursor += glyph.advance() * size;
+            previous = glyph.unicode();
+        }
+        return cursor;
+    }
+
+    private static void submit(GuiGraphicsExtractor graphics, TextState.Glyphs glyphs) {
+        if (!glyphs.isEmpty()) Submit.submit(graphics, TextState.of(graphics, FONT.texture(), glyphs));
+    }
+
+    private static int length(List<Span> spans) {
+        int length = 0;
+        for (Span span : spans) length += span.text().length();
+        return length;
     }
 }

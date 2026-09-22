@@ -5,12 +5,17 @@ import lombok.NoArgsConstructor;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public final class Entities {
+    private static final Map<EntityType<?>, String> IDS = new ConcurrentHashMap<>();
+
     public static String id(Entity entity) {
-        return BuiltInRegistries.ENTITY_TYPE.getKey(entity.getType()).toString();
+        return IDS.computeIfAbsent(entity.getType(), type -> BuiltInRegistries.ENTITY_TYPE.getKey(type).toString());
     }
 
     public static boolean isLocal(Entity entity) {

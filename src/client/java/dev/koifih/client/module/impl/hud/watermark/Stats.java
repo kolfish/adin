@@ -41,14 +41,24 @@ final class Stats {
     private final Time.Stopwatch shown = new Time.Stopwatch();
     private final RollingText fps = new RollingText();
     private final RollingText ping = new RollingText();
+    private int sampledFps = -1;
+    private int sampledPing = -1;
 
     void restart() {
         shown.reset();
     }
 
     void sample() {
-        fps.set(Integer.toString(mc.getFps()));
-        ping.set(Integer.toString(latency()));
+        int currentFps = mc.getFps();
+        if (currentFps != sampledFps) {
+            sampledFps = currentFps;
+            fps.set(Integer.toString(currentFps));
+        }
+        int currentPing = latency();
+        if (currentPing != sampledPing) {
+            sampledPing = currentPing;
+            ping.set(Integer.toString(currentPing));
+        }
     }
 
     private int latency() {
