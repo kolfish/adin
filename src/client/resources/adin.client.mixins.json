@@ -37,8 +37,12 @@
 		"render.ItemInHandRendererMixin",
 		"render.LevelRendererMixin",
 		"render.PictureInPictureRendererMixin",
+		"render.SkyRendererMixin",
 		"render.SubmitNodeCollectionMixin",
-		"world.LevelChunkMixin"
+		"world.ClientLevelMixin",
+		"world.EnvironmentAttributeSystemMixin",
+		"world.LevelChunkMixin",
+		"world.LevelMixin"
 	],
 	"injectors": {
 		"defaultRequire": 1

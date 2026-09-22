@@ -211,5 +211,8 @@
   "setting.antiBot.preset": "Пресет",
   "setting.antiBot.advanced": "Расширенно",
   "setting.antiBot.checks": "Проверки",
-  "setting.antiBot.grace": "Отсрочка"
+  "setting.antiBot.grace": "Отсрочка",
+  "module.worldModifier": "World Modifier",
+  "module.worldModifier.description": "Меняет погоду и атмосферу твоего мира",
+  "setting.worldModifier.theme": "Тема"
 }

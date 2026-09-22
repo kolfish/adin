@@ -211,5 +211,8 @@
   "setting.antiBot.preset": "Preset",
   "setting.antiBot.advanced": "Advanced",
   "setting.antiBot.checks": "Checks",
-  "setting.antiBot.grace": "Grace"
+  "setting.antiBot.grace": "Grace",
+  "module.worldModifier": "World Modifier",
+  "module.worldModifier.description": "Changes your world's weather and atmosphere",
+  "setting.worldModifier.theme": "Theme"
 }

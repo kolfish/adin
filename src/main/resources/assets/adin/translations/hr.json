@@ -211,5 +211,8 @@
   "setting.antiBot.preset": "Predložak",
   "setting.antiBot.advanced": "Napredno",
   "setting.antiBot.checks": "Provjere",
-  "setting.antiBot.grace": "Odgoda"
+  "setting.antiBot.grace": "Odgoda",
+  "module.worldModifier": "World Modifier",
+  "module.worldModifier.description": "Mijenja vrijeme i atmosferu tvog svijeta",
+  "setting.worldModifier.theme": "Tema"
 }

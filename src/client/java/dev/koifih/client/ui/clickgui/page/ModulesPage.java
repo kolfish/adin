@@ -278,8 +278,11 @@ public final class ModulesPage implements Page {
                     slider.setFormat(range::format);
                     yield slider;
                 }
-                case EnumSetting choice ->
-                        bounded(Dropdown.single(x, 0, width, fieldHeight, scale, label, choice.options(), choice::get, choice::set));
+                case EnumSetting choice -> {
+                    Dropdown select = Dropdown.single(x, 0, width, fieldHeight, scale, label, choice.options(), choice::get, choice::set);
+                    select.setArt(choice.icons(), choice.images());
+                    yield bounded(select);
+                }
                 case MultiSetting multi -> {
                     Dropdown select = Dropdown.multi(x, 0, width, fieldHeight, scale, label, multi.options(), multi::get);
                     select.setOptionVisible(multi::isOptionVisible);

@@ -3,9 +3,12 @@ package dev.koifih.client.render;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 import com.mojang.blaze3d.pipeline.RenderPipeline;
+import com.mojang.blaze3d.systems.RenderSystem;
+import com.mojang.blaze3d.textures.FilterMode;
 import dev.koifih.client.render.font.Font;
 import dev.koifih.client.render.font.Fonts;
 import dev.koifih.client.render.glass.GlassRenderer;
+import dev.koifih.client.render.state.FadedTextureState;
 import dev.koifih.client.render.state.Pipelines;
 import dev.koifih.client.render.state.RectState;
 import dev.koifih.client.render.state.StairsState;
@@ -14,10 +17,15 @@ import dev.koifih.client.render.state.TextState;
 import dev.koifih.client.util.Colors;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
+import net.minecraft.client.gui.render.TextureSetup;
+import net.minecraft.client.renderer.texture.AbstractTexture;
+import net.minecraft.resources.Identifier;
 import org.joml.Matrix3x2f;
 import org.joml.Vector2f;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public final class Draw {
@@ -38,6 +46,7 @@ public final class Draw {
     private static final int ICON_LAYERS = 3;
     private static final float GLASS_LIGHT_X = -0.33f;
     private static final float GLASS_LIGHT_Y = -0.94f;
+    private static final Map<AbstractTexture, TextureSetup> TEXTURES = new HashMap<>();
 
     public static void rect(GuiGraphicsExtractor graphics, int x, int y, int width, int height, int radius, int color) {
         rect(graphics, x, y, width, height, radius, ALL_CORNERS, color, Pipelines.RECT);
@@ -105,6 +114,16 @@ public final class Draw {
                 centerX - halfWidth, centerY - halfHeight, centerX + halfWidth, centerY + halfHeight,
                 uv.left(), uv.top(), uv.right(), uv.bottom(), color);
         Submit.submit(graphics, TextState.of(graphics, font.texture(), List.of(quad)));
+    }
+
+    public static void fadedTexture(GuiGraphicsExtractor graphics, Identifier texture, float x, float y, float width,
+                                    float height, float u0, float fade) {
+        int color = Opacity.apply(0xFFFFFFFF);
+        if (width <= 0 || height <= 0 || Colors.transparent(color)) return;
+        TextureSetup setup = TEXTURES.computeIfAbsent(Minecraft.getInstance().getTextureManager().getTexture(texture), source ->
+                TextureSetup.singleTexture(source.getTextureView(), RenderSystem.getSamplerCache().getClampToEdge(FilterMode.LINEAR)));
+        Matrix3x2f pose = new Matrix3x2f(graphics.pose()).translate(x, y).scale(width, height);
+        Submit.submit(graphics, new FadedTextureState(pose, setup, u0, fade, color, Scissor.current()));
     }
 
     public static void logo(GuiGraphicsExtractor graphics, float x, float y, float size, int starColor) {

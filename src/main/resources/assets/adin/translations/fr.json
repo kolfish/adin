@@ -211,5 +211,8 @@
   "setting.antiBot.preset": "Préréglage",
   "setting.antiBot.advanced": "Avancé",
   "setting.antiBot.checks": "Vérifications",
-  "setting.antiBot.grace": "Délai de grâce"
+  "setting.antiBot.grace": "Délai de grâce",
+  "module.worldModifier": "World Modifier",
+  "module.worldModifier.description": "Change la météo et l'ambiance de ton monde",
+  "setting.worldModifier.theme": "Thème"
 }

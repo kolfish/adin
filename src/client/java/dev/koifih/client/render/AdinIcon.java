@@ -25,5 +25,11 @@ public enum AdinIcon {
     WALK,
     SNEAK,
     SWIM,
-    FLY
+    FLY,
+    SNOW,
+    RAIN,
+    THUNDER,
+    NETHER,
+    END,
+    DEEP_DARK
 }

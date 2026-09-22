@@ -24,6 +24,10 @@ abstract class RowPopup extends Popup {
         this.icon = icon;
     }
 
+    protected AdinIcon icon() {
+        return icon;
+    }
+
     protected abstract void drawRowValue(GuiGraphicsExtractor graphics, float rightLimit, float available);
 
     protected abstract void drawContents(GuiGraphicsExtractor graphics, float x, float top, float width, float height);
@@ -39,9 +43,10 @@ abstract class RowPopup extends Popup {
 
     private void drawRow(GuiGraphicsExtractor graphics, float shown) {
         float labelX = getX() + px(10);
-        if (icon != null) {
+        AdinIcon rowIcon = icon();
+        if (rowIcon != null) {
             float size = px(9);
-            Draw.icon(graphics, icon, getX() + px(8), centerY() - size / 2, size, Theme.DIM, Theme.ACCENT, Theme.TEXT, Theme.ROW);
+            Draw.icon(graphics, rowIcon, getX() + px(8), centerY() - size / 2, size, Theme.DIM, Theme.ACCENT, Theme.TEXT, Theme.ROW);
             labelX += px(13);
         }
         String label = getMessage().getString();

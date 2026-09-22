@@ -211,5 +211,8 @@
   "setting.antiBot.preset": "Ustawienie",
   "setting.antiBot.advanced": "Zaawansowane",
   "setting.antiBot.checks": "Sprawdzenia",
-  "setting.antiBot.grace": "Czas ochronny"
+  "setting.antiBot.grace": "Czas ochronny",
+  "module.worldModifier": "World Modifier",
+  "module.worldModifier.description": "Zmienia pogodę i klimat twojego świata",
+  "setting.worldModifier.theme": "Motyw"
 }

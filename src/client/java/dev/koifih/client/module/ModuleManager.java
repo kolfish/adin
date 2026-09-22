@@ -34,7 +34,7 @@ public final class ModuleManager {
     private static final List<String> ORDER = List.of(
             "AimAssist", "Triggerbot", "ShieldBreaker", "AutoHitCrystal", "AutoCrystal", "AutoAnchor", "AutoCart", "Backtrack",
             "Sprint", "MoveFix", "JumpReset",
-            "Esp", "Nametags", "BlockEsp", "Capes",
+            "Esp", "Nametags", "BlockEsp", "Capes", "WorldModifier",
             "Notifications", "ModuleList", "Watermark", "KeybindList",
             "KeyPearl", "AutoTotem", "Refill",
             "Friends", "AntiBot");
