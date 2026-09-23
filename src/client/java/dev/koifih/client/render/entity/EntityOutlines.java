@@ -36,10 +36,12 @@ import java.util.OptionalDouble;
 
 @RequiredArgsConstructor(access = AccessLevel.PRIVATE)
 public final class EntityOutlines {
-    public static final EntityOutlines LEVEL = new EntityOutlines("level");
-    public static final EntityOutlines PREVIEW = new EntityOutlines("preview");
+    public static final EntityOutlines LEVEL = new EntityOutlines("level", true);
+    public static final EntityOutlines PREVIEW = new EntityOutlines("preview", false);
 
     private static final int CONFIG_SIZE = 48;
+    private static final int SCALE_STEPS = 63;
+    private static final int SCALE_BITS = 0x030303;
     private static final Vector4fc CLEAR = new Vector4f();
     private static final BindGroupLayout CONFIG = BindGroupLayout.builder()
             .withUniform("OutlineConfig", UniformType.UNIFORM_BUFFER)
@@ -82,6 +84,7 @@ public final class EntityOutlines {
     private record Binding(String name, GpuTextureView view, GpuSampler sampler) {}
 
     private final String name;
+    private final boolean scaled;
     private GpuBuffer config;
     private RenderTarget scratch;
     private KawaseBlur blur;
@@ -94,6 +97,11 @@ public final class EntityOutlines {
     public static void configure(EntityOutline outline) {
         level = outline;
         if (outline == null) region = null;
+    }
+
+    public static int scaled(int color, float scale) {
+        int code = Math.round((1f - Math.clamp(scale, 0f, 1f)) * SCALE_STEPS);
+        return color & ~SCALE_BITS | (code >> 4 & 3) << 16 | (code >> 2 & 3) << 8 | code & 3;
     }
 
     public static void include(int x0, int y0, int x1, int y1) {
@@ -173,7 +181,7 @@ public final class EntityOutlines {
                     .align(16)
                     .putVec4(Colors.red(color) / 255f, Colors.green(color) / 255f, Colors.blue(color) / 255f,
                             Colors.alpha(color) / 255f)
-                    .putFloat(outline.fill()).putFloat(outline.layers()).putFloat(outline.glow()).putFloat(0f)
+                    .putFloat(outline.fill()).putFloat(outline.glow()).putFloat(scaled ? 1f : 0f)
                     .get());
         }
         uploaded = outline;

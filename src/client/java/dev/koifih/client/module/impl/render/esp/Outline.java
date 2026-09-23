@@ -5,7 +5,6 @@ import dev.koifih.client.render.Rect;
 import dev.koifih.client.render.entity.EntityOutline;
 import dev.koifih.client.render.entity.EntityOutlines;
 import dev.koifih.client.render.screen.Projection;
-import dev.koifih.client.setting.EnumSetting;
 import dev.koifih.client.setting.Measure;
 import dev.koifih.client.setting.MultiSetting;
 import dev.koifih.client.setting.SliderSetting;
@@ -17,18 +16,15 @@ final class Outline {
     private static final int DEFAULT_WIDTH = 2;
     private static final int MIN_WIDTH = 1;
     private static final int MAX_WIDTH = 8;
-    private static final String[] SHOW = {"Fill", "Layers", "Glow"};
+    private static final String[] SHOW = {"Fill", "Glow"};
     private static final int SHOW_FILL = 0;
-    private static final int SHOW_LAYERS = 1;
-    private static final int SHOW_GLOW = 2;
-    private static final String[] LAYERS = {"1", "2", "3"};
+    private static final int SHOW_GLOW = 1;
     private static final double RENDER_REACH = 1.0;
 
     private final Esp esp;
     private final Box box;
     private final SliderSetting width;
     private final MultiSetting show;
-    private final EnumSetting layers;
     private final SliderSetting intensity;
     private final SliderSetting radius;
     private Projection projection;
@@ -38,12 +34,10 @@ final class Outline {
         this.box = box;
         width = esp.setting(new SliderSetting("outlineWidth", DEFAULT_WIDTH, MIN_WIDTH, MAX_WIDTH, Measure.NONE));
         show = esp.setting(new MultiSetting("outlineShow", SHOW, SHOW_FILL));
-        layers = esp.setting(new EnumSetting("outlineLayers", 0, LAYERS));
         intensity = esp.setting(new SliderSetting("glowIntensity", 200, 10, 300, Measure.PERCENT));
         radius = esp.setting(new SliderSetting("glowRadius", 6, 1, 16, Measure.NONE));
         width.visibleWhen(esp::outlined);
         show.visibleWhen(esp::outlined);
-        layers.visibleWhen(() -> esp.outlined() && show.has(SHOW_LAYERS));
         intensity.visibleWhen(() -> esp.outlined() && show.has(SHOW_GLOW));
         radius.visibleWhen(() -> esp.outlined() && show.has(SHOW_GLOW));
     }
@@ -53,11 +47,12 @@ final class Outline {
     }
 
     int color() {
-        return Colors.opaque(box.rgb());
+        return EntityOutlines.scaled(Colors.opaque(box.rgb()), 1f);
     }
 
-    void include(EntityRenderStateEvent event) {
+    void include(EntityRenderStateEvent event, double distanceSq) {
         if (projection == null) projection = Projection.capture();
+        event.state().outlineColor = EntityOutlines.scaled(event.state().outlineColor, Box.perspective(distanceSq));
         Entity entity = event.entity();
         Rect rect = projection.bounds(entity.getBoundingBox().inflate(RENDER_REACH).move(event.renderPosition().subtract(entity.position())));
         if (rect == null) return;
@@ -70,11 +65,7 @@ final class Outline {
     }
 
     EntityOutline spec() {
-        return esp.outlined() ? new EntityOutline(color(), texels(), fill(), layers(), glow(), glowRadius()) : null;
-    }
-
-    int layers() {
-        return show.has(SHOW_LAYERS) ? layers.get() + 1 : 0;
+        return esp.outlined() ? new EntityOutline(color(), texels(), fill(), glow(), glowRadius()) : null;
     }
 
     float fill() {

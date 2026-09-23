@@ -139,10 +139,11 @@ public final class Esp extends Module {
         if (!shaded() && !outlined()) return;
         Camera camera = Minecraft.getInstance().gameRenderer.mainCamera();
         Entity entity = event.entity();
-        boolean targeted = targeted(entity, camera) && entity.distanceToSqr(camera.position()) <= range();
+        double distanceSq = entity.distanceToSqr(camera.position());
+        boolean targeted = targeted(entity, camera) && distanceSq <= range();
         if (outlined()) {
             if (targeted) event.state().outlineColor = outline.color();
-            if (targeted || entity.isCurrentlyGlowing()) outline.include(event);
+            if (targeted || entity.isCurrentlyGlowing()) outline.include(event, distanceSq);
             return;
         }
         if (targeted) ((Filled) event.state()).adin$setFill(shader.entityFill(event.renderPosition(), camera, event.state()));

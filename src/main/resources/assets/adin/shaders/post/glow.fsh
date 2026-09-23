@@ -7,8 +7,8 @@ layout(std140) uniform OutlineConfig {
     float Width;
     vec4 Color;
     float Fill;
-    float Layers;
     float Glow;
+    float Scaled;
 };
 
 in vec2 texCoord;
