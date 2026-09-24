@@ -1,0 +1,33 @@
+{
+	"schemaVersion": 1,
+	"id": "adin",
+	"version": "${version}",
+	"name": "Adin",
+	"description": "Adin client.",
+	"authors": [
+		"koifih"
+	],
+	"license": "CC0-1.0",
+	"icon": "assets/adin/icon.png",
+	"environment": "*",
+	"entrypoints": {
+		"main": [
+			"dev.koifih.Adin"
+		],
+		"client": [
+			"dev.koifih.client.AdinClient"
+		]
+	},
+	"mixins": [
+		{
+			"config": "adin.client.mixins.json",
+			"environment": "client"
+		}
+	],
+	"depends": {
+		"fabricloader": ">=0.19.5",
+		"minecraft": "~26.2",
+		"java": ">=25",
+		"fabric-api": "*"
+	}
+}

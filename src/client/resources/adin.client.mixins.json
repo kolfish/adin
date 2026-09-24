@@ -1,0 +1,53 @@
+{
+	"required": true,
+	"package": "dev.koifih.client.mixin",
+	"compatibilityLevel": "JAVA_25",
+	"client": [
+		"accessor.AbstractContainerScreenAccessor",
+		"accessor.FallingBlockEntityAccessor",
+		"accessor.GameRendererAccessor",
+		"accessor.GuiGraphicsExtractorAccessor",
+		"accessor.KeyMappingAccessor",
+		"accessor.KeyboardHandlerAccessor",
+		"accessor.LevelRendererAccessor",
+		"accessor.MinecraftAccessor",
+		"accessor.MouseHandlerAccessor",
+		"accessor.MultiPlayerGameModeAccessor",
+		"accessor.RenderSetupAccessor",
+		"accessor.RenderTypeAccessor",
+		"accessor.TextureBindingAccessor",
+		"entity.EntityMixin",
+		"entity.LivingEntityMixin",
+		"entity.LocalPlayerMixin",
+		"entity.PlayerMixin",
+		"input.ChatScreenMixin",
+		"input.KeyboardInputMixin",
+		"input.MinecraftMixin",
+		"input.MouseHandlerMixin",
+		"network.ClientCommonPacketListenerImplMixin",
+		"network.ClientPacketListenerMixin",
+		"network.ConnectionMixin",
+		"network.MultiPlayerGameModeMixin",
+		"network.ServerboundUseItemPacketMixin",
+		"render.CapeLayerMixin",
+		"render.EntityRendererMixin",
+		"render.GameRendererMixin",
+		"render.GuiRendererMixin",
+		"render.EntityRenderStateMixin",
+		"render.ItemInHandRendererMixin",
+		"render.LevelRendererMixin",
+		"render.PictureInPictureRendererMixin",
+		"render.SkyRendererMixin",
+		"render.SubmitNodeCollectionMixin",
+		"world.ClientLevelMixin",
+		"world.EnvironmentAttributeSystemMixin",
+		"world.LevelChunkMixin",
+		"world.LevelMixin"
+	],
+	"injectors": {
+		"defaultRequire": 1
+	},
+	"overwrites": {
+		"requireAnnotations": true
+	}
+}

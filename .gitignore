@@ -1,0 +1,49 @@
+# Gradle
+.gradle/
+build/
+out/
+classes/
+*.launch
+
+# Fabric / Minecraft dev environment
+run/
+runs/
+run-data/
+remappedSrc/
+*.jar
+!gradle/wrapper/gradle-wrapper.jar
+!RuntimeFabricMod-main/compiled_java/GenerateHeaders.jar
+!RuntimeFabricMod-main/compiled_java/Injection.class
+
+# IntelliJ IDEA
+.idea/
+*.iml
+*.ipr
+*.iws
+
+# Eclipse
+.classpath
+.project
+.settings/
+bin/
+
+# VS Code
+.vscode/
+
+# Fleet
+.fleet/
+
+# Java
+*.class
+!RuntimeFabricMod-main/compiled_java/Injection.class
+hs_err_pid*
+replay_pid*
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Misc
+*.log
+*.swp
+*~
