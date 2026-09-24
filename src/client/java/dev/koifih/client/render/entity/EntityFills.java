@@ -18,8 +18,15 @@ import net.minecraft.client.renderer.rendertype.OutputTarget;
 import net.minecraft.client.renderer.rendertype.RenderSetup;
 import net.minecraft.client.renderer.rendertype.RenderType;
 import net.minecraft.resources.Identifier;
+import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.blaze3d.vertex.QuadInstance;
+import com.mojang.blaze3d.vertex.VertexConsumer;
+import net.minecraft.client.resources.model.geometry.BakedQuad;
+import net.minecraft.world.phys.Vec3;
+import org.joml.Vector3f;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -129,5 +136,28 @@ public final class EntityFills {
                 .withDepthStencilState(depth)
                 .withCull(false)
                 .build();
+    }
+
+    public static void putQuads(PoseStack.Pose entry, VertexConsumer consumer, List<BakedQuad> quads, EntityFill fill) {
+        QuadInstance instance = new QuadInstance();
+        instance.setColor(fill.visible());
+        instance.setLightCoords(fill.light());
+        instance.setOverlayCoords(fill.visibleOverlay());
+        for (BakedQuad quad : quads) consumer.putBakedQuad(entry, quad, instance);
+    }
+
+    public static boolean outliningHand() {
+        return EntityOutlines.hand() != null && inHandPass();
+    }
+
+    public static EntityFill handOutline() {
+        return EntityFill.solid(EntityOutlines.hand().color(), 0);
+    }
+
+    public static EntityFill hand(PoseStack pose) {
+        EntityFill fill = hand();
+        if (fill == null) return null;
+        Vector3f pivot = pose.last().pose().getTranslation(new Vector3f());
+        return fill.anchored(new Vec3(pivot));
     }
 }

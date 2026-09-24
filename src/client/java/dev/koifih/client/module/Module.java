@@ -112,6 +112,10 @@ public abstract class Module {
         return false;
     }
 
+    public boolean interceptsUseItem() {
+        return false;
+    }
+
     protected void onActivate() {
     }
 
@@ -153,6 +157,11 @@ public abstract class Module {
                     if (!bindDown && bindKeyWasDown) onRelease();
                 }
             } else {
+                if (hold) {
+                    if (down != keyWasDown) setEnabled(down);
+                } else if (down && !keyWasDown) {
+                    toggle();
+                }
                 if (enabled) {
                     if (down && !keyWasDown) onActivate();
                     if (down) onHold();

@@ -6,6 +6,7 @@ import dev.koifih.client.event.events.PreTickEvent;
 import dev.koifih.client.mixin.accessor.KeyMappingAccessor;
 import dev.koifih.client.mixin.accessor.KeyboardHandlerAccessor;
 import dev.koifih.client.mixin.accessor.MouseHandlerAccessor;
+import dev.koifih.client.module.impl.combat.AimAssist;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 import com.mojang.blaze3d.platform.InputConstants;
@@ -85,5 +86,21 @@ public final class Clicks {
 
     private static void send(Minecraft client, int button, int action) {
         ((MouseHandlerAccessor) client.mouseHandler).adin$onButton(client.getWindow().handle(), new MouseButtonInfo(button, 0), action);
+    }
+
+    public static boolean blocksBreaking(Minecraft client) {
+        if (client.hitResult == null || client.hitResult.getType() != HitResult.Type.BLOCK) return false;
+        AimAssist aimAssist = AdinClient.MODULES.get(AimAssist.class);
+        if (aimAssist == null || !aimAssist.blocksBreaking()) return false;
+        if (client.gameMode != null) client.gameMode.stopDestroyBlock();
+        return true;
+    }
+
+    public static boolean interceptsUseItem() {
+        return !simulating(GLFW.GLFW_MOUSE_BUTTON_RIGHT) && AdinClient.MODULES.interceptsUseItem();
+    }
+
+    public static boolean activates(int button) {
+        return !simulating(button) && AdinClient.MODULES.activates(InputConstants.Type.MOUSE.getOrCreate(button));
     }
 }

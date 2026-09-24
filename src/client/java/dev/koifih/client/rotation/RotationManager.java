@@ -111,6 +111,11 @@ public final class RotationManager {
         rotator = null;
     }
 
+    public void syncFromPlayer() {
+        LocalPlayer player = Minecraft.getInstance().player;
+        if (player != null) sync(Rotation.of(player));
+    }
+
     private static MoveFix moveFix() {
         return AdinClient.MODULES.get(MoveFix.class);
     }

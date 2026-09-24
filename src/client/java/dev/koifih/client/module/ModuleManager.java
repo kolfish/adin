@@ -32,7 +32,7 @@ public final class ModuleManager {
 
     private static final String IMPL = "dev/koifih/client/module/impl";
     private static final List<String> ORDER = List.of(
-            "AimAssist", "Triggerbot", "ShieldBreaker", "AutoHitCrystal", "AutoCrystal", "AutoAnchor", "AutoCart", "Backtrack",
+            "AimAssist", "Triggerbot", "ShieldBreaker", "AutoHitCrystal", "AutoCrystal", "AutoAnchor", "SafeAnchor", "AutoCart", "Backtrack",
             "Sprint", "MoveFix", "JumpReset",
             "Esp", "Nametags", "BlockEsp", "Capes", "WorldModifier",
             "Notifications", "ModuleList", "Watermark", "KeybindList",
@@ -59,6 +59,7 @@ public final class ModuleManager {
             dev.koifih.client.module.impl.combat.AutoHitCrystal.class,
             dev.koifih.client.module.impl.combat.AutoCrystal.class,
             dev.koifih.client.module.impl.combat.AutoAnchor.class,
+            dev.koifih.client.module.impl.combat.SafeAnchor.class,
             dev.koifih.client.module.impl.combat.AutoCart.class,
             dev.koifih.client.module.impl.combat.Backtrack.class,
             dev.koifih.client.module.impl.movement.Sprint.class,
@@ -179,6 +180,13 @@ public final class ModuleManager {
                 InputConstants.Key check = module.bindKey() != InputConstants.UNKNOWN ? module.bindKey() : module.key();
                 if (check.equals(key)) return true;
             }
+        }
+        return false;
+    }
+
+    public boolean interceptsUseItem() {
+        for (Module module : modules) {
+            if (module.isEnabled() && module.interceptsUseItem()) return true;
         }
         return false;
     }

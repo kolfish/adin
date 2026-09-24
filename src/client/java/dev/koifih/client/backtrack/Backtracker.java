@@ -21,6 +21,10 @@ import net.minecraft.network.protocol.game.ClientboundPlayerChatPacket;
 import net.minecraft.network.protocol.game.ClientboundPlayerPositionPacket;
 import net.minecraft.network.protocol.game.ClientboundRespawnPacket;
 import net.minecraft.network.protocol.game.ClientboundSetHealthPacket;
+import net.minecraft.network.protocol.game.ClientboundDamageEventPacket;
+import net.minecraft.network.protocol.game.ClientboundEntityEventPacket;
+import net.minecraft.network.protocol.game.ClientboundHurtAnimationPacket;
+import net.minecraft.network.protocol.game.ClientboundSoundEntityPacket;
 import net.minecraft.network.protocol.game.ClientboundSoundPacket;
 import net.minecraft.network.protocol.game.ClientboundStartConfigurationPacket;
 import net.minecraft.network.protocol.game.ClientboundSystemChatPacket;
@@ -98,7 +102,11 @@ public final class Backtracker {
                 || packet instanceof ClientboundSystemChatPacket
                 || packet instanceof ClientboundPlayerChatPacket
                 || packet instanceof ClientboundDisguisedChatPacket
-                || packet instanceof ClientboundSoundPacket sound && sound.getSound().value() == SoundEvents.PLAYER_HURT;
+                || packet instanceof ClientboundSoundPacket
+                || packet instanceof ClientboundSoundEntityPacket
+                || packet instanceof ClientboundEntityEventPacket
+                || packet instanceof ClientboundHurtAnimationPacket
+                || packet instanceof ClientboundDamageEventPacket;
     }
 
     public static void release(long delayMillis) {

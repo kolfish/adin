@@ -47,7 +47,7 @@ public final class Backtrack extends Module {
 
     private final EnumSetting mode = add(new EnumSetting("mode", MODE_DELAY, MODES));
     private final SliderSetting delay = add(new SliderSetting("delay", 120, 0, 1000, Measure.MILLIS));
-    private final BoolSetting pauseOnHurt = add(new BoolSetting("pauseOnHurt", false));
+    private final BoolSetting pauseOnHurt = add(new BoolSetting("pauseOnHurt", true));
     private final TargetSettings targets = add(new TargetSettings());
     private final EnumSetting visualize = add(new EnumSetting("visualize", VISUALIZE_BOX, VISUALIZE));
     private final BacktrackPreview preview = add(new BacktrackPreview("preview", delay::get, this::frozen, this::style));
@@ -133,7 +133,12 @@ public final class Backtrack extends Module {
 
     private void onAttack(AttackEvent event) {
         attackedAt = System.currentTimeMillis();
-        if (event.target() instanceof LivingEntity living) processTarget(mc, living);
+        if (event.target() instanceof LivingEntity living) {
+            processTarget(mc, living);
+            if (pauseOnHurt.get()) {
+                Backtracker.releaseAll();
+            }
+        }
         sync(mc, mc.player);
     }
 
@@ -197,7 +202,7 @@ public final class Backtrack extends Module {
                 && targets.accepts(player, entity)
                 && player.tickCount > MIN_TICKS
                 && (now - attackedAt <= ATTACK_WINDOW_MILLIS || assists(entity))
-                && !(pauseOnHurt.get() && entity.hurtTime >= HURT_TIME);
+                && !(pauseOnHurt.get() && entity.hurtTime > 0);
     }
 
     private boolean approaching(LocalPlayer player, Vec3 real) {
