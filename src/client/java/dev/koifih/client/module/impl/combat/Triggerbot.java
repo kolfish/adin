@@ -14,6 +14,10 @@ import dev.koifih.client.util.Maths;
 import dev.koifih.client.util.Players;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.LocalPlayer;
+<<<<<<< HEAD
+import net.minecraft.network.protocol.game.ServerboundPlayerCommandPacket;
+=======
+>>>>>>> 630b1b46c1def750e98fc9ad571b50ab0e4f226d
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.phys.EntityHitResult;
@@ -27,7 +31,11 @@ public final class Triggerbot extends Module {
     private static final int EXTRA_CHARGE = 125;
     private static final float HUNDREDTHS = 100f;
 
+<<<<<<< HEAD
+    private final RangeSetting cooldown = add(new RangeSetting("cooldown", 100, 100, 0, EXTRA_CHARGE, Measure.FRACTION));
+=======
     private final RangeSetting cooldown = add(new RangeSetting("cooldown", 60, 100, 0, EXTRA_CHARGE, Measure.FRACTION));
+>>>>>>> 630b1b46c1def750e98fc9ad571b50ab0e4f226d
     private final BoolSetting extraDelay = add(new BoolSetting("extraDelay", false));
     private final BoolSetting range = add(new BoolSetting("range", false));
     private final RangeSetting blocks = add(new RangeSetting("blocks", 300, 300, 100, 300, Measure.FRACTION));
@@ -89,11 +97,30 @@ public final class Triggerbot extends Module {
             holdingSprint = false;
             return;
         }
+<<<<<<< HEAD
+        if (target.hurtTime > 0) return;
+        AdinClient.MODULES.get(ShieldBreaker.class).prepare(player, target);
+        if (crits.get() && !critReady(client, player)) return;
+        if (!charged(player, 0f)) return;
+        if (Clicks.simulate) {
+            while (client.options.keyAttack.consumeClick()) {}
+            if (!Clicks.left(client, target)) {
+                client.gameMode.attack(player, target);
+                player.resetAttackStrengthTicker();
+                player.swing(InteractionHand.MAIN_HAND);
+            }
+        } else {
+            client.gameMode.attack(player, target);
+            player.resetAttackStrengthTicker();
+            player.swing(InteractionHand.MAIN_HAND);
+        }
+=======
         if (crits.get() && !critReady(client, player)) return;
         if (!charged(player, 0.5f)) return;
         AdinClient.MODULES.get(ShieldBreaker.class).prepare(player, target);
         if (!Clicks.left(client, target)) client.gameMode.attack(player, target);
         player.swing(InteractionHand.MAIN_HAND);
+>>>>>>> 630b1b46c1def750e98fc9ad571b50ab0e4f226d
         holdingSprint = false;
         rearm();
     }
@@ -101,7 +128,16 @@ public final class Triggerbot extends Module {
     private boolean critReady(Minecraft client, LocalPlayer player) {
         if (player.onGround()) {
             holdingSprint = false;
+<<<<<<< HEAD
+            if (client.options.keyJump.isDown()) return false;
+            if (player.isSprinting()) {
+                dropSprint(player);
+                return false;
+            }
+            return player.getDeltaMovement().y <= 0.0;
+=======
             return !client.options.keyJump.isDown() && player.getDeltaMovement().y <= 0.0;
+>>>>>>> 630b1b46c1def750e98fc9ad571b50ab0e4f226d
         }
         if (!Players.canCrit(player)) {
             if (player.fallDistance <= 0.0 && peaking(player) && charged(player, NEXT_TICK)) dropSprint(player);
@@ -116,16 +152,33 @@ public final class Triggerbot extends Module {
 
     private void dropSprint(LocalPlayer player) {
         holdingSprint = true;
+<<<<<<< HEAD
+        if (player.isSprinting()) {
+            player.connection.send(new ServerboundPlayerCommandPacket(player, ServerboundPlayerCommandPacket.Action.STOP_SPRINTING));
+        }
+=======
+>>>>>>> 630b1b46c1def750e98fc9ad571b50ab0e4f226d
         player.setSprinting(false);
     }
 
     private boolean charged(LocalPlayer player, float ticksAhead) {
+<<<<<<< HEAD
+        float scale = player.getAttackStrengthScale(ticksAhead);
+        if (scale < Math.min(threshold, 1f)) return false;
+        if (scale < 0.95f) return false;
+=======
         if (player.getAttackStrengthScale(ticksAhead) < Math.min(threshold, 1f)) return false;
+>>>>>>> 630b1b46c1def750e98fc9ad571b50ab0e4f226d
         return overcharge >= Math.max(0f, threshold - 1f) * player.getCurrentItemAttackStrengthDelay();
     }
 
     private void rearm() {
+<<<<<<< HEAD
+        threshold = Math.max(0.95f, Maths.random(cooldown.low() / HUNDREDTHS, cooldown.high() / HUNDREDTHS));
+        if (crits.get() && threshold < 1f) threshold = 1f;
+=======
         threshold = Maths.random(cooldown.low() / HUNDREDTHS, cooldown.high() / HUNDREDTHS);
+>>>>>>> 630b1b46c1def750e98fc9ad571b50ab0e4f226d
         reach = Maths.random(blocks.low() / HUNDREDTHS, blocks.high() / HUNDREDTHS);
         overcharge = 0;
     }

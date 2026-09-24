@@ -1,22 +1,19 @@
 package dev.koifih.client.module.impl.combat;
 
+import org.lwjgl.glfw.GLFW;
+import com.mojang.blaze3d.platform.InputConstants;
 import dev.koifih.client.AdinClient;
-import dev.koifih.client.setting.Measure;
-import dev.koifih.client.util.Clicks;
 import dev.koifih.client.event.Priority;
 import dev.koifih.client.event.events.PreTickEvent;
 import dev.koifih.client.mixin.accessor.MultiPlayerGameModeAccessor;
-<<<<<<< HEAD
-import com.mojang.blaze3d.platform.InputConstants;
-import org.lwjgl.glfw.GLFW;
-=======
->>>>>>> 630b1b46c1def750e98fc9ad571b50ab0e4f226d
 import dev.koifih.client.module.Module;
 import dev.koifih.client.rotation.Rotation;
 import dev.koifih.client.rotation.RotationConfig;
 import dev.koifih.client.rotation.Smoothing;
 import dev.koifih.client.setting.BoolSetting;
 import dev.koifih.client.setting.SliderSetting;
+import dev.koifih.client.setting.Measure;
+import dev.koifih.client.util.Clicks;
 import dev.koifih.client.util.Game;
 import dev.koifih.client.util.Hotbar;
 import dev.koifih.client.util.Placement;
@@ -43,37 +40,31 @@ import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import java.util.function.Predicate;
 
-public final class AutoAnchor extends Module {
+public final class SafeAnchor extends Module {
     private static final long PLACE_WAIT = 500;
     private static final double DIAGONAL = 0.4;
     private static final RotationConfig SNAP = RotationConfig.silent(0f, Smoothing.EASE_OUT_CUBIC);
 
     private final SliderSetting delay = add(new SliderSetting("delay", 100, 50, 500, Measure.MILLIS));
-<<<<<<< HEAD
-=======
-    private final BoolSetting safe = add(new BoolSetting("safe", false));
->>>>>>> 630b1b46c1def750e98fc9ad571b50ab0e4f226d
     private final BoolSetting silentSwap = add(new BoolSetting("silentSwap", false));
     private final BoolSetting swapBack = add(new BoolSetting("swapBack", true));
     private final Time.Ticker pacer = new Time.Ticker();
     private final Time.Stopwatch sincePlace = new Time.Stopwatch();
+    private final Time.Stopwatch searchTimer = new Time.Stopwatch();
     private int originalSlot = Hotbar.NONE;
     private boolean silent;
     private BlockPos anchor;
     private BlockPos charged;
-<<<<<<< HEAD
-=======
     private BlockPos shield;
->>>>>>> 630b1b46c1def750e98fc9ad571b50ab0e4f226d
     private boolean spent;
+    private boolean active;
 
-    public AutoAnchor() {
-        super("autoAnchor");
+    public SafeAnchor() {
+        super("safeAnchor");
         swapBack.visibleWhen(() -> !silentSwap.get());
     }
 
     @Override
-<<<<<<< HEAD
     public boolean activatable() {
         return true;
     }
@@ -94,55 +85,66 @@ public final class AutoAnchor extends Module {
     }
 
     @Override
-=======
->>>>>>> 630b1b46c1def750e98fc9ad571b50ab0e4f226d
     protected void onEnable() {
         spent = false;
+        active = false;
         listen(PreTickEvent.class, this::onTick);
     }
 
     @Override
     protected void onDisable() {
+        active = false;
         idle(Game.player());
     }
 
-<<<<<<< HEAD
+    @Override
+    protected void onActivate() {
+        active = true;
+        spent = false;
+        searchTimer.reset();
+    }
+
+    @Override
+    protected void onHold() {
+        active = true;
+    }
+
     @Override
     protected void onRelease() {
-        idle(mc.player);
+        if (anchor == null && shield == null) {
+            active = false;
+            idle(mc.player);
+        }
     }
 
     private void onTick(PreTickEvent event) {
         LocalPlayer player = event.client().player;
         if (player == null) return;
-        if (bindKey() != InputConstants.UNKNOWN && !isBindDown()) {
-            if (anchor != null) idle(player);
+        boolean isHolding = bindKey() != InputConstants.UNKNOWN ? isBindDown() : isEnabled();
+        if (!active && !isHolding) {
+            if (shield != null || anchor != null) idle(player);
             return;
         }
-        if (!Game.playing(mc) || Players.consuming(player)) {
-            if (anchor == null) idle(player);
-            return;
-        }
-        if (anchor == null) look(player);
-=======
-    private void onTick(PreTickEvent event) {
-        LocalPlayer player = event.client().player;
-        if (player == null) return;
         if (!Game.playing(mc) || Players.consuming(player)) {
             if (shield == null && anchor == null) idle(player);
             return;
         }
-        if (anchor == null) look(player);
+        if (anchor == null) {
+            look(player);
+            if (anchor == null && !isHolding && searchTimer.elapsed(500)) {
+                active = false;
+                idle(player);
+                return;
+            }
+        }
         if (shield != null && shield(player)) return;
->>>>>>> 630b1b46c1def750e98fc9ad571b50ab0e4f226d
-        if (anchor != null) work(player);
+        if (anchor != null) work(player, isHolding);
     }
 
     private void look(LocalPlayer player) {
         if (!pacer.ready()) return;
         BlockHitResult hit = mc.hitResult instanceof BlockHitResult block && block.getType() == HitResult.Type.BLOCK ? block : null;
         if (hit == null) {
-            idle(player);
             return;
         }
         BlockPos pos = hit.getBlockPos();
@@ -154,17 +156,12 @@ public final class AutoAnchor extends Module {
         BlockPos target = state.canBeReplaced() ? pos : pos.relative(hit.getDirection());
         int slot = nearest(player, stack -> stack.is(Items.RESPAWN_ANCHOR));
         if (spent || slot == Hotbar.NONE || !placeable(player, player.getInventory().getItem(slot), hit, Blocks.RESPAWN_ANCHOR)) {
-            idle(player);
+            // wait for valid placement or timeout
         } else if (act(player, hit, stack -> stack.is(Items.RESPAWN_ANCHOR), true)) {
             anchor = target;
             spent = true;
             sincePlace.reset();
-<<<<<<< HEAD
-        }
-    }
-
-=======
-            if (safe.get()) shield = target.offset(towardPlayer(player, target));
+            shield = target.offset(towardPlayer(player, target));
         }
     }
 
@@ -195,11 +192,34 @@ public final class AutoAnchor extends Module {
         return true;
     }
 
->>>>>>> 630b1b46c1def750e98fc9ad571b50ab0e4f226d
-    private void work(LocalPlayer player) {
+    private void work(LocalPlayer player, boolean isHolding) {
         BlockState state = mc.level.getBlockState(anchor);
         if (!(state.getBlock() instanceof RespawnAnchorBlock)) {
-            if (sincePlace.elapsed(PLACE_WAIT)) idle(player);
+            if (anchor.equals(charged)) {
+                if (isHolding) {
+                    anchor = null;
+                    charged = null;
+                    shield = null;
+                    spent = false;
+                    searchTimer.reset();
+                } else {
+                    active = false;
+                    idle(player);
+                }
+                return;
+            }
+            if (sincePlace.elapsed(PLACE_WAIT)) {
+                if (isHolding) {
+                    anchor = null;
+                    charged = null;
+                    shield = null;
+                    spent = false;
+                    searchTimer.reset();
+                } else {
+                    active = false;
+                    idle(player);
+                }
+            }
             return;
         }
         BlockHitResult hit = Placement.clickOn(mc.level, player.getEyePosition(), anchor);
@@ -209,6 +229,7 @@ public final class AutoAnchor extends Module {
         if (state.getValue(RespawnAnchorBlock.CHARGE) == 0 && !anchor.equals(charged)) {
             if (act(player, hit, stack -> stack.is(Items.GLOWSTONE), false)) charged = anchor;
         } else if (mc.level.environmentAttributes().getValue(EnvironmentAttributes.RESPAWN_ANCHOR_WORKS, anchor)) {
+            active = false;
             idle(player);
         } else {
             act(player, hit, detonator(player), false);
@@ -224,45 +245,6 @@ public final class AutoAnchor extends Module {
         Vec3 eye = player.getEyePosition();
         Vec3 look = AdinClient.ROTATIONS.rotation(player).direction();
         return Placement.looksAt(mc.level, hit.getBlockPos(), eye, look, player.blockInteractionRange());
-    }
-
-    private void idle(LocalPlayer player) {
-        anchor = null;
-        charged = null;
-<<<<<<< HEAD
-=======
-        shield = null;
->>>>>>> 630b1b46c1def750e98fc9ad571b50ab0e4f226d
-        restore(player);
-    }
-
-    private static boolean placeable(LocalPlayer player, ItemStack stack, BlockHitResult hit, Block block) {
-        BlockPlaceContext context = new BlockPlaceContext(player, InteractionHand.MAIN_HAND, stack, hit);
-        if (!context.canPlace()) return false;
-        BlockState state = block.getStateForPlacement(context);
-        return state != null && state.canSurvive(mc.level, context.getClickedPos())
-                && mc.level.isUnobstructed(state, context.getClickedPos(), CollisionContext.of(player));
-    }
-
-    private static Predicate<ItemStack> detonator(LocalPlayer player) {
-        if (has(player, stack -> stack.is(Items.TOTEM_OF_UNDYING))) return stack -> stack.is(Items.TOTEM_OF_UNDYING);
-        if (has(player, stack -> stack.has(DataComponents.WEAPON))) return stack -> stack.has(DataComponents.WEAPON);
-        return stack -> !stack.isEmpty() && !stack.is(Items.GLOWSTONE);
-    }
-
-    private static boolean has(LocalPlayer player, Predicate<ItemStack> matcher) {
-        return nearest(player, matcher) != Hotbar.NONE;
-    }
-
-    private static int nearest(LocalPlayer player, Predicate<ItemStack> matcher) {
-        Inventory inventory = player.getInventory();
-        int selected = Hotbar.selected(player);
-        for (int distance = 0; distance < Inventory.SELECTION_SIZE; distance++) {
-            for (int slot : new int[] {selected - distance, selected + distance}) {
-                if (Inventory.isHotbarSlot(slot) && matcher.test(inventory.getItem(slot))) return slot;
-            }
-        }
-        return Hotbar.NONE;
     }
 
     private boolean act(LocalPlayer player, BlockHitResult hit, Predicate<ItemStack> matcher, boolean placing) {
@@ -296,6 +278,36 @@ public final class AutoAnchor extends Module {
         return true;
     }
 
+    private static Predicate<ItemStack> detonator(LocalPlayer player) {
+        if (has(player, stack -> stack.is(Items.TOTEM_OF_UNDYING))) return stack -> stack.is(Items.TOTEM_OF_UNDYING);
+        if (has(player, stack -> stack.has(DataComponents.WEAPON))) return stack -> stack.has(DataComponents.WEAPON);
+        return stack -> !stack.isEmpty() && !stack.is(Items.GLOWSTONE);
+    }
+
+    private static boolean has(LocalPlayer player, Predicate<ItemStack> matcher) {
+        return nearest(player, matcher) != Hotbar.NONE;
+    }
+
+    private static int nearest(LocalPlayer player, Predicate<ItemStack> matcher) {
+        Inventory inventory = player.getInventory();
+        int selected = Hotbar.selected(player);
+        for (int distance = 0; distance < Inventory.SELECTION_SIZE; distance++) {
+            for (int slot : new int[] {selected - distance, selected + distance}) {
+                if (Inventory.isHotbarSlot(slot) && matcher.test(inventory.getItem(slot))) return slot;
+            }
+        }
+        return Hotbar.NONE;
+    }
+
+    private void idle(LocalPlayer player) {
+        anchor = null;
+        charged = null;
+        shield = null;
+        spent = false;
+        active = false;
+        restore(player);
+    }
+
     private void restore(LocalPlayer player) {
         if (player != null && originalSlot != Hotbar.NONE) {
             boolean done = silent ? Hotbar.resync(player) : !swapBack.get() || Hotbar.swap(player, originalSlot, false);
@@ -303,5 +315,13 @@ public final class AutoAnchor extends Module {
         }
         originalSlot = Hotbar.NONE;
         silent = false;
+    }
+
+    private static boolean placeable(LocalPlayer player, ItemStack stack, BlockHitResult hit, Block block) {
+        BlockPlaceContext context = new BlockPlaceContext(player, InteractionHand.MAIN_HAND, stack, hit);
+        if (!context.canPlace()) return false;
+        BlockState state = block.getStateForPlacement(context);
+        return state != null && state.canSurvive(mc.level, context.getClickedPos())
+                && mc.level.isUnobstructed(state, context.getClickedPos(), CollisionContext.of(player));
     }
 }

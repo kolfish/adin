@@ -28,11 +28,17 @@
 		"network.ClientPacketListenerMixin",
 		"network.ConnectionMixin",
 		"network.MultiPlayerGameModeMixin",
+<<<<<<< HEAD
+		"render.CapeLayerMixin",
+		"render.EntityRendererMixin",
+		"render.GameRendererMixin",
+=======
 		"network.ServerboundUseItemPacketMixin",
 		"render.CapeLayerMixin",
 		"render.EntityRendererMixin",
 		"render.GameRendererMixin",
 		"render.GuiRendererMixin",
+>>>>>>> 630b1b46c1def750e98fc9ad571b50ab0e4f226d
 		"render.EntityRenderStateMixin",
 		"render.ItemInHandRendererMixin",
 		"render.LevelRendererMixin",
@@ -41,8 +47,12 @@
 		"render.SubmitNodeCollectionMixin",
 		"world.ClientLevelMixin",
 		"world.EnvironmentAttributeSystemMixin",
+<<<<<<< HEAD
+		"world.LevelChunkMixin"
+=======
 		"world.LevelChunkMixin",
 		"world.LevelMixin"
+>>>>>>> 630b1b46c1def750e98fc9ad571b50ab0e4f226d
 	],
 	"injectors": {
 		"defaultRequire": 1

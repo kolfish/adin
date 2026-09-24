@@ -34,8 +34,17 @@ public abstract class Module {
     @Getter
     private InputConstants.Key key = InputConstants.UNKNOWN;
     @Getter
+<<<<<<< HEAD
+    private InputConstants.Key bindKey = InputConstants.UNKNOWN;
+    @Getter
     private boolean hold;
     private boolean keyWasDown;
+    private boolean bindKeyWasDown;
+    private boolean bindHolding;
+=======
+    private boolean hold;
+    private boolean keyWasDown;
+>>>>>>> 630b1b46c1def750e98fc9ad571b50ab0e4f226d
     private final Lang.Localized name = new Lang.Localized(() -> Lang.getOrDefault("module." + id(), Lang.capitalize(id())));
     private final Lang.Localized description = new Lang.Localized(() -> Lang.getOrDefault("module." + id() + ".description", ""));
 
@@ -92,14 +101,35 @@ public abstract class Module {
         this.key = key == null ? InputConstants.UNKNOWN : key;
     }
 
+<<<<<<< HEAD
+    public void setBindKey(InputConstants.Key key) {
+        this.bindKey = key == null ? InputConstants.UNKNOWN : key;
+    }
+
+=======
+>>>>>>> 630b1b46c1def750e98fc9ad571b50ab0e4f226d
     public void setHold(boolean hold) {
         this.hold = hold;
     }
 
+<<<<<<< HEAD
+    public boolean isBindDown() {
+        return bindKeyWasDown;
+    }
+
+=======
+>>>>>>> 630b1b46c1def750e98fc9ad571b50ab0e4f226d
     public boolean activatable() {
         return false;
     }
 
+<<<<<<< HEAD
+    public boolean interceptsUseItem() {
+        return false;
+    }
+
+=======
+>>>>>>> 630b1b46c1def750e98fc9ad571b50ab0e4f226d
     protected void onActivate() {
     }
 
@@ -124,6 +154,61 @@ public abstract class Module {
     }
 
     void tickKeybind(Minecraft client) {
+<<<<<<< HEAD
+        long window = client.getWindow().handle();
+        boolean noScreen = client.gui.screen() == null;
+        boolean down = key != InputConstants.UNKNOWN && noScreen && isKeyDown(window, key);
+        boolean bindDown = bindKey != InputConstants.UNKNOWN && noScreen && isKeyDown(window, bindKey);
+        if (activatable()) {
+            if (bindKey != InputConstants.UNKNOWN) {
+                if (hold) {
+                    if (down != keyWasDown) setEnabled(down);
+                } else if (down && !keyWasDown) {
+                    toggle();
+                }
+                if (enabled) {
+                    if (bindDown && !bindKeyWasDown) onActivate();
+                    if (bindDown) onHold();
+                    if (!bindDown && bindKeyWasDown) onRelease();
+                }
+            } else {
+                if (hold) {
+                    if (down != keyWasDown) setEnabled(down);
+                } else if (down && !keyWasDown) {
+                    toggle();
+                }
+                if (enabled) {
+                    if (down && !keyWasDown) onActivate();
+                    if (down) onHold();
+                    if (!down && keyWasDown) onRelease();
+                }
+            }
+        } else {
+            if (hold) {
+                if (down != keyWasDown) setEnabled(down);
+            } else if (down && !keyWasDown) {
+                toggle();
+            }
+            if (bindKey != InputConstants.UNKNOWN) {
+                if (bindDown && !bindKeyWasDown && !enabled) {
+                    setEnabled(true);
+                    bindHolding = true;
+                }
+                if (!bindDown && bindKeyWasDown && bindHolding) {
+                    setEnabled(false);
+                    bindHolding = false;
+                }
+            }
+        }
+        keyWasDown = down;
+        bindKeyWasDown = bindDown;
+    }
+
+    private boolean isKeyDown(long window, InputConstants.Key inputKey) {
+        return switch (inputKey.getType()) {
+            case KEYSYM -> GLFW.glfwGetKey(window, inputKey.getValue()) == GLFW.GLFW_PRESS;
+            case MOUSE -> GLFW.glfwGetMouseButton(window, inputKey.getValue()) == GLFW.GLFW_PRESS;
+=======
         boolean down = key != InputConstants.UNKNOWN && client.gui.screen() == null && isKeyDown(client.getWindow().handle());
         if (activatable()) {
             if (enabled) {
@@ -143,6 +228,7 @@ public abstract class Module {
         return switch (key.getType()) {
             case KEYSYM -> GLFW.glfwGetKey(window, key.getValue()) == GLFW.GLFW_PRESS;
             case MOUSE -> GLFW.glfwGetMouseButton(window, key.getValue()) == GLFW.GLFW_PRESS;
+>>>>>>> 630b1b46c1def750e98fc9ad571b50ab0e4f226d
             default -> false;
         };
     }

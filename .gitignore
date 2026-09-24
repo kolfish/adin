@@ -12,6 +12,11 @@ run-data/
 remappedSrc/
 *.jar
 !gradle/wrapper/gradle-wrapper.jar
+<<<<<<< HEAD
+!RuntimeFabricMod-main/compiled_java/GenerateHeaders.jar
+!RuntimeFabricMod-main/compiled_java/Injection.class
+=======
+>>>>>>> 630b1b46c1def750e98fc9ad571b50ab0e4f226d
 
 # IntelliJ IDEA
 .idea/
@@ -33,6 +38,10 @@ bin/
 
 # Java
 *.class
+<<<<<<< HEAD
+!RuntimeFabricMod-main/compiled_java/Injection.class
+=======
+>>>>>>> 630b1b46c1def750e98fc9ad571b50ab0e4f226d
 hs_err_pid*
 replay_pid*
 

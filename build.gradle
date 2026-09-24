@@ -64,6 +64,31 @@ jar {
 	}
 }
 
+<<<<<<< HEAD
+task resourcesJar(type: Jar) {
+	archiveClassifier = 'resources'
+	from(sourceSets.main.resources.srcDirs) {
+		exclude '*.class'
+	}
+	from(sourceSets.client.resources.srcDirs) {
+		exclude '*.class'
+	}
+}
+
+task dllPrep(dependsOn: ['remapJar', 'resourcesJar']) {
+	doLast {
+		def buildDir = layout.buildDirectory.dir('libs').get().asFile
+		println "DLL prep complete:"
+		println "  Mod JAR: ${buildDir}/${project.name}-${version}.jar"
+		println "  Resources JAR: ${buildDir}/${project.name}-${version}-resources.jar"
+		println "Next steps:"
+		println "  1. Run GenerateHeaders on the mod JAR"
+		println "  2. Place resources JAR as 'adin-resources.jar' in .minecraft directory"
+	}
+}
+
+=======
+>>>>>>> 630b1b46c1def750e98fc9ad571b50ab0e4f226d
 publishing {
 	publications {
 		create("mavenJava", MavenPublication) {

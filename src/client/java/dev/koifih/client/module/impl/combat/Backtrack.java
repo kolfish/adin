@@ -7,6 +7,10 @@ import dev.koifih.client.event.events.AttackEvent;
 import dev.koifih.client.event.events.PacketProcessEvent;
 import dev.koifih.client.event.events.PreTickEvent;
 import dev.koifih.client.event.events.WorldRenderEvent;
+<<<<<<< HEAD
+import com.mojang.blaze3d.platform.InputConstants;
+=======
+>>>>>>> 630b1b46c1def750e98fc9ad571b50ab0e4f226d
 import dev.koifih.client.module.Module;
 import dev.koifih.client.render.Style;
 import dev.koifih.client.setting.BacktrackPreview;
@@ -46,7 +50,11 @@ public final class Backtrack extends Module {
 
     private final EnumSetting mode = add(new EnumSetting("mode", MODE_DELAY, MODES));
     private final SliderSetting delay = add(new SliderSetting("delay", 120, 0, 1000, Measure.MILLIS));
+<<<<<<< HEAD
+    private final BoolSetting pauseOnHurt = add(new BoolSetting("pauseOnHurt", true));
+=======
     private final BoolSetting pauseOnHurt = add(new BoolSetting("pauseOnHurt", false));
+>>>>>>> 630b1b46c1def750e98fc9ad571b50ab0e4f226d
     private final TargetSettings targets = add(new TargetSettings());
     private final EnumSetting visualize = add(new EnumSetting("visualize", VISUALIZE_BOX, VISUALIZE));
     private final BacktrackPreview preview = add(new BacktrackPreview("preview", delay::get, this::frozen, this::style));
@@ -78,11 +86,27 @@ public final class Backtrack extends Module {
     }
 
     @Override
+<<<<<<< HEAD
+    public boolean activatable() {
+        return true;
+    }
+
+    @Override
+=======
+>>>>>>> 630b1b46c1def750e98fc9ad571b50ab0e4f226d
     protected void onDisable() {
         Backtracker.hold(false);
         reset();
     }
 
+<<<<<<< HEAD
+    @Override
+    protected void onRelease() {
+        reset();
+    }
+
+=======
+>>>>>>> 630b1b46c1def750e98fc9ad571b50ab0e4f226d
     private boolean frozen() {
         return mode.get() == MODE_FREEZE;
     }
@@ -122,7 +146,16 @@ public final class Backtrack extends Module {
 
     private void onAttack(AttackEvent event) {
         attackedAt = System.currentTimeMillis();
+<<<<<<< HEAD
+        if (event.target() instanceof LivingEntity living) {
+            processTarget(mc, living);
+            if (pauseOnHurt.get()) {
+                Backtracker.releaseAll();
+            }
+        }
+=======
         if (event.target() instanceof LivingEntity living) processTarget(mc, living);
+>>>>>>> 630b1b46c1def750e98fc9ad571b50ab0e4f226d
         sync(mc, mc.player);
     }
 
@@ -174,6 +207,10 @@ public final class Backtrack extends Module {
 
     private boolean holding(Minecraft client, LocalPlayer player) {
         if (target == null || !target.isAlive() || target.level() != client.level) return false;
+<<<<<<< HEAD
+        if (bindKey() != InputConstants.UNKNOWN && !isBindDown()) return false;
+=======
+>>>>>>> 630b1b46c1def750e98fc9ad571b50ab0e4f226d
         return frozen() || shouldBacktrack(player, target);
     }
 
@@ -185,7 +222,11 @@ public final class Backtrack extends Module {
                 && targets.accepts(player, entity)
                 && player.tickCount > MIN_TICKS
                 && (now - attackedAt <= ATTACK_WINDOW_MILLIS || assists(entity))
+<<<<<<< HEAD
+                && !(pauseOnHurt.get() && entity.hurtTime > 0);
+=======
                 && !(pauseOnHurt.get() && entity.hurtTime >= HURT_TIME);
+>>>>>>> 630b1b46c1def750e98fc9ad571b50ab0e4f226d
     }
 
     private boolean approaching(LocalPlayer player, Vec3 real) {

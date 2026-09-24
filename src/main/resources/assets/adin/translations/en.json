@@ -14,6 +14,12 @@
   "units.metric": "Metric",
   "units.imperial": "Imperial",
   "keybind": "Keybind",
+<<<<<<< HEAD
+  "toggleKey": "Toggle key",
+  "bindKey": "Bind key",
+  "bind.help.bind": "Bind: hold to activate while the module is enabled",
+=======
+>>>>>>> 630b1b46c1def750e98fc9ad571b50ab0e4f226d
   "none": "None",
   "category.combat": "Combat",
   "category.render": "Render",
@@ -124,7 +130,12 @@
   "setting.autoCart.smoothness": "Smoothness",
   "module.autoAnchor": "Auto Anchor",
   "module.autoAnchor.description": "Places, charges and blows up anchors where you look",
+<<<<<<< HEAD
+  "module.safeAnchor": "Safe Anchor",
+  "module.safeAnchor.description": "Places, shields and blows up anchors safely where you look",
+=======
   "setting.autoAnchor.safe": "Safe anchor",
+>>>>>>> 630b1b46c1def750e98fc9ad571b50ab0e4f226d
   "module.autoTotem": "Auto Totem",
   "module.autoTotem.description": "Puts a totem in your offhand after one pops",
   "setting.autoTotem.mode": "Mode",
