@@ -32,7 +32,11 @@ public final class ModuleManager {
 
     private static final String IMPL = "dev/koifih/client/module/impl";
     private static final List<String> ORDER = List.of(
+<<<<<<< HEAD
             "AimAssist", "Triggerbot", "ShieldBreaker", "AutoHitCrystal", "AutoCrystal", "AutoAnchor", "SafeAnchor", "AutoCart", "Backtrack",
+=======
+            "AimAssist", "Triggerbot", "ShieldBreaker", "AutoHitCrystal", "AutoCrystal", "AutoAnchor", "AutoCart", "Backtrack",
+>>>>>>> 630b1b46c1def750e98fc9ad571b50ab0e4f226d
             "Sprint", "MoveFix", "JumpReset",
             "Esp", "Nametags", "BlockEsp", "Capes", "WorldModifier",
             "Notifications", "ModuleList", "Watermark", "KeybindList",
@@ -51,6 +55,7 @@ public final class ModuleManager {
         return index < 0 ? ORDER.size() : index;
     }
 
+<<<<<<< HEAD
     @SuppressWarnings("unchecked")
     private static final Class<? extends Module>[] MANUAL_TYPES = new Class[] {
             dev.koifih.client.module.impl.combat.AimAssist.class,
@@ -93,6 +98,14 @@ public final class ModuleManager {
         if (types.isEmpty()) {
             Collections.addAll(types, MANUAL_TYPES);
         }
+=======
+    static List<Class<? extends Module>> discover() {
+        ModContainer container = FabricLoader.getInstance().getModContainer(Adin.MOD_ID)
+                .orElseThrow(() -> new IllegalStateException("Missing mod container: " + Adin.MOD_ID));
+        List<Class<? extends Module>> types = new ArrayList<>();
+        for (Path root : container.getRootPaths()) collect(root, types);
+        if (types.isEmpty()) throw new IllegalStateException("No modules found under " + IMPL);
+>>>>>>> 630b1b46c1def750e98fc9ad571b50ab0e4f226d
         return types;
     }
 
@@ -176,6 +189,7 @@ public final class ModuleManager {
 
     public boolean activates(InputConstants.Key key) {
         for (Module module : modules) {
+<<<<<<< HEAD
             if (module.activatable() && module.isEnabled()) {
                 InputConstants.Key check = module.bindKey() != InputConstants.UNKNOWN ? module.bindKey() : module.key();
                 if (check.equals(key)) return true;
@@ -187,6 +201,9 @@ public final class ModuleManager {
     public boolean interceptsUseItem() {
         for (Module module : modules) {
             if (module.isEnabled() && module.interceptsUseItem()) return true;
+=======
+            if (module.activatable() && module.isEnabled() && module.key().equals(key)) return true;
+>>>>>>> 630b1b46c1def750e98fc9ad571b50ab0e4f226d
         }
         return false;
     }
@@ -197,7 +214,10 @@ public final class ModuleManager {
             State.ModuleState state = new State.ModuleState();
             state.enabled = module.isEnabled();
             state.key = module.key().getName();
+<<<<<<< HEAD
             state.bindKey = module.bindKey().getName();
+=======
+>>>>>>> 630b1b46c1def750e98fc9ad571b50ab0e4f226d
             state.hold = module.hold();
             state.settings = new LinkedHashMap<>();
             for (Setting<?> setting : module.settings()) state.settings.put(setting.id(), setting.save());
@@ -212,7 +232,10 @@ public final class ModuleManager {
             if (state == null) continue;
             module.setHold(state.hold);
             module.setKey(parseKey(state.key));
+<<<<<<< HEAD
             module.setBindKey(parseKey(state.bindKey));
+=======
+>>>>>>> 630b1b46c1def750e98fc9ad571b50ab0e4f226d
             if (state.settings != null) {
                 for (Setting<?> setting : module.settings()) {
                     JsonElement json = state.settings.get(setting.id());

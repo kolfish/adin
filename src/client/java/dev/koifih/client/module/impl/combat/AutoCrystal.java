@@ -6,8 +6,11 @@ import dev.koifih.client.util.Clicks;
 import dev.koifih.client.event.Priority;
 import dev.koifih.client.event.events.PreTickEvent;
 import dev.koifih.client.mixin.accessor.MultiPlayerGameModeAccessor;
+<<<<<<< HEAD
 import com.mojang.blaze3d.platform.InputConstants;
 import org.lwjgl.glfw.GLFW;
+=======
+>>>>>>> 630b1b46c1def750e98fc9ad571b50ab0e4f226d
 import dev.koifih.client.module.Module;
 import dev.koifih.client.rotation.Rotation;
 import dev.koifih.client.rotation.RotationConfig;
@@ -24,7 +27,10 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.network.protocol.game.ServerboundUseItemOnPacket;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.boss.enderdragon.EndCrystal;
+<<<<<<< HEAD
 import net.minecraft.world.item.BlockItem;
+=======
+>>>>>>> 630b1b46c1def750e98fc9ad571b50ab0e4f226d
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.ClipContext;
 import net.minecraft.world.level.block.Blocks;
@@ -62,6 +68,7 @@ public final class AutoCrystal extends Module {
     }
 
     @Override
+<<<<<<< HEAD
     public boolean interceptsUseItem() {
         if (!isEnabled()) return false;
         InputConstants.Key check = bindKey() != InputConstants.UNKNOWN ? bindKey() : key();
@@ -84,6 +91,8 @@ public final class AutoCrystal extends Module {
     }
 
     @Override
+=======
+>>>>>>> 630b1b46c1def750e98fc9ad571b50ab0e4f226d
     protected void onEnable() {
         listen(PreTickEvent.class, event -> {
             if (releasing) restore(event.client().player);
@@ -100,7 +109,10 @@ public final class AutoCrystal extends Module {
     protected void onHold() {
         LocalPlayer player = mc.player;
         if (!Game.playing(mc) || Players.consuming(player)) return;
+<<<<<<< HEAD
         if (player.getMainHandItem().getItem() instanceof BlockItem) return;
+=======
+>>>>>>> 630b1b46c1def750e98fc9ad571b50ab0e4f226d
         releasing = false;
         if (headBob.get()) {
             bob(player);
@@ -205,6 +217,7 @@ public final class AutoCrystal extends Module {
 
     private boolean place(LocalPlayer player, BlockHitResult hit) {
         if (!Placement.ready()) return false;
+<<<<<<< HEAD
         if (player.getOffhandItem().is(Items.END_CRYSTAL)) {
             if (!Clicks.right(mc, hit.getBlockPos())) {
                 mc.gameMode.useItemOn(player, InteractionHand.OFF_HAND, hit);
@@ -223,15 +236,31 @@ public final class AutoCrystal extends Module {
             return true;
         }
         int slot = Hotbar.find(player, stack -> stack.is(Items.END_CRYSTAL));
+=======
+        int selected = Hotbar.selected(player);
+        int slot = player.getMainHandItem().is(Items.END_CRYSTAL) ? selected : Hotbar.find(player, stack -> stack.is(Items.END_CRYSTAL));
+>>>>>>> 630b1b46c1def750e98fc9ad571b50ab0e4f226d
         if (slot == Hotbar.NONE) return false;
         if (originalSlot == Hotbar.NONE) {
             int handedOff = AdinClient.MODULES.get(AutoHitCrystal.class).holding();
             originalSlot = handedOff != Hotbar.NONE ? handedOff : selected;
+<<<<<<< HEAD
             silent = true;
         }
         if (slot != Hotbar.serverSlot() && !Hotbar.swap(player, slot, true)) return false;
         ((MultiPlayerGameModeAccessor) mc.gameMode).adin$startPrediction(mc.level,
                 sequence -> new ServerboundUseItemOnPacket(InteractionHand.MAIN_HAND, hit, sequence));
+=======
+            silent = silentSwap.get();
+        }
+        if (slot != (silent ? Hotbar.serverSlot() : selected) && !Hotbar.swap(player, slot, silent)) return false;
+        if (silent && slot != selected) {
+            ((MultiPlayerGameModeAccessor) mc.gameMode).adin$startPrediction(mc.level,
+                    sequence -> new ServerboundUseItemOnPacket(InteractionHand.MAIN_HAND, hit, sequence));
+        } else if (!Clicks.right(mc, hit.getBlockPos())) {
+            mc.gameMode.useItemOn(player, InteractionHand.MAIN_HAND, hit);
+        }
+>>>>>>> 630b1b46c1def750e98fc9ad571b50ab0e4f226d
         player.swing(InteractionHand.MAIN_HAND);
         pacer.pace(delay.get());
         return true;
@@ -239,7 +268,11 @@ public final class AutoCrystal extends Module {
 
     private void restore(LocalPlayer player) {
         if (player != null && originalSlot != Hotbar.NONE) {
+<<<<<<< HEAD
             boolean done = Hotbar.resync(player);
+=======
+            boolean done = silent ? Hotbar.resync(player) : !swapBack.get() || Hotbar.swap(player, originalSlot, false);
+>>>>>>> 630b1b46c1def750e98fc9ad571b50ab0e4f226d
             if (!done) return;
         }
         originalSlot = Hotbar.NONE;

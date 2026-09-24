@@ -64,6 +64,7 @@ jar {
 	}
 }
 
+<<<<<<< HEAD
 task resourcesJar(type: Jar) {
 	archiveClassifier = 'resources'
 	from(sourceSets.main.resources.srcDirs) {
@@ -86,6 +87,8 @@ task dllPrep(dependsOn: ['remapJar', 'resourcesJar']) {
 	}
 }
 
+=======
+>>>>>>> 630b1b46c1def750e98fc9ad571b50ab0e4f226d
 publishing {
 	publications {
 		create("mavenJava", MavenPublication) {

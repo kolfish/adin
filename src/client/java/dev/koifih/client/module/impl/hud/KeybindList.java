@@ -64,7 +64,11 @@ public final class KeybindList extends HudModule {
     private void onHudRender(HudRenderEvent event) {
         List<Module> bound = new ArrayList<>();
         for (Module module : AdinClient.MODULES.all()) {
+<<<<<<< HEAD
             if (module.key() != InputConstants.UNKNOWN || module.bindKey() != InputConstants.UNKNOWN) bound.add(module);
+=======
+            if (module.key() != InputConstants.UNKNOWN) bound.add(module);
+>>>>>>> 630b1b46c1def750e98fc9ad571b50ab0e4f226d
         }
         if (bound.isEmpty()) {
             placed(0f, 0f, 0f, 0f);

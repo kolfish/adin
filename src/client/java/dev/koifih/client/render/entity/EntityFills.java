@@ -18,6 +18,7 @@ import net.minecraft.client.renderer.rendertype.OutputTarget;
 import net.minecraft.client.renderer.rendertype.RenderSetup;
 import net.minecraft.client.renderer.rendertype.RenderType;
 import net.minecraft.resources.Identifier;
+<<<<<<< HEAD
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.QuadInstance;
 import com.mojang.blaze3d.vertex.VertexConsumer;
@@ -27,6 +28,10 @@ import org.joml.Vector3f;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+=======
+import java.util.HashMap;
+import java.util.HashSet;
+>>>>>>> 630b1b46c1def750e98fc9ad571b50ab0e4f226d
 import java.util.Map;
 import java.util.Set;
 
@@ -137,6 +142,7 @@ public final class EntityFills {
                 .withCull(false)
                 .build();
     }
+<<<<<<< HEAD
 
     public static void putQuads(PoseStack.Pose entry, VertexConsumer consumer, List<BakedQuad> quads, EntityFill fill) {
         QuadInstance instance = new QuadInstance();
@@ -160,4 +166,6 @@ public final class EntityFills {
         Vector3f pivot = pose.last().pose().getTranslation(new Vector3f());
         return fill.anchored(new Vec3(pivot));
     }
+=======
+>>>>>>> 630b1b46c1def750e98fc9ad571b50ab0e4f226d
 }

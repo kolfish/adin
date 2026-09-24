@@ -14,7 +14,10 @@ public class State {
     public static final class ModuleState {
         public boolean enabled;
         public String key;
+<<<<<<< HEAD
         public String bindKey;
+=======
+>>>>>>> 630b1b46c1def750e98fc9ad571b50ab0e4f226d
         public boolean hold;
         public Map<String, JsonElement> settings;
     }

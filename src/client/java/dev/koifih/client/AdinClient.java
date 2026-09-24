@@ -29,11 +29,14 @@ public final class AdinClient implements ClientModInitializer {
     @Override
     public void onInitializeClient() {
         StateStore.init();
+<<<<<<< HEAD
         try {
             StateStore.load();
         } catch (Throwable t) {
             System.out.println("[AdinClient] Warning loading state: " + t.getMessage());
         }
+=======
+>>>>>>> 630b1b46c1def750e98fc9ad571b50ab0e4f226d
         Backtracker.init();
         Keybinds.register();
         ROTATIONS.init();

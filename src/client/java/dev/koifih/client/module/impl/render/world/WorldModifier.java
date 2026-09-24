@@ -112,6 +112,7 @@ public final class WorldModifier extends Module {
         bolt.setId(nextBoltId--);
         level.addEntity(bolt);
     }
+<<<<<<< HEAD
 
     public static void applyEnvironmentAttribute(Object system, net.minecraft.world.attribute.EnvironmentAttribute<Object> attribute, org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable<Object> info) {
         ClientLevel level = net.minecraft.client.Minecraft.getInstance().level;
@@ -121,4 +122,6 @@ public final class WorldModifier extends Module {
         Atmosphere atmosphere = modifier.atmosphere();
         if (atmosphere != null) info.setReturnValue(atmosphere.apply(attribute, info.getReturnValue()));
     }
+=======
+>>>>>>> 630b1b46c1def750e98fc9ad571b50ab0e4f226d
 }

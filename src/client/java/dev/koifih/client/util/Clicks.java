@@ -6,7 +6,10 @@ import dev.koifih.client.event.events.PreTickEvent;
 import dev.koifih.client.mixin.accessor.KeyMappingAccessor;
 import dev.koifih.client.mixin.accessor.KeyboardHandlerAccessor;
 import dev.koifih.client.mixin.accessor.MouseHandlerAccessor;
+<<<<<<< HEAD
 import dev.koifih.client.module.impl.combat.AimAssist;
+=======
+>>>>>>> 630b1b46c1def750e98fc9ad571b50ab0e4f226d
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 import com.mojang.blaze3d.platform.InputConstants;
@@ -87,6 +90,7 @@ public final class Clicks {
     private static void send(Minecraft client, int button, int action) {
         ((MouseHandlerAccessor) client.mouseHandler).adin$onButton(client.getWindow().handle(), new MouseButtonInfo(button, 0), action);
     }
+<<<<<<< HEAD
 
     public static boolean blocksBreaking(Minecraft client) {
         if (client.hitResult == null || client.hitResult.getType() != HitResult.Type.BLOCK) return false;
@@ -103,4 +107,6 @@ public final class Clicks {
     public static boolean activates(int button) {
         return !simulating(button) && AdinClient.MODULES.activates(InputConstants.Type.MOUSE.getOrCreate(button));
     }
+=======
+>>>>>>> 630b1b46c1def750e98fc9ad571b50ab0e4f226d
 }

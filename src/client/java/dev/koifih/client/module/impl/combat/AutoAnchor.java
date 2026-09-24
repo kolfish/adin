@@ -6,8 +6,11 @@ import dev.koifih.client.util.Clicks;
 import dev.koifih.client.event.Priority;
 import dev.koifih.client.event.events.PreTickEvent;
 import dev.koifih.client.mixin.accessor.MultiPlayerGameModeAccessor;
+<<<<<<< HEAD
 import com.mojang.blaze3d.platform.InputConstants;
 import org.lwjgl.glfw.GLFW;
+=======
+>>>>>>> 630b1b46c1def750e98fc9ad571b50ab0e4f226d
 import dev.koifih.client.module.Module;
 import dev.koifih.client.rotation.Rotation;
 import dev.koifih.client.rotation.RotationConfig;
@@ -46,6 +49,10 @@ public final class AutoAnchor extends Module {
     private static final RotationConfig SNAP = RotationConfig.silent(0f, Smoothing.EASE_OUT_CUBIC);
 
     private final SliderSetting delay = add(new SliderSetting("delay", 100, 50, 500, Measure.MILLIS));
+<<<<<<< HEAD
+=======
+    private final BoolSetting safe = add(new BoolSetting("safe", false));
+>>>>>>> 630b1b46c1def750e98fc9ad571b50ab0e4f226d
     private final BoolSetting silentSwap = add(new BoolSetting("silentSwap", false));
     private final BoolSetting swapBack = add(new BoolSetting("swapBack", true));
     private final Time.Ticker pacer = new Time.Ticker();
@@ -54,6 +61,10 @@ public final class AutoAnchor extends Module {
     private boolean silent;
     private BlockPos anchor;
     private BlockPos charged;
+<<<<<<< HEAD
+=======
+    private BlockPos shield;
+>>>>>>> 630b1b46c1def750e98fc9ad571b50ab0e4f226d
     private boolean spent;
 
     public AutoAnchor() {
@@ -62,6 +73,7 @@ public final class AutoAnchor extends Module {
     }
 
     @Override
+<<<<<<< HEAD
     public boolean activatable() {
         return true;
     }
@@ -82,6 +94,8 @@ public final class AutoAnchor extends Module {
     }
 
     @Override
+=======
+>>>>>>> 630b1b46c1def750e98fc9ad571b50ab0e4f226d
     protected void onEnable() {
         spent = false;
         listen(PreTickEvent.class, this::onTick);
@@ -92,6 +106,7 @@ public final class AutoAnchor extends Module {
         idle(Game.player());
     }
 
+<<<<<<< HEAD
     @Override
     protected void onRelease() {
         idle(mc.player);
@@ -109,6 +124,17 @@ public final class AutoAnchor extends Module {
             return;
         }
         if (anchor == null) look(player);
+=======
+    private void onTick(PreTickEvent event) {
+        LocalPlayer player = event.client().player;
+        if (player == null) return;
+        if (!Game.playing(mc) || Players.consuming(player)) {
+            if (shield == null && anchor == null) idle(player);
+            return;
+        }
+        if (anchor == null) look(player);
+        if (shield != null && shield(player)) return;
+>>>>>>> 630b1b46c1def750e98fc9ad571b50ab0e4f226d
         if (anchor != null) work(player);
     }
 
@@ -133,9 +159,43 @@ public final class AutoAnchor extends Module {
             anchor = target;
             spent = true;
             sincePlace.reset();
+<<<<<<< HEAD
         }
     }
 
+=======
+            if (safe.get()) shield = target.offset(towardPlayer(player, target));
+        }
+    }
+
+    private static Vec3i towardPlayer(LocalPlayer player, BlockPos anchor) {
+        Vec3 offset = player.getEyePosition().subtract(Vec3.atCenterOf(anchor));
+        double x = Math.abs(offset.x);
+        double z = Math.abs(offset.z);
+        boolean diagonal = Math.min(x, z) > DIAGONAL * Math.max(x, z);
+        int stepX = diagonal || x >= z ? (int) Math.signum(offset.x) : 0;
+        int stepZ = diagonal || z > x ? (int) Math.signum(offset.z) : 0;
+        return new Vec3i(stepX, 0, stepZ);
+    }
+
+    private boolean shield(LocalPlayer player) {
+        BlockPos ground = shield.below();
+        if (sincePlace.elapsed(PLACE_WAIT) || !mc.level.getBlockState(shield).canBeReplaced() || mc.level.getBlockState(ground).canBeReplaced()) {
+            shield = null;
+            return false;
+        }
+        BlockHitResult hit = Placement.placeInto(mc.level, player.getEyePosition(), shield, anchor);
+        int slot = nearest(player, stack -> stack.is(Items.GLOWSTONE));
+        if (hit == null || slot == Hotbar.NONE || !placeable(player, player.getInventory().getItem(slot), hit, Blocks.GLOWSTONE)
+                || (facing(player, hit) && use(player, hit, stack -> stack.is(Items.GLOWSTONE), true))) {
+            shield = null;
+            return false;
+        }
+        aim(player, hit);
+        return true;
+    }
+
+>>>>>>> 630b1b46c1def750e98fc9ad571b50ab0e4f226d
     private void work(LocalPlayer player) {
         BlockState state = mc.level.getBlockState(anchor);
         if (!(state.getBlock() instanceof RespawnAnchorBlock)) {
@@ -169,6 +229,10 @@ public final class AutoAnchor extends Module {
     private void idle(LocalPlayer player) {
         anchor = null;
         charged = null;
+<<<<<<< HEAD
+=======
+        shield = null;
+>>>>>>> 630b1b46c1def750e98fc9ad571b50ab0e4f226d
         restore(player);
     }
 

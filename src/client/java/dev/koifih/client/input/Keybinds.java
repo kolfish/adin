@@ -22,6 +22,7 @@ public final class Keybinds {
         ClientTickEvents.END_CLIENT_TICK.register(Keybinds::onClientTick);
     }
 
+<<<<<<< HEAD
     private static boolean wasClickGuiDown;
 
     private static void onClientTick(Minecraft client) {
@@ -43,12 +44,18 @@ public final class Keybinds {
             wasClickGuiDown = isDown;
         }
 
+=======
+    private static void onClientTick(Minecraft client) {
+        boolean pressed = false;
+        while (OPEN_CLICK_GUI.consumeClick()) pressed = true;
+>>>>>>> 630b1b46c1def750e98fc9ad571b50ab0e4f226d
         if (pressed && client.gui.screen() == null && client.player != null) {
             client.gui.setScreen(new ClickGui());
         }
     }
 
     public static InputConstants.Key clickGuiKey() {
+<<<<<<< HEAD
         try {
             return ((KeyMappingAccessor) OPEN_CLICK_GUI).adin$getKey();
         } catch (Throwable t) {
@@ -60,6 +67,9 @@ public final class Keybinds {
                 return OPEN_CLICK_GUI.getDefaultKey();
             }
         }
+=======
+        return ((KeyMappingAccessor) OPEN_CLICK_GUI).adin$getKey();
+>>>>>>> 630b1b46c1def750e98fc9ad571b50ab0e4f226d
     }
 
     public static void setClickGuiKey(InputConstants.Key key) {
@@ -71,10 +81,14 @@ public final class Keybinds {
 
     private static KeyMapping register(String name, int key) {
         var mapping = new KeyMapping("key." + Adin.MOD_ID + "." + name, InputConstants.Type.KEYSYM, key, CATEGORY);
+<<<<<<< HEAD
         try {
             return KeyMappingHelper.registerKeyMapping(mapping);
         } catch (Throwable ignored) {
             return mapping;
         }
+=======
+        return KeyMappingHelper.registerKeyMapping(mapping);
+>>>>>>> 630b1b46c1def750e98fc9ad571b50ab0e4f226d
     }
 }
