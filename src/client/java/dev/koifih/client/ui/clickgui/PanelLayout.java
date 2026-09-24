@@ -1,7 +1,7 @@
 package dev.koifih.client.ui.clickgui;
 
 public record PanelLayout(float scale, int x, int y, int width, int height, int sidebarWidth, int topBarHeight) {
-    public static final int WIDTH = 375;
+    public static final int WIDTH = 383;
     public static final int HEIGHT = 323;
     public static final int RADIUS = 6;
     public static final int SIDEBAR_WIDTH = 78;

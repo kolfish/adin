@@ -6,6 +6,7 @@ import dev.koifih.client.util.Clicks;
 import dev.koifih.client.event.Priority;
 import dev.koifih.client.event.events.PreTickEvent;
 import dev.koifih.client.mixin.accessor.MultiPlayerGameModeAccessor;
+import com.mojang.blaze3d.platform.InputConstants;
 import dev.koifih.client.module.Module;
 import dev.koifih.client.rotation.Rotation;
 import dev.koifih.client.rotation.RotationConfig;
@@ -62,6 +63,11 @@ public final class AutoAnchor extends Module {
     }
 
     @Override
+    public boolean activatable() {
+        return true;
+    }
+
+    @Override
     protected void onEnable() {
         spent = false;
         listen(PreTickEvent.class, this::onTick);
@@ -72,9 +78,18 @@ public final class AutoAnchor extends Module {
         idle(Game.player());
     }
 
+    @Override
+    protected void onRelease() {
+        idle(mc.player);
+    }
+
     private void onTick(PreTickEvent event) {
         LocalPlayer player = event.client().player;
         if (player == null) return;
+        if (bindKey() != InputConstants.UNKNOWN && !isBindDown()) {
+            if (shield != null || anchor != null) idle(player);
+            return;
+        }
         if (!Game.playing(mc) || Players.consuming(player)) {
             if (shield == null && anchor == null) idle(player);
             return;

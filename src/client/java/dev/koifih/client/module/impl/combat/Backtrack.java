@@ -7,6 +7,7 @@ import dev.koifih.client.event.events.AttackEvent;
 import dev.koifih.client.event.events.PacketProcessEvent;
 import dev.koifih.client.event.events.PreTickEvent;
 import dev.koifih.client.event.events.WorldRenderEvent;
+import com.mojang.blaze3d.platform.InputConstants;
 import dev.koifih.client.module.Module;
 import dev.koifih.client.render.Style;
 import dev.koifih.client.setting.BacktrackPreview;
@@ -78,8 +79,18 @@ public final class Backtrack extends Module {
     }
 
     @Override
+    public boolean activatable() {
+        return true;
+    }
+
+    @Override
     protected void onDisable() {
         Backtracker.hold(false);
+        reset();
+    }
+
+    @Override
+    protected void onRelease() {
         reset();
     }
 
@@ -174,6 +185,7 @@ public final class Backtrack extends Module {
 
     private boolean holding(Minecraft client, LocalPlayer player) {
         if (target == null || !target.isAlive() || target.level() != client.level) return false;
+        if (bindKey() != InputConstants.UNKNOWN && !isBindDown()) return false;
         return frozen() || shouldBacktrack(player, target);
     }
 

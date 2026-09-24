@@ -99,6 +99,9 @@ public final class ModulesPage implements Page {
     private final List<CatalogPicker> windows = new ArrayList<>();
     private PanelLayout layout;
     private Keybind bindControl;
+    private Keybind bindKeyControl;
+    private final List<Control> toggleControls = new ArrayList<>();
+    private final List<Control> bindControls = new ArrayList<>();
     private Module openModule;
     private boolean shown;
     private boolean interactive;
@@ -229,6 +232,8 @@ public final class ModulesPage implements Page {
             if (row.help() != null) gui.remove(row.help());
         }
         settingControls.clear();
+        toggleControls.clear();
+        bindControls.clear();
         settingRows.clear();
         windows.clear();
         float scale = layout.scale();
@@ -247,19 +252,32 @@ public final class ModulesPage implements Page {
         int helpSize = layout.atLeastOne(HELP_SIZE);
 
         int modeX = right - modeWidth;
-        int bindX = module.activatable() ? right - bindWidth : modeX - layout.scaled(PanelLayout.GAP) - bindWidth;
+        int bindX = modeX - layout.scaled(PanelLayout.GAP) - bindWidth;
         bindControl = gui.add(new Keybind(bindX, settingY(0, bindHeight),
-                bindWidth, bindHeight, scale, Component.literal(Lang.get("keybind")), module::key, module::setKey));
+                bindWidth, bindHeight, scale, Component.literal(Lang.get("toggleKey")), module::key, module::setKey));
         settingControls.add(bindControl);
-        if (!module.activatable()) {
-            settingControls.add(gui.add(new Segmented(modeX, settingY(0, bindHeight), modeWidth, bindHeight, scale,
-                    Component.literal("Bind mode"),
-                    new Segmented.Segment[] {Segmented.Segment.of(AdinIcon.TOGGLE), Segmented.Segment.of(AdinIcon.HOLD)},
-                    () -> module.hold() ? 1 : 0, index -> module.setHold(index == 1))));
-            settingControls.add(gui.add(bounded(new HelpDot(bindControl.getX() - layout.scaled(PanelLayout.GAP) - helpSize,
-                    settingY(0, helpSize), helpSize, scale,
-                    () -> Lang.get(module.hold() ? "bind.help.hold" : "bind.help.toggle")), x, right)));
-        }
+        toggleControls.add(bindControl);
+        Control modeControl = gui.add(new Segmented(modeX, settingY(0, bindHeight), modeWidth, bindHeight, scale,
+                Component.literal("Bind mode"),
+                new Segmented.Segment[] {Segmented.Segment.of(AdinIcon.TOGGLE), Segmented.Segment.of(AdinIcon.HOLD)},
+                () -> module.hold() ? 1 : 0, index -> module.setHold(index == 1)));
+        settingControls.add(modeControl);
+        toggleControls.add(modeControl);
+        Control helpControl = gui.add(bounded(new HelpDot(bindControl.getX() - layout.scaled(PanelLayout.GAP) - helpSize,
+                settingY(0, helpSize), helpSize, scale,
+                () -> Lang.get(module.hold() ? "bind.help.hold" : "bind.help.toggle")), x, right));
+        settingControls.add(helpControl);
+        toggleControls.add(helpControl);
+
+        bindKeyControl = gui.add(new Keybind(right - bindWidth, settingY(1, bindHeight),
+                bindWidth, bindHeight, scale, Component.literal(Lang.get("bindKey")), module::bindKey, module::setBindKey));
+        settingControls.add(bindKeyControl);
+        bindControls.add(bindKeyControl);
+        Control bindHelpControl = gui.add(bounded(new HelpDot(bindKeyControl.getX() - layout.scaled(PanelLayout.GAP) - helpSize,
+                settingY(1, helpSize), helpSize, scale,
+                () -> Lang.get("bind.help.bind")), x, right));
+        settingControls.add(bindHelpControl);
+        bindControls.add(bindHelpControl);
 
         for (Setting<?> setting : module.settings()) {
             Component label = Component.literal(setting.name());
@@ -351,8 +369,9 @@ public final class ModulesPage implements Page {
     private void layoutRows() {
         settingScroll = Math.clamp(settingScroll, 0f, maxSettingScroll());
         settingScrollShown.set(settingScroll);
-        for (Control control : settingControls) control.setY(settingY(0f, control.getHeight()));
-        float offset = 1f;
+        for (Control control : toggleControls) control.setY(settingY(0f, control.getHeight()));
+        for (Control control : bindControls) control.setY(settingY(1f, control.getHeight()));
+        float offset = 2f;
         for (SettingRow row : settingRows) {
             Control control = row.control();
             control.setY(settingY(offset, control.getHeight()));
@@ -362,7 +381,7 @@ public final class ModulesPage implements Page {
     }
 
     private float rowSpan() {
-        float span = 1f;
+        float span = 2f;
         for (SettingRow row : settingRows) span += row.shown();
         return span;
     }
@@ -516,7 +535,9 @@ public final class ModulesPage implements Page {
     }
 
     public boolean captureMouse(MouseButtonEvent event) {
-        return bindControl != null && bindControl.captureMouse(event);
+        if (bindControl != null && bindControl.captureMouse(event)) return true;
+        if (bindKeyControl != null && bindKeyControl.captureMouse(event)) return true;
+        return false;
     }
 
     @Override
@@ -604,10 +625,12 @@ public final class ModulesPage implements Page {
         int radius = layout.atLeastOne(OVERLAY_RADIUS);
         Draw.bordered(graphics, overlayX(), overlayY(), overlayWidth(), overlayHeight(), radius, Theme.OVERLAY, Theme.POPUP_BORDER);
         Scissor.clip(overlayArea(), () -> {
-            Text.drawCentered(graphics, Lang.get("keybind"), settingX() + LABEL_INSET * scale,
+            Text.drawCentered(graphics, Lang.get("toggleKey"), settingX() + LABEL_INSET * scale,
                     settingRowY(0f) + settingRowHeight() * 0.5f, 8 * scale, Theme.TEXT);
+            Text.drawCentered(graphics, Lang.get("bindKey"), settingX() + LABEL_INSET * scale,
+                    settingRowY(1f) + settingRowHeight() * 0.5f, 8 * scale, Theme.TEXT);
             for (Control control : settingControls) control.extractRenderState(graphics, mouseX, mouseY, delta);
-            float offset = 1f;
+            float offset = 2f;
             for (SettingRow row : settingRows) {
                 float rowShown = row.shown();
                 if (rowShown > 0f) drawRow(graphics, row, offset, rowShown, mouseX, mouseY, delta);
